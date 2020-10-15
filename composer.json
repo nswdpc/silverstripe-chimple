@@ -1,0 +1,61 @@
+{
+    "name": "nswdpc/silverstripe-chimple",
+    "description": "Chimple - Simple Mailchimp handling in Silverstripe",
+    "type": "silverstripe-vendormodule",
+    "keywords": [
+        "silverstripe",
+        "nsw",
+        "mailchimp",
+        "simple",
+        "chimp"
+    ],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "James",
+            "homepage": "https://dpc.nsw.gov.au",
+            "role": "Developer"
+        },
+        {
+            "name": "Mark",
+            "homepage": "https://dpc.nsw.gov.au",
+            "role": "Developer"
+        },
+        {
+            "name": "Symbiote",
+            "role": "Contributors"
+        }
+    ],
+    "support": {
+        "key" : "value"
+    },
+    "require": {
+        "dnadesign/silverstripe-elemental": "^4.3",
+        "silverstripe/framework" : "^4",
+        "silverstripe/siteconfig" : "^4",
+        "symbiote/silverstripe-queuedjobs": "^4",
+        "drewm/mailchimp-api" : "^2.5",
+        "symbiote/silverstripe-multivaluefield" : "^5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7|^7",
+        "squizlabs/php_codesniffer": "^3.0",
+        "vlucas/phpdotenv": "^3",
+        "codeception/codeception": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "NSWDPC\\Chimple\\Models\\": "src/Models/",
+            "NSWDPC\\Chimple\\Models\\Elements\\" : "src/Models/Elements",
+            "NSWDPC\\Chimple\\Controllers\\" : "src/Controllers/",
+            "NSWDPC\\Chimple\\Extensions\\" : "src/Extensions/",
+            "NSWDPC\\Chimple\\Jobs\\" : "src/Jobs/",
+            "NSWDPC\\Chimple\\Services\\" : "src/Services/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NSWDPC\\Chimple\\Tests\\": "tests/"
+        }
+    }
+}

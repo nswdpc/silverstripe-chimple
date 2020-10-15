@@ -1,0 +1,9 @@
+---
+Name: silverstripe-chimple-extensions
+---
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - 'NSWDPC\Chimple\Extensions\SiteConfigExtension'
+Page:
+  extensions:
+    - 'NSWDPC\Chimple\Extensions\PageExtension'

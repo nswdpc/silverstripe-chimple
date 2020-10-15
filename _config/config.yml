@@ -1,0 +1,10 @@
+---
+Name: silverstripe-chimple
+---
+NSWDPC\Chimple\Models\MailchimpConfig:
+  api_key: ''
+  # global default list (audience) ID
+  list_id: ''
+  # defaults
+  success_message: 'Thank you for subscribing'
+  error_message: 'Sorry, we could not subscribe that email address at the current time. Please try again later.'

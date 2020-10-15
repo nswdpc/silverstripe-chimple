@@ -1,4 +1,4 @@
-# Chimple - Simple Mailchimp handling Silverstripe
+# Chimple - Simple Mailchimp handling in Silverstripe
 
 This module allows you to manage list subscriptions from a silverstripe app/website.
 

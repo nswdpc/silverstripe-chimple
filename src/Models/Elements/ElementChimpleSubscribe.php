@@ -22,6 +22,8 @@ class ElementChimpleSubscribe extends BaseElement
     private static $singular_name = 'Mailchimp subscribe';
     private static $plural_name = 'Mailchimp subscribe';
 
+    private static $icon = 'font-icon-up-circled';
+
     /**
      * Has_one relationship
      * @var array

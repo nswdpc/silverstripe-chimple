@@ -1,6 +1,6 @@
-<% if $Title && $ShowTitle %>
-    <h2 class="content-element__title">{$Title.XML}</h2>
-<% end_if %>
+<% if $SubscribeForm %>
+<% include ChimpleSubscribeTitle %>
 <div class="element element-content<% if $StyleVariant %> $StyleVariant<% end_if %>">
     {$SubscribeForm}
 </div>
+<% end_if %>

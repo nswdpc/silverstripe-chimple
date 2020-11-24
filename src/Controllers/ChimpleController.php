@@ -204,32 +204,53 @@ class ChimpleController extends PageController
 
             $enabled = MailchimpConfig::isEnabled();
             if(!$enabled) {
-                $error_message = "Subscriptions are not available at the moment";
+                $error_message = _t(
+                    __CLASS__ . '.SUBSCRIPTIONS_NOT_AVAILABLE',
+                    "Subscriptions are not available at the moment"
+                );
             }
 
             // proceed with Email checking...
             if (!$error_message) {
                 if (empty($data['Email'])) {
                     // fail with error
-                    $error_message = "No e-mail address was provided";
+                    $error_message = _t(
+                        __CLASS__ . '.NO_EMAIL_ADDRESS',
+                        "No e-mail address was provided"
+                    );
                 }
                 if (!Email::is_valid_address($data['Email'])) {
-                    $error_message = "Please provide a valid e-mail address, {$data['Email']} is not valid";
+                    $error_message = _t(
+                        __CLASS__ . '.INVALID_EMAIL_ADDRESS',
+                        "Please provide a valid e-mail address, '{email}' is not valid",
+                        [
+                            'email' => htmlspecialchars($data['Email'])
+                        ]
+                    );
                 }
             }
 
             if (!$error_message) {
                 // check code provided
                 if (!$code) {
-                    $error_message = "Sorry, the sign-up could not be completed";
+                    $error_message = _t(
+                        __CLASS__ . ".GENERIC_ERROR_1",
+                        "Sorry, the sign-up could not be completed"
+                    );
                 } else {
                     $mc_config = MailchimpConfig::getConfig('', '', $code);
                     if (empty($mc_config->ID)) {
-                        $error_message = "Sorry, the sign-up could not be completed";
+                        $error_message = _t(
+                            __CLASS__ . ".GENERIC_ERROR_2",
+                            "Sorry, the sign-up could not be completed"
+                        );
                     }
                     $list_id = $mc_config->getMailchimpListId();
                     if (!$list_id) {
-                        $error_message = "Sorry, the sign-up could not be completed";
+                        $error_message = _t(
+                            __CLASS__ . ".GENERIC_ERROR_3",
+                            "Sorry, the sign-up could not be completed"
+                        );
                     }
                 }
             }

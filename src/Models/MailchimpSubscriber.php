@@ -560,15 +560,15 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         return [
             'MAILCHIMP_SUBSCRIBER_VIEW' => [
-                'name' => 'View Mailchimp Subscribers',
+                'name' => _t(__CLASS__ . '.MAILCHIMP_SUBSCRIBER_VIEW', 'View Mailchimp Subscribers'),
                 'category' => 'Mailchimp',
             ],
             'MAILCHIMP_SUBSCRIBER_EDIT' => [
-                'name' => 'Edit Mailchimp Subscribers',
+                'name' => _t(__CLASS__ . '.MAILCHIMP_SUBSCRIBER_EDIT', 'Edit Mailchimp Subscribers'),
                 'category' => 'Mailchimp',
             ],
             'MAILCHIMP_SUBSCRIBER_CREATE' => [
-                'name' => 'Create Mailchimp Subscribers',
+                'name' => _t(__CLASS__ . '.MAILCHIMP_SUBSCRIBER_CREATE', 'Create Mailchimp Subscribers'),
                 'category' => 'Mailchimp',
             ]
         ];

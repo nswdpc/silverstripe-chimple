@@ -79,9 +79,11 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue($retrieved_config->DoubleOptIn == 0, "Double Opt In setting should be false");
 
         // test configuration form retrieval
-        $form = $config->SubscribeForm();
+        $form = $config->SubscribeForm(true);
 
         $this->assertTrue( $form instanceof Form, "SubscribeForm is not an instance of Form");
+
+        $this->assertEquals( 1, $form->getAttribute('data-xhr'), "Form should have XHR attribute enabled" );
 
         $fields = $form->Fields();
 

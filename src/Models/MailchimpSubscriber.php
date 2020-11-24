@@ -426,6 +426,14 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     }
 
     /**
+     * Get the has that is used as the MC subscribed Id value
+     * @return string
+     */
+    public static function getMailchimpSubscribedId($email) {
+        return md5(strtolower($email));
+    }
+
+    /**
      * Subscribe *this* particular record
      */
     public function subscribe()

@@ -2,6 +2,7 @@
 
 namespace NSWDPC\Chimple\Models\Elements;
 
+use SilverStripe\Forms\CheckboxField;
 use DNADesign\Elemental\Models\BaseElement;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use SilverStripe\Forms\Form;
@@ -10,7 +11,8 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
- * Provide a subscription for element for Elemental
+ * Provide a subscription form element for Elemental
+ * Content editors can choose a list and whether to subscribe in place via AJAX
  *
  * @author James
  */
@@ -23,6 +25,10 @@ class ElementChimpleSubscribe extends BaseElement
     private static $plural_name = 'Mailchimp subscribe';
 
     private static $icon = 'font-icon-up-circled';
+
+    private static $db = [
+        'UseXHR' => 'Boolean',// whether to submit without redirect
+    ];
 
     /**
      * Has_one relationship
@@ -61,16 +67,24 @@ class ElementChimpleSubscribe extends BaseElement
             'MailchimpConfigID'
         ]);
 
-        $fields->addFieldToTab(
-            'Root.Main',
-            $eventcollections = DropdownField::create(
-                'MailchimpConfigID',
-                _t(
-                    __CLASS__ . '.SELECT_CONFIGURATION',
-                    'Select the list configuration to use for this subscription form'
+        $fields->addFieldsToTab(
+            'Root.Main', [
+                CheckboxField::create(
+                    'UseXHR',
+                    _t(
+                        __CLASS__ . '.USE_XHR',
+                        'Submit without redirecting'
+                    ),
                 ),
-                MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
-            )->setEmptyString('')
+                $eventcollections = DropdownField::create(
+                    'MailchimpConfigID',
+                    _t(
+                        __CLASS__ . '.SELECT_CONFIGURATION',
+                        'Select the list configuration to use for this subscription form'
+                    ),
+                    MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
+                )->setEmptyString('')
+            ]
         );
 
         return $fields;
@@ -82,7 +96,12 @@ class ElementChimpleSubscribe extends BaseElement
      */
     public function getSubscribeForm() {
         if($config = $this->MailchimpConfig()) {
-            return $config->SubscribeForm();
+            $form = $config->SubscribeForm( $this->UseXHR == 1 );
+            if($form) {
+                // ensure for ID attribute is unique
+                $form->setHTMLID($form->getHTMLID() . "_e{$this->ID}");
+            }
+            return $form;
         }
         return null;
     }

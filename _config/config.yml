@@ -6,5 +6,5 @@ NSWDPC\Chimple\Models\MailchimpConfig:
   # global default list (audience) ID
   list_id: ''
   # defaults
-  success_message: 'Thank you for subscribing'
+  success_message: 'Thank you for subscribing. You will receive an email to confirm your subscription shortly.'
   error_message: 'Sorry, we could not subscribe that email address at the current time. Please try again later.'

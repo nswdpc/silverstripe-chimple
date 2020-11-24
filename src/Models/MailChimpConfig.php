@@ -25,9 +25,11 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
+
     private static $list_id = "";// default list (audience) ID
     private static $api_key = "";// API key provided by Mailchimp
     private static $double_optin = true;// have a good reason to set to false
+    private static $use_xhr = true;//whether to use XHR for submissions
 
     private static $success_message = "Thank you for subscribing. You will receive an email to confirm your subscription shortly.";
     private static $error_message = "Sorry, we could not subscribe that email address at the current time. Please try again later.";
@@ -291,9 +293,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Use the form provided by the controller
+     * @param bool whether to submit in place via XHR
      * @return Form
      */
-    public function SubscribeForm()
+    public function SubscribeForm($use_xhr = false)
     {
         // No form available if not enabled
         $enabled = self::isEnabled();
@@ -312,6 +315,9 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 $form->setLegend($this->Heading);
             }
             $form->addExtraClass('form-subscribe');
+            if($use_xhr) {
+                $form->setAttribute('data-xhr',1);
+            }
             return $form;
         }
 
@@ -377,7 +383,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Get a subscribe form based on a config code
-     * This is called from a template calling $ChimpleSubscribeForm('code')
+     * This first parameter is the list code (not the MC audience ID)
+     * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
+     * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
+     * @param array
      * @return mixed
      */
     public static function get_chimple_subscribe_form(...$args)
@@ -394,7 +403,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             }
 
             if ($config) {
-                return $config->SubscribeForm();
+                return $config->SubscribeForm(!empty($args[1]));
             }
         }
         return null;
@@ -409,7 +418,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     {
         $config = self::getGlobalConfig();
         if ($config) {
-            return $config->SubscribeForm();
+            $use_xhr = static::config()->get('use_xhr');
+            return $config->SubscribeForm($use_xhr);
         }
         return null;
     }

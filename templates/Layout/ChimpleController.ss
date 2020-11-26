@@ -5,9 +5,9 @@ $Breadcrumbs
 
 <section role="main">
 
-    <% if $IsComplete == 'y' %>
+    <% if $IsComplete %>
         <p>Your subscription was successful</p>
-    <% else_if $IsComplete == 'n' %>
+    <% else %>
         <p>Your subscription was not successful</p>
         <% include ChimpleSubscribeForm Code=$Code %>
     <% end_if %>

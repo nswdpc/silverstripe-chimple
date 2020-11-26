@@ -2,6 +2,7 @@
 
 namespace NSWDPC\Chimple\Controllers;
 
+use NSWDPC\Chimple\Exceptions\RequestException;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use SilverStripe\Forms\Form;
@@ -45,13 +46,8 @@ class ChimpleController extends PageController
     public function index()
     {
         $form = $this->SubscribeForm();
-
-        if ($this->request->isAjax()) {
-            return $form->addExtraClass('js-ajax-form')->forAjaxTemplate();
-        }
-
         $data = ArrayData::create([
-            'IsComplete' => $this->request->getVar('complete'),
+            'IsComplete' => ($this->request->getVar('complete') == 'y'),
             'Code' => $this->Code(),
             'HideGenericChimpleForm' => $this->HideGenericChimpleForm()
         ]);
@@ -104,6 +100,11 @@ class ChimpleController extends PageController
             return null;
         }
 
+        // Form JS, incl XHR handling
+        Requirements::javascript(
+            'nswdpc/silverstripe-chimple:client/static/js/chimple.js'
+        );
+
         $fields = FieldList::create(
             $name = TextField::create('Name', _t(__CLASS__. '.NAME', 'Name'))
                         ->setAttribute('placeholder', _t(__CLASS__. '.YOUR_NAME', 'Your name'))
@@ -124,12 +125,8 @@ class ChimpleController extends PageController
         );
 
         $form = Form::create($this, 'SubscribeForm', $fields, $actions);
-        $form->addExtraClass('subscribe');
+        $form->addExtraClass('subscribe chimple');
         $form->setTemplate('MailchimpSubscriberForm');
-
-        if($this->config()->get('disable_security_token')) {
-            $form->disableSecurityToken();
-        }
         $form->setFormMethod('POST');
 
         // allow extensions to manipulate the form
@@ -139,132 +136,224 @@ class ChimpleController extends PageController
     }
 
     /**
+     * Handle errors, based on the request type
+     */
+    private function handleError($code, $error_message, Form $form = null) {
+        if($form) {
+            // clear messages prior to setting any new ones
+            $form->clearMessage();
+        }
+        if($this->request->isAjax()) {
+            return $this->xhrError($code, $error_message);
+        } else if($form) {
+            // set session error on the form
+            $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
+        }
+        return;
+    }
+
+    /**
+     * Handle successful submissions, based on the request type
+     */
+    private function handleSuccess($code, $message, Form $form = null) {
+        $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
+        if($form) {
+            // clear messages prior to setting any new ones
+            $form->clearMessage();
+        }
+        if($this->request->isAjax()) {
+            return $this->xhrSuccess($code, $message, $success_message);
+        } else if($form) {
+            // set session message on the form
+            $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
+        }
+        return;
+    }
+
+    /**
      * Subscribe action
      */
     public function subscribe($data = [], Form $form = null)
     {
-        $code = strip_tags(trim($data['code'] ?: ''));
-        $error_message = "";
-        $mc_config = null;
 
-        $enabled = MailchimpConfig::isEnabled();
-        if(!$enabled) {
-            $error_message = "Subscriptions are not available at the moment";
-        }
+        try {
 
-        // proceed with Email checking...
-        if (!$error_message) {
+            $response = null;
+            $code = "";// MailchimpConfig.Code
 
-            if (empty($data['Email'])) {
-                // fail with error
-                $error_message = "No e-mail address was provided";
+            if(!$form) {
+                throw new RequestException("Forbidden", 403);
             }
 
-            if (!Email::is_valid_address($data['Email'])) {
-                $error_message = "Please provide a valid e-mail address";
+            if(!$token = $form->getSecurityToken()) {
+                throw new RequestException("Forbidden", 403);
             }
-        }
 
+            $token_name = $token->getName();
+            $token_value = isset( $data[ $token_name ] ) ?? '';
 
-        if (!$error_message) {
-            // check code provided
-            if (!$code) {
-                $error_message = "Sorry, the sign-up could not be completed";
-            } else {
-                $mc_config = MailchimpConfig::getConfig('', '', $code);
-                if (empty($mc_config->ID)) {
-                    $error_message = "Sorry, the sign-up could not be completed";
+            $check = $token->check($token_value);
+            if(!$token_value || !$check) {
+                throw new RequestException("Forbidden", 403);
+            }
+
+            $code = strip_tags(trim($data['code'] ?: ''));
+            $error_message = "";
+            $error_code = 400;// default to invalid data500
+            $mc_config = null;
+
+            $enabled = MailchimpConfig::isEnabled();
+            if(!$enabled) {
+                $error_message = _t(
+                    __CLASS__ . '.SUBSCRIPTIONS_NOT_AVAILABLE',
+                    "Subscriptions are not available at the moment"
+                );
+            }
+
+            // proceed with Email checking...
+            if (!$error_message) {
+                if (empty($data['Email'])) {
+                    // fail with error
+                    $error_message = _t(
+                        __CLASS__ . '.NO_EMAIL_ADDRESS',
+                        "No e-mail address was provided"
+                    );
                 }
-
-                $list_id = $mc_config->getMailchimpListId();
-                if (!$list_id) {
-                    $error_message = "Sorry, the sign-up could not be completed";
+                if (!Email::is_valid_address($data['Email'])) {
+                    $error_message = _t(
+                        __CLASS__ . '.INVALID_EMAIL_ADDRESS',
+                        "Please provide a valid e-mail address, '{email}' is not valid",
+                        [
+                            'email' => htmlspecialchars($data['Email'])
+                        ]
+                    );
                 }
             }
-        }
 
-        // failed prior to subscription
-        if ($error_message) {
-            if ($this->request->isAjax()) {
-                return $this->xhrError(500, $error_message);
-            } else {
-                $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
-                return $this->redirect($this->Link("?complete=n&code={$code}"));
+            if (!$error_message) {
+                // check code provided
+                if (!$code) {
+                    $error_message = _t(
+                        __CLASS__ . ".GENERIC_ERROR_1",
+                        "Sorry, the sign-up could not be completed"
+                    );
+                } else {
+                    $mc_config = MailchimpConfig::getConfig('', '', $code);
+                    if (empty($mc_config->ID)) {
+                        $error_message = _t(
+                            __CLASS__ . ".GENERIC_ERROR_2",
+                            "Sorry, the sign-up could not be completed"
+                        );
+                    }
+                    $list_id = $mc_config->getMailchimpListId();
+                    if (!$list_id) {
+                        $error_message = _t(
+                            __CLASS__ . ".GENERIC_ERROR_3",
+                            "Sorry, the sign-up could not be completed"
+                        );
+                    }
+                }
             }
-        }
 
-        $sub_id = false;
-        // see if email is assigned to list already
-        $sub = MailchimpSubscriber::get()
-                // for this list
-                ->filter([
-                    'MailchimpListId' => $list_id
-                ])
-                // for the Email or the MD5 of it
-                ->filterAny([
-                    'Email' => $data['Email'],
-                    'SubscribedId' => md5(strtolower($data['Email'])),//may not have the email anymore
-                ])->first();
-
-        if (empty($sub->ID)) {
-            $sub = MailchimpSubscriber::create();
-            $sub->Name = $data['Name'];
-            $sub->Email = $data['Email'];
-            $sub->MailchimpListId = $list_id;//list they are subscribing to
-            $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-            $sub->UpdateExisting = $mc_config->UpdateExisting;
-            $sub->SendWelcome = $mc_config->SendWelcome;
-            $sub->ReplaceInterests = $mc_config->ReplaceInterests;
-            $sub->DoubleOptIn = $mc_config->DoubleOptIn;
-            $sub->Tags = $mc_config->Tags;
-        }
-
-        $sub_id = $sub->write();
-
-        // handle meta
-        if(!empty($data['meta'])) {
-            // treat a key marked meta in the form as data for Merge Fields
-            $sub->updateMergeFields($data['meta']);
-        }
-
-        $success = Config::inst()->get(MailchimpConfig::class, 'success_message');
-        $failure = Config::inst()->get(MailchimpConfig::class, 'error_message');
-        $complete = 'n';
-        if ($this->request->isAjax()) {
-            if (!$sub_id) {
-                return $this->xhrError(500, $failure);
-            } else {
-                return $this->xhrSuccess(200, $success);
+            // failed prior to subscription
+            if ($error_message) {
+                throw new RequestException($error_message, $error_code);
             }
-        } elseif ($sub_id) {
-            $complete = 'y';
-            $form->sessionMessage($success, ValidationResult::TYPE_GOOD);
+
+            $sub_id = false;
+            // see if email is assigned to list already
+            $sub = MailchimpSubscriber::get()
+                    // for this list
+                    ->filter([
+                        'MailchimpListId' => $list_id
+                    ])
+                    // for the Email or the MD5 of it
+                    ->filterAny([
+                        'Email' => $data['Email'],// match on email address provided
+                        'SubscribedId' => MailchimpSubscriber::getMailchimpSubscribedId($data['Email'])// OR may not have the email anymore
+                    ])->first();
+
+            if (empty($sub->ID)) {
+                $sub = MailchimpSubscriber::create();
+                $sub->Name = $data['Name'];
+                $sub->Email = $data['Email'];
+                $sub->MailchimpListId = $list_id;//list they are subscribing to
+                $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
+                $sub->UpdateExisting = $mc_config->UpdateExisting;
+                $sub->SendWelcome = $mc_config->SendWelcome;
+                $sub->ReplaceInterests = $mc_config->ReplaceInterests;
+                $sub->DoubleOptIn = $mc_config->DoubleOptIn;
+                $sub->Tags = $mc_config->Tags;
+                $sub_id = $sub->write();
+                if (!$sub_id) {
+                    throw new RequestException("502", "Bad Gateway");
+                }
+            }
+
+            // handle meta
+            if(!empty($data['meta'])) {
+                // treat a key marked meta in the form as data for Merge Fields
+                $sub->updateMergeFields($data['meta']);
+            }
+
+            // handle a successful subscription
+            $response = $this->handleSuccess(200, "OK", $form);
+            if($response && ($response instanceof HTTPResponse)) {
+                // handle responses for e.g XHR
+                return $response->output();
+            } else {
+                return $this->redirect($this->Link("?complete=y&code={$code}"));
+            }
+
+        } catch (RequestException $e) {
+            $error_message = $e->getMessage();
+            $error_code = $e->getCode();
+        } catch (\Exception $e) {
+            // general exceptin
+            $error_message = Config::inst()->get(MailchimpConfig::class, 'error_message');
+            $error_code = 500;
+        }
+
+        // only handle failures
+        $response = $this->handleError($error_code, $error_message, $form);
+        // handle XHR error responses
+        if($response && ($response instanceof HTTPResponse)) {
+            return $response->output();
         } else {
-            $form->sessionError($failure, ValidationResult::TYPE_ERROR);
+            $query = [
+                'complete' => 'n'
+            ];
+            if($code) {
+                $query['code'] = $code;
+            }
+            $query_string = http_build_query($query);
+            return $this->redirect($this->Link($query));
         }
-        return $this->redirect($this->Link("?complete={$complete}&code={$code}"));
+
     }
 
     /**
      * Return error response for XHR
+     * @return HTTPResponse
      */
-    private function xhrError($code = 500, $message = "") {
+    private function xhrError($code = 500, $message = "", $description = "") {
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-Message', $message);
-        $response->output();
+        $response->addHeader('X-Submission-Description', $message);
+        return $response;
     }
 
     /**
      * Return success response for XHR
+     * @return HTTPResponse
      */
-    private function xhrSuccess($code = 200, $message = "") {
+    private function xhrSuccess($code = 200, $message = "", $description = "") {
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-Message', $message);
-        $response->output();
+        $response->addHeader('X-Submission-Description', $description);
+        return $response;
     }
 
 }

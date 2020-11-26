@@ -26,6 +26,11 @@
             "role": "Contributors"
         }
     ],
+    "extra": {
+        "expose": [
+            "client/static"
+        ]
+    },
     "support": {
         "key" : "value"
     },

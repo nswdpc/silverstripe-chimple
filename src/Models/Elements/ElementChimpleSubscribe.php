@@ -8,6 +8,7 @@ use NSWDPC\Chimple\Models\MailchimpConfig;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -28,6 +29,8 @@ class ElementChimpleSubscribe extends BaseElement
 
     private static $db = [
         'UseXHR' => 'Boolean',// whether to submit without redirect
+        'BeforeFormContent' => 'HTMLText',
+        'AfterFormContent' => 'HTMLText'
     ];
 
     /**
@@ -69,6 +72,20 @@ class ElementChimpleSubscribe extends BaseElement
 
         $fields->addFieldsToTab(
             'Root.Main', [
+                HTMLEditorField::create(
+                    'BeforeFormContent',
+                    _t(
+                        __CLASS__ . '.BEFORE_CONTENT',
+                        'Content to show before form'
+                    )
+                )->setRows(6),
+                HTMLEditorField::create(
+                    'AfterFormContent',
+                    _t(
+                        __CLASS__ . '.AFTER_CONTENT',
+                        'Content to show after form'
+                    )
+                )->setRows(6),
                 CheckboxField::create(
                     'UseXHR',
                     _t(

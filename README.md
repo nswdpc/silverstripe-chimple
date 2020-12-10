@@ -13,8 +13,9 @@ It provides:
 + an elemental subscription form element
 + Merge Fields support
 + Tags for subscribers
++ ability to submit a form with or without (via XHR) redirecting.
 
-### Usage
+### Setup
 
 + Configure your Mailchimp API key and list (audience)
 + Set up one or more configurations, assign one as the default
@@ -39,7 +40,15 @@ Forms will post to the controller endpoint
 
 Including the same subscription form multiple times will lead to id attribute collisions in the DOM. To workaround this, add multiple configurations for the same List (audience) ID.
 
-The module provides basic HTML and no CSS by default.
+The module provides basic HTML and no CSS by default, that's up to you or your developer.
+
+### Content element
+
+A subscription element for use with the Elemental module is provided. Content authors can add a subscription form to a page and configure:
+
++ submitting with/without redirect
++ the audience ID value
++ before/after HTML content to render with the form
 
 ## Requirements
 
@@ -68,6 +77,8 @@ After:
   - '#silverstripe-chimple'
 ---
 NSWDPC\Chimple\Models\MailchimpConfig:
+  # override the XHR submission setting for the global form only
+  use_xhr: true|false
   # account API key
   api_key: '<api key>'
   # default list id

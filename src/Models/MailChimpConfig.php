@@ -10,6 +10,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField;
 use Silverstripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Security\PermissionProvider;
@@ -36,8 +37,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static $table_name = 'ChimpleConfig';
 
-    private static $singular_name = 'Mailchimp Config';
-    private static $plural_name = 'Mailchimp Configs';
+    private static $singular_name = 'Mailchimp Configuration';
+    private static $plural_name = 'Mailchimp Configurations';
 
     private static $title = "Mailchimp Subscriber Form";
     private static $description = "Configuration for a Mailchimp subscribe form";
@@ -58,7 +59,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'ReplaceInterests' => 'Boolean',
         'DoubleOptIn' => 'Boolean',// whether to double opt-in subscribers for this configuration
         // for storing tags to submit with subscriber
-        'Tags' => 'MultiValueField'
+        'Tags' => 'MultiValueField',
+        'UseXHR' => 'Boolean'// whether to submit without redirect
     ];
 
     /**
@@ -72,7 +74,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'IsGlobal.Nice' => 'Default',
         'Heading' => 'Heading',
         'MailchimpListId' => 'List',
-        'DoubleOptIn' => 'Double Opt-in'
+        'DoubleOptIn' => 'Double Opt-in',
+        'UseXHR.Nice' => 'Submit w/o redirect'
     ];
 
     private static $indexes = [
@@ -82,7 +85,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static $defaults = [
         'DoubleOptIn' => 1,
-        'IsGlobal' => 0
+        'IsGlobal' => 0,
+        'UseXHR' => 1
     ];
 
     public static function isEnabled() {
@@ -245,13 +249,28 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             )
         );
 
+        $fields->addFieldToTab(
+            'Root.Main',
+            CheckboxField::create(
+                'UseXHR',
+                _t(
+                    __CLASS__ . '.USE_XHR',
+                    'Submit without redirecting'
+                )
+            ),
+            'Code'
+        );
+
         $fields->removeByName('IsGlobal');
         return $fields;
     }
 
+    /**
+     * Render this config dataobject a subscription form based on settings
+     */
     public function forTemplate()
     {
-        return $this->MailchimpGlobalForm();
+        return $this->SubscribeForm();
     }
 
     /**
@@ -293,10 +312,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Use the form provided by the controller
-     * @param bool whether to submit in place via XHR
+     * @param bool $force_use_xhr whether to submit in place via XHR or not, the default is to let the config decide
      * @return Form
      */
-    public function SubscribeForm($use_xhr = false)
+    public function SubscribeForm($force_use_xhr = null)
     {
         // No form available if not enabled
         $enabled = self::isEnabled();
@@ -315,6 +334,12 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 $form->setLegend($this->Heading);
             }
             $form->addExtraClass('form-subscribe');
+
+            // handle use of XHR submission
+            $use_xhr = $this->UseXHR;// use the default
+            if(!is_null($force_use_xhr)) {
+                $use_xhr = $force_use_xhr;
+            }
             if($use_xhr) {
                 $form->setAttribute('data-xhr',1);
             }

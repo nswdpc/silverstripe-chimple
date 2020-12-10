@@ -27,12 +27,13 @@ class PageExtension extends Extension
     /**
      * Returns a form based on a config code
      * @return Form|null
+     * @param string $config_code a MailchimpConfig.Code value (not an audience ID)
      */
-    public function ChimpleSubscribeForm($config_code, $use_xhr = true)
+    public function ChimpleSubscribeForm($config_code)
     {
         $config = MailchimpConfig::getConfig('', '', $config_code);
         if($config) {
-            return $config->SubscribeForm($use_xhr);
+            return $config->SubscribeForm();
         }
         return null;
     }

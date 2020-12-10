@@ -33,6 +33,10 @@ class ElementChimpleSubscribe extends BaseElement
         'AfterFormContent' => 'HTMLText'
     ];
 
+    private static $defaults = [
+        'UseXHR' => 1
+    ];
+
     /**
      * Has_one relationship
      * @var array
@@ -72,6 +76,21 @@ class ElementChimpleSubscribe extends BaseElement
 
         $fields->addFieldsToTab(
             'Root.Main', [
+                DropdownField::create(
+                    'MailchimpConfigID',
+                    _t(
+                        __CLASS__ . '.SELECT_CONFIGURATION',
+                        'Select the list configuration to use for this subscription form'
+                    ),
+                    MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
+                )->setEmptyString(''),
+                CheckboxField::create(
+                    'UseXHR',
+                    _t(
+                        __CLASS__ . '.USE_XHR',
+                        'Submit without redirecting'
+                    ),
+                ),
                 HTMLEditorField::create(
                     'BeforeFormContent',
                     _t(
@@ -85,22 +104,7 @@ class ElementChimpleSubscribe extends BaseElement
                         __CLASS__ . '.AFTER_CONTENT',
                         'Content to show after form'
                     )
-                )->setRows(6),
-                CheckboxField::create(
-                    'UseXHR',
-                    _t(
-                        __CLASS__ . '.USE_XHR',
-                        'Submit without redirecting'
-                    ),
-                ),
-                $eventcollections = DropdownField::create(
-                    'MailchimpConfigID',
-                    _t(
-                        __CLASS__ . '.SELECT_CONFIGURATION',
-                        'Select the list configuration to use for this subscription form'
-                    ),
-                    MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
-                )->setEmptyString('')
+                )->setRows(6)
             ]
         );
 
@@ -113,6 +117,7 @@ class ElementChimpleSubscribe extends BaseElement
      */
     public function getSubscribeForm() {
         if($config = $this->MailchimpConfig()) {
+            // render the form with this element's XHR setting overriding the config being used
             $form = $config->SubscribeForm( $this->UseXHR == 1 );
             if($form) {
                 // ensure for ID attribute is unique

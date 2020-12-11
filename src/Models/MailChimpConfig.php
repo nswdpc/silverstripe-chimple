@@ -428,7 +428,18 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             }
 
             if ($config) {
-                return $config->SubscribeForm(!empty($args[1]));
+                // default to let the config decide
+                $force_use_xhr = null;
+                if(isset($args[1])) {
+                    if($args[1] === '0') {
+                        // string '0' passed in as an arg in the template
+                        $force_use_xhr = false;
+                    } else if($args[1] === '1') {
+                        // string '1' passed in as an arg in the template
+                        $force_use_xhr = true;
+                    }
+                }
+                return $config->SubscribeForm($force_use_xhr);
             }
         }
         return null;

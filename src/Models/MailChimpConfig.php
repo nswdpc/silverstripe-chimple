@@ -94,7 +94,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     ];
 
     public function TitleCode() {
-        return "{$this->Title} ({$this->Code}}";
+        return "{$this->Title} ({$this->Code})";
     }
 
     public static function isEnabled() {

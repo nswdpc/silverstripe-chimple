@@ -46,18 +46,30 @@ class ChimpleController extends PageController
     public function index()
     {
         $form = $this->SubscribeForm();
+        // work out if complete or not
+        $is_complete = $this->request->getVar('complete');
         $data = ArrayData::create([
-            'IsComplete' => ($this->request->getVar('complete') == 'y'),
+            'IsComplete' => $is_complete,
             'Code' => $this->Code(),
-            'HideGenericChimpleForm' => $this->HideGenericChimpleForm()
+            'HideGenericChimpleForm' => $this->HideGenericChimpleForm(),
+            'Title' => $this->pageTitle($is_complete)
         ]);
-
         return $this->customise($data)->renderWith([ 'ChimpleController', 'Page' ]);
     }
 
-    public function Title()
+    public function pageTitle($complete = null)
     {
-        return _t(__CLASS__. '.DEFAULT_TITLE', 'Subscribe');
+        switch($complete) {
+            case 'y':
+                return _t(__CLASS__. '.DEFAULT_TITLE_SUCCESSFUL', 'Thanks for subscribing');
+                break;
+            case 'n':
+                return _t(__CLASS__. '.DEFAULT_TITLE_NOT_SUCCESSFUL', 'Sorry, there was an error');
+                break;
+            default:
+                return _t(__CLASS__. '.DEFAULT_TITLE', 'Subscribe');
+                break;
+        }
     }
 
     public function Link($action = null)
@@ -128,6 +140,7 @@ class ChimpleController extends PageController
         $form->addExtraClass('subscribe chimple');
         $form->setTemplate('MailchimpSubscriberForm');
         $form->setFormMethod('POST');
+        $form->setFormAction( $this->Link('SubscribeForm') );
 
         // allow extensions to manipulate the form
         $form->extend('updateChimpleSubscribeForm');

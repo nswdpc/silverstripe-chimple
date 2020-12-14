@@ -10,12 +10,15 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use Silverstripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\TemplateGlobalProvider;
+use SilverStripe\View\ArrayData;
 use Symbiote\MultiValueField\Fields\MultiValueTextField;
 
 /**
@@ -36,8 +39,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static $table_name = 'ChimpleConfig';
 
-    private static $singular_name = 'Mailchimp Config';
-    private static $plural_name = 'Mailchimp Configs';
+    private static $singular_name = 'Mailchimp Configuration';
+    private static $plural_name = 'Mailchimp Configurations';
 
     private static $title = "Mailchimp Subscriber Form";
     private static $description = "Configuration for a Mailchimp subscribe form";
@@ -58,7 +61,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'ReplaceInterests' => 'Boolean',
         'DoubleOptIn' => 'Boolean',// whether to double opt-in subscribers for this configuration
         // for storing tags to submit with subscriber
-        'Tags' => 'MultiValueField'
+        'Tags' => 'MultiValueField',
+        'UseXHR' => 'Boolean',// whether to submit without redirect
+        'BeforeFormContent' => 'HTMLText',
+        'AfterFormContent' => 'HTMLText'
     ];
 
     /**
@@ -72,7 +78,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'IsGlobal.Nice' => 'Default',
         'Heading' => 'Heading',
         'MailchimpListId' => 'List',
-        'DoubleOptIn' => 'Double Opt-in'
+        'DoubleOptIn' => 'Double Opt-in',
+        'UseXHR.Nice' => 'Submit w/o redirect'
     ];
 
     private static $indexes = [
@@ -80,10 +87,22 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'Code' => ['type' => 'unique']
     ];
 
+    /**
+     * Add default values to database
+     * @var array
+     */
     private static $defaults = [
+        'UpdateExisting' => 1,
+        'SendWelcome' => 0,
+        'ReplaceInterests' => 0,
         'DoubleOptIn' => 1,
-        'IsGlobal' => 0
+        'IsGlobal' => 0,
+        'UseXHR' => 1
     ];
+
+    public function TitleCode() {
+        return "{$this->Title} ({$this->Code})";
+    }
 
     public static function isEnabled() {
         $site_config = SiteConfig::current_site_config();
@@ -175,6 +194,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
         $api_key = self::getApiKey();
         if (!$api_key) {
             $fields->addFieldToTab(
@@ -245,13 +265,45 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             )
         );
 
+        $fields->addFieldToTab(
+            'Root.Main',
+            CheckboxField::create(
+                'UseXHR',
+                _t(
+                    __CLASS__ . '.USE_XHR',
+                    'Submit without redirecting'
+                )
+            ),
+            'Code'
+        );
+
+        $fields->addFieldsToTab(
+            'Root.Main', [
+            HTMLEditorField::create(
+                'BeforeFormContent',
+                _t(
+                    __CLASS__ . '.BEFORE_CONTENT',
+                    'Content to show before form'
+                )
+            )->setRows(6),
+            HTMLEditorField::create(
+                'AfterFormContent',
+                _t(
+                    __CLASS__ . '.AFTER_CONTENT',
+                    'Content to show after form'
+                )
+            )->setRows(6)
+        ]);
+
+        if($heading = $fields->dataFieldByName('Heading')) {
+            $heading->setDescription(_t(
+                __CLASS__ . '.HEADING_DESCRIPTON',
+                'Displayed above the form'
+            ));
+        }
+
         $fields->removeByName('IsGlobal');
         return $fields;
-    }
-
-    public function forTemplate()
-    {
-        return $this->MailchimpGlobalForm();
     }
 
     /**
@@ -293,10 +345,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Use the form provided by the controller
-     * @param bool whether to submit in place via XHR
+     * @param bool $force_use_xhr whether to submit in place via XHR or not, the default is to let the config decide
      * @return Form
      */
-    public function SubscribeForm($use_xhr = false)
+    public function SubscribeForm($force_use_xhr = null)
     {
         // No form available if not enabled
         $enabled = self::isEnabled();
@@ -306,7 +358,19 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         $form = Injector::inst()->create(ChimpleController::class)->SubscribeForm();
         // to return a form, there must be one and the Code must exist
         if($form && $this->Code) {
-            $form->setHTMLID( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
+
+            // handle use of XHR submission
+            $use_xhr = $this->UseXHR;// use the default
+            if(!is_null($force_use_xhr)) {
+                $use_xhr = $force_use_xhr;
+            }
+            if($use_xhr) {
+                $form->setAttribute('data-xhr',1);
+                $form->clearMessage();
+            }
+
+            // ensure the form has a unique name per code
+            $form->setName( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
             // apply the code for this config to the form
             $code_field = HiddenField::create('code', 'code', $this->Code);
             $code_field->setForm($form);
@@ -315,9 +379,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 $form->setLegend($this->Heading);
             }
             $form->addExtraClass('form-subscribe');
-            if($use_xhr) {
-                $form->setAttribute('data-xhr',1);
-            }
             return $form;
         }
 
@@ -382,28 +443,44 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     }
 
     /**
+     * Render this record using a template
+     * @return DBHTMLText|null
+     */
+    public function forTemplate($force_use_xhr = null)
+    {
+        $form = $this->SubscribeForm($force_use_xhr);
+        if($form) {
+            return $this->customise(['Form'=>$form])->renderWith( self::class );
+        }
+        return null;
+    }
+
+    /**
      * Get a subscribe form based on a config code
      * This first parameter is the list code (not the MC audience ID)
      * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
      * @param array
-     * @return mixed
+     * @return string|null
      */
     public static function get_chimple_subscribe_form(...$args)
     {
         $code = isset($args[0]) ? $args[0] : '';
         if ($code) {
             $config = self::getConfig('', '', $code);
-            if (!$config) {
-                // try to get the default one
-                $default_list_id = self::getDefaultMailchimpListId();
-                if ($default_list_id) {
-                    $config = self::getConfig('', $default_list_id);
-                }
-            }
-
             if ($config) {
-                return $config->SubscribeForm(!empty($args[1]));
+                // default to let the config decide
+                $force_use_xhr = null;
+                if(isset($args[1])) {
+                    if($args[1] === '0') {
+                        // string '0' passed in as an arg in the template
+                        $force_use_xhr = false;
+                    } else if($args[1] === '1') {
+                        // string '1' passed in as an arg in the template
+                        $force_use_xhr = true;
+                    }
+                }
+                return $config->forTemplate($force_use_xhr);
             }
         }
         return null;
@@ -412,14 +489,14 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Get the subscribe form for the current global config
      * This is called from a template calling $ChimpleSubscribeForm('code')
-     * @return mixed
+     * @return string|null
      */
     public static function get_chimple_global_subscribe_form()
     {
         $config = self::getGlobalConfig();
         if ($config) {
             $use_xhr = static::config()->get('use_xhr');
-            return $config->SubscribeForm($use_xhr);
+            return $config->forTemplate($use_xhr);
         }
         return null;
     }

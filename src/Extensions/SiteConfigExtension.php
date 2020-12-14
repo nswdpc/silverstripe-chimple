@@ -31,7 +31,7 @@ class SiteConfigExtension extends DataExtension
                 DropdownField::create(
                     'MailchimpConfigID',
                     _t(__CLASS__. '.DEFAULT_MAILCHIMP_CONFIG', 'Default Mailchimp configuration'),
-                    MailchimpConfig::get()->map('ID', 'Title')
+                    MailchimpConfig::get()->map('ID', 'TitleCode')
                 )->setEmptyString('')
             ]
         );

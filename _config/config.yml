@@ -2,6 +2,8 @@
 Name: silverstripe-chimple
 ---
 NSWDPC\Chimple\Models\MailchimpConfig:
+  # this is for the global form only
+  use_xhr: true
   api_key: ''
   # global default list (audience) ID
   list_id: ''

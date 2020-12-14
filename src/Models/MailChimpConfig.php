@@ -358,15 +358,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         $form = Injector::inst()->create(ChimpleController::class)->SubscribeForm();
         // to return a form, there must be one and the Code must exist
         if($form && $this->Code) {
-            $form->setHTMLID( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
-            // apply the code for this config to the form
-            $code_field = HiddenField::create('code', 'code', $this->Code);
-            $code_field->setForm($form);
-            $form->Fields()->push($code_field);
-            if ($this->Heading) {
-                $form->setLegend($this->Heading);
-            }
-            $form->addExtraClass('form-subscribe');
 
             // handle use of XHR submission
             $use_xhr = $this->UseXHR;// use the default
@@ -375,7 +366,19 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             }
             if($use_xhr) {
                 $form->setAttribute('data-xhr',1);
+                $form->clearMessage();
             }
+
+            // ensure the form has a unique name per code
+            $form->setName( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
+            // apply the code for this config to the form
+            $code_field = HiddenField::create('code', 'code', $this->Code);
+            $code_field->setForm($form);
+            $form->Fields()->push($code_field);
+            if ($this->Heading) {
+                $form->setLegend($this->Heading);
+            }
+            $form->addExtraClass('form-subscribe');
             return $form;
         }
 

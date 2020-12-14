@@ -5,11 +5,12 @@ $Breadcrumbs
 
 <section role="main">
 
-    <% if $IsComplete %>
-        <p>Your subscription was successful</p>
-    <% else %>
-        <p>Your subscription was not successful</p>
-        <% include ChimpleSubscribeForm Code=$Code %>
+    <% if $IsComplete == 'y' %>
+        <p>You should receive a notification email shortly.</p>
+    <% else_if $IsComplete == 'n' %>
+        <p>Unfortunately your subscription request could not be completed, you could try again now or later.</p>
     <% end_if %>
+
+    <% include ChimpleSubscribeForm Code=$Code %>
 
 </div>

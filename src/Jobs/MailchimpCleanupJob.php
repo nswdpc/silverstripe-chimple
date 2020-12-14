@@ -43,7 +43,6 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
 
     public function getJobType()
     {
-        $this->totalSteps = 'Lots';
         return QueuedJob::QUEUED;
     }
 
@@ -66,6 +65,8 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         $prune_datetime->modify("-{$minutes} minutes");
 
         $this->currentStep = 0;
+        $success_deletes = 0;
+        $failed_deletes = 0;
 
         // handle successful subscriptions
         $successful = MailchimpSubscriber::get()
@@ -81,18 +82,16 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         if ($this->report_only) {
             $this->addMessage("Would delete {$successful->count()} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS);
         } else {
-            $deletes = 0;
             foreach ($successful as $subscriber) {
                 // remove this subscriber from the table
                 $subscriber->delete();
-                $deletes++;
+                $success_deletes++;
             }
-            $this->addMessage("Deleted {$deletes} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS);
+            $this->addMessage("Deleted {$success_deletes} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS);
         }
 
 
-        $this->currentStep += $successful->count();
-        $this->totalSteps = $this->currentStep;
+        $this->currentStep = $this->totalSteps = $success_deletes;
 
         // remove stale failed subscriptions older than 7 days
         $fail_datetime = new DateTime();
@@ -105,19 +104,16 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         if ($this->report_only) {
             $this->addMessage("Would delete {$failed->count()} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_FAIL);
         } else {
-            // todo email ppl ?
-            $deletes = 0;
             foreach ($failed as $failed_subscriber) {
+                // remove this subscriber from the table
                 $failed_subscriber->delete();
-                $deletes++;
+                $failed_deletes++;
             }
-            $this->addMessage("Deleted {$deletes} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_FAIL);
+            $this->addMessage("Deleted {$failed_deletes} subscribers with status " . MailchimpSubscriber::CHIMPLE_STATUS_FAIL);
         }
 
-        $this->currentStep += $failed->count();
-        $this->totalSteps = $this->currentStep;
 
-        // this will leave any subscribers in non FAIL|SUCCESS status
+        $this->currentStep = $this->totalSteps = ($success_deletes + $failed_deletes);
 
         return true;
     }

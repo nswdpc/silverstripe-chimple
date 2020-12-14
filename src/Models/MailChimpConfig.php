@@ -87,7 +87,14 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'Code' => ['type' => 'unique']
     ];
 
+    /**
+     * Add default values to database
+     * @var array
+     */
     private static $defaults = [
+        'UpdateExisting' => 1,
+        'SendWelcome' => 0,
+        'ReplaceInterests' => 0,
         'DoubleOptIn' => 1,
         'IsGlobal' => 0,
         'UseXHR' => 1

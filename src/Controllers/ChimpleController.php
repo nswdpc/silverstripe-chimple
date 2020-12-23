@@ -153,6 +153,10 @@ class ChimpleController extends PageController
             $form->setFormMethod("GET", false);
         }
 
+        if($form->hasMethod('enableSpamProtection')) {
+            $form->enableSpamProtection();
+        }
+
         // allow extensions to manipulate the form
         $form->extend('updateChimpleSubscribeForm');
 

@@ -33,6 +33,8 @@ class ChimpleController extends PageController
 
     private static $disable_security_token = false;
 
+    private static $use_get = false;
+
     private static $allowed_actions = [
         'SubscribeForm',
         'subscribe'
@@ -142,6 +144,15 @@ class ChimpleController extends PageController
         $form->setFormMethod('POST');
         $form->setFormAction( $this->Link('SubscribeForm') );
 
+        if($this->config()->get('disable_security_token')) {
+            $form->disableSecurityToken();
+        }
+
+        if($this->config()->get('use_get')) {
+            // 2nd param required as XHR forms use POST
+            $form->setFormMethod("GET", false);
+        }
+
         // allow extensions to manipulate the form
         $form->extend('updateChimpleSubscribeForm');
 
@@ -198,22 +209,39 @@ class ChimpleController extends PageController
                 throw new RequestException("Forbidden", 403);
             }
 
-            if(!$token = $form->getSecurityToken()) {
-                throw new RequestException("Forbidden", 403);
+            if(!$this->config()->get('disable_security_token')) {
+
+                if(!$token = $form->getSecurityToken()) {
+                    throw new RequestException("Forbidden", 403);
+                }
+
+                $token_name = $token->getName();
+                $token_value = isset( $data[ $token_name ] ) ?? '';
+
+                $check = $token->check($token_value);
+                if(!$token_value || !$check) {
+                    throw new RequestException("Forbidden", 403);
+                }
             }
 
-            $token_name = $token->getName();
-            $token_value = isset( $data[ $token_name ] ) ?? '';
-
-            $check = $token->check($token_value);
-            if(!$token_value || !$check) {
-                throw new RequestException("Forbidden", 403);
-            }
-
-            $code = strip_tags(trim($data['code'] ?: ''));
-            $error_message = "";
-            $error_code = 400;// default to invalid data500
             $mc_config = null;
+
+            if(empty($data['code'])) {
+                // fail with error
+                $error_message = _t(
+                    __CLASS__ . '.NO_CODE',
+                    "No code was provided"
+                );
+                $error_code = 400;// default to invalid data
+
+            } else {
+
+                $code = strip_tags(trim($data['code'] ?: ''));
+                $error_message = "";
+                $error_code = 400;// default to invalid data
+                $mc_config = null;
+
+            }
 
             $enabled = MailchimpConfig::isEnabled();
             if(!$enabled) {

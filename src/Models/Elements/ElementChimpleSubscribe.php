@@ -5,6 +5,8 @@ namespace NSWDPC\Chimple\Models\Elements;
 use SilverStripe\Forms\CheckboxField;
 use DNADesign\Elemental\Models\BaseElement;
 use NSWDPC\Chimple\Models\MailchimpConfig;
+use SilverStripe\Assets\Image;
+use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
@@ -43,6 +45,11 @@ class ElementChimpleSubscribe extends BaseElement
      */
     private static $has_one = [
         'MailchimpConfig' => MailchimpConfig::class,
+        'Image' => Image::class
+    ];
+
+    private static $owns = [
+        'Image'
     ];
 
     public function getType()
@@ -104,7 +111,18 @@ class ElementChimpleSubscribe extends BaseElement
                         __CLASS__ . '.AFTER_CONTENT',
                         'Content to show after form'
                     )
-                )->setRows(6)
+                )->setRows(6),
+                UploadField::create(
+                    'Image',
+                    _t(__CLASS__ . '.IMAGE', 'Image')
+                )->setTitle(
+                    _t(
+                        __CLASS__ . '.ADD_IMAGE_TO_CONTENT_BLOCK',
+                        'Add an image'
+                    )
+                )->setFolderName('blocks/content/' . $this->owner->ID)
+                ->setAllowedMaxFileNumber(1)
+                ->setIsMultiUpload(false)
             ]
         );
 

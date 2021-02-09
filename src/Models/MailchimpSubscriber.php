@@ -355,33 +355,41 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     }
 
     /**
-     *  @return array
+     * Get the subscription record data for adding/updating member in list
+     * @param string $existing_status for updates to subscription status, the subscribers's current status
+     * @return array
      */
-    public function getSubscribeRecord() {
+    public function getSubscribeRecord($existing_status = '') {
 
         // merge fields to send
         $merge_fields = $this->applyMergeFields();
 
         // status: subscribed unsubscribed cleaned pending
         $double_optin = $this->DoubleOptIn == 1;
-        if (!$double_optin) {
-            // subscribed when doubleoptin is off
-            $status = self::MAILCHIMP_SUBSCRIBER_SUBSCRIBED;
-        } else {
-            // pending when doubleoptin is on
-            $status = self::MAILCHIMP_SUBSCRIBER_PENDING;
-        }
 
         $params = [
             'email_address' => $this->Email,
-            'status'        => $status,
-            'double_optin' => $double_optin,
+            'double_optin' => $double_optin,// @deprecated
             'merge_fields' => $merge_fields,
-            'update_existing' => $this->UpdateExisting,
-            'replace_interests' => $this->ReplaceInterests,
-            'send_welcome' => $this->SendWelcome,
+            'update_existing' => $this->UpdateExisting,// @deprecated
+            'replace_interests' => $this->ReplaceInterests,// @deprecated
+            'send_welcome' => $this->SendWelcome,// @deprecated
             'tags' => $this->getSubscriberTags()
         ];
+
+        if(!$existing_status) {
+            if (!$double_optin) {
+                // subscribed when doubleoptin is off
+                $status = self::MAILCHIMP_SUBSCRIBER_SUBSCRIBED;
+            } else {
+                // pending when doubleoptin is on
+                $status = self::MAILCHIMP_SUBSCRIBER_PENDING;
+            }
+            $params['status'] = $status;
+        } else {
+            // use existing_status as it is a required field
+            $params['status'] = $existing_status;
+        }
 
         return $params;
     }
@@ -426,11 +434,72 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     }
 
     /**
-     * Get the has that is used as the MC subscribed Id value
+     * Get the hash that is used as the MC subscribed Id value
      * @return string
      */
     public static function getMailchimpSubscribedId($email) {
-        return md5(strtolower($email));
+        return MailchimpApiClient::subscriberHash($email);
+    }
+
+    /**
+     * Check if a  given email address exists in the given list (audience)
+     * @param string $list_id the Audience ID
+     * @param string $email an email address, this is hashed using the MC hashing strategy
+     * @param string $api_key you can optionally provide another API key, other than the one configured.
+     *               If this is not provided, the configured one is used
+     * @return boolean
+     */
+    public static function checkExistsInList(string $list_id, string $email, string $api_key = '') {
+
+
+        // sanity check on input
+        if(!$email) {
+            throw new \Exception(
+                _t(
+                    __CLASS__ . ".EMAIL_NOT_PROVIDED",
+                    "Please provide an email address"
+                )
+            );
+        }
+
+        if(!$list_id) {
+            throw new \Exception(
+                _t(
+                    __CLASS__ . ".AUDIENCE_NOT_PROVIDED",
+                    "Please provide a Mailchimp audience/list ID"
+                )
+            );
+        }
+
+        // can provide an API key as a param
+        if(!$api_key) {
+            $api_key = MailchimpConfig::getApiKey();
+            if (!$api_key) {
+                throw new Exception(
+                    _t(
+                        __CLASS__ . ".APIKEY_NOT_PROVIDED_CONFIGURED",
+                        "No Mailchimp API Key provided or configured!"
+                    )
+                );
+            }
+        }
+
+        // API client
+        $api = new MailchimpApiClient($api_key);
+
+        // attempt to get the subscriber
+        $hash = self::getMailchimpSubscribedId($email);
+        $result = $api->get(
+            "lists/{$list_id}/members/{$hash}"
+        );
+
+        // an existing member will return an 'id' value matching the hash
+        // id = The MD5 hash of the lowercase version of the list member's email address.
+        if(isset($result['id']) && $result['id'] == $hash) {
+            return $result;
+        }
+
+        return false;
     }
 
     /**
@@ -445,12 +514,27 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 throw new Exception("No Mailchimp List/Audience Id configured!");
             }
 
-            // Subscribe via API
+            /**
+             * Check if the subscriber already exists in this list
+             */
+            $existing = self::checkExistsInList($list_id, $this->Email);
+
+            $result = false;
             $api = $this->getMailchimp();
-            $result = $api->post(
-                "lists/{$list_id}/members",
-                $this->getSubscribeRecord()
-            );
+            if(!$existing) {
+                // New: subscribe - use POST
+                $result = $api->post(
+                    "lists/{$list_id}/members",
+                    $this->getSubscribeRecord()
+                );
+            } else {
+                // Current: patch into list
+                $result = $api->patch(
+                    "lists/{$list_id}/members/{$existing['id']}",
+                    // use current status of subscriber, to avoid changing it
+                    $this->getSubscribeRecord($existing['status'])
+                );
+            }
 
             if (!empty($result['unique_email_id'])) {
                 // this unique_email_id value is returned when subscribed

@@ -210,10 +210,18 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             ]
         );
 
+        // get profile link
+        $dc = MailChimpConfig::getDataCentre();
+        if($dc && $this->SubscribedWebId) {
+            $subscriber_profile_link = "https://{$dc}.admin.mailchimp.com/lists/members/view?id={$this->SubscribedWebId}";
+        } else {
+            $subscriber_profile_link = "n/a";
+        }
+
         $readonly_fields = [
             'MailchimpListId' => _t(__CLASS__ . '.SUBSCRIBER_LIST_ID', "The Mailchimp List (audience) Id for this subscription record"),
             'SubscribedUniqueEmailId' => _t(__CLASS__ . '.SUBSCRIBER_UNIQUE_EMAIL_ID', "An identifier for the address across all of Mailchimp."),
-            'SubscribedWebId' => _t(__CLASS__ . '.SUBSCRIBER_WEB_ID', "The ID used in the Mailchimp web application. View this member in your Mailchimp account at https://{dc}.admin.mailchimp.com/lists/members/view?id={web_id}"),
+            'SubscribedWebId' => _t(__CLASS__ . '.SUBSCRIBER_WEB_ID', "Member profile page: {link}", ['link' => $subscriber_profile_link]),
             'SubscribedId' => _t(__CLASS__ . '.SUBSCRIBER_ID', "The MD5 hash of the lowercase version of the list member's email address.")
         ];
 

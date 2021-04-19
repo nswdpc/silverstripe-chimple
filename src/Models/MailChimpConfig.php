@@ -119,6 +119,20 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         return Config::inst()->get(MailchimpConfig::class, 'api_key');
     }
 
+    /**
+     * Returns the data centre (dc) component based on the API key e.g us2
+     * @return string
+     */
+    public static function getDataCentre() : string {
+        $dc = '';
+        $key = self::getApiKey();
+        $parts = [];
+        if($key) {
+            $parts = explode("-", $key);
+        }
+        return !empty($parts[1]) ? $parts[1] : '';
+    }
+
     public function TitleWithCode() {
         return $this->Title . " - (code {$this->Code})";
     }

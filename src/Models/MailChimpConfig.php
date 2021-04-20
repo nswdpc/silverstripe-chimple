@@ -14,6 +14,7 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use Silverstripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -31,7 +32,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static $list_id = "";// default list (audience) ID
     private static $api_key = "";// API key provided by Mailchimp
-    private static $double_optin = true;// have a good reason to set to false
     private static $use_xhr = true;//whether to use XHR for submissions
 
     private static $success_message = "Thank you for subscribing. You will receive an email to confirm your subscription shortly.";
@@ -56,10 +56,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'Heading' => 'Varchar(255)',
         'MailchimpListId' => 'Varchar(255)',//list to subscribe people to
         'ArchiveLink' =>  'Varchar(255)',//link to newsletter archive page for the list
-        'UpdateExisting' => 'Boolean',
-        'SendWelcome' => 'Boolean',
-        'ReplaceInterests' => 'Boolean',
-        'DoubleOptIn' => 'Boolean',// whether to double opt-in subscribers for this configuration
+        'UpdateExisting' => 'Boolean',// @deprecated
+        'SendWelcome' => 'Boolean',// @deprecated
+        'ReplaceInterests' => 'Boolean',// @deprecated
+        'DoubleOptIn' => 'Boolean',// @deprecated
         // for storing tags to submit with subscriber
         'Tags' => 'MultiValueField',
         'UseXHR' => 'Boolean',// whether to submit without redirect
@@ -78,7 +78,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'IsGlobal.Nice' => 'Default',
         'Heading' => 'Heading',
         'MailchimpListId' => 'List',
-        'DoubleOptIn' => 'Double Opt-in',
         'UseXHR.Nice' => 'Submit w/o redirect'
     ];
 
@@ -92,10 +91,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * @var array
      */
     private static $defaults = [
-        'UpdateExisting' => 1,
-        'SendWelcome' => 0,
-        'ReplaceInterests' => 0,
-        'DoubleOptIn' => 1,
+        'UpdateExisting' => 1,// @deprecated
+        'SendWelcome' => 0,// @deprecated
+        'ReplaceInterests' => 0,// @deprecated
+        'DoubleOptIn' => 1,// @deprecated
         'IsGlobal' => 0,
         'UseXHR' => 1
     ];
@@ -208,6 +207,14 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
+        // remove deprecated fields
+        $fields->removeByName([
+            'UpdateExisting',
+            'SendWelcome',
+            'ReplaceInterests',
+            'DoubleOptIn'
+        ]);
 
         $api_key = self::getApiKey();
         if (!$api_key) {
@@ -475,7 +482,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
      * @param array
-     * @return string|null
+     * @return DBHTMLText|null
      */
     public static function get_chimple_subscribe_form(...$args)
     {
@@ -503,7 +510,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Get the subscribe form for the current global config
      * This is called from a template calling $ChimpleSubscribeForm('code')
-     * @return string|null
+     * @return DBHTMLText|null
      */
     public static function get_chimple_global_subscribe_form()
     {

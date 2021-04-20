@@ -3,7 +3,7 @@
     <div class="element element-content<% if $StyleVariant %> $StyleVariant<% end_if %>">
 
         <% if $BeforeFormContent %>
-            <div class="before">
+            <div class="content pre">
                 {$BeforeFormContent}
             </div>
         <% end_if %>
@@ -19,7 +19,7 @@
         </div>
 
         <% if $BeforeFormContent %>
-            <div class="after">
+            <div class="content post">
                 {$BeforeFormContent}
             </div>
         <% end_if %>

@@ -324,10 +324,6 @@ class ChimpleController extends PageController
                 $sub->Email = $data['Email'];
                 $sub->MailchimpListId = $list_id;//list they are subscribing to
                 $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-                $sub->UpdateExisting = $mc_config->UpdateExisting;
-                $sub->SendWelcome = $mc_config->SendWelcome;
-                $sub->ReplaceInterests = $mc_config->ReplaceInterests;
-                $sub->DoubleOptIn = $mc_config->DoubleOptIn;
                 $sub->Tags = $mc_config->Tags;
                 $sub_id = $sub->write();
                 if (!$sub_id) {

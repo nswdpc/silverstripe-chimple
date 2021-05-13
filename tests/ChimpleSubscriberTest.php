@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Tests;
 
 use DrewM\MailChimp\MailChimp as MailchimpApiClient;
+use NSWDPC\Chimple\Services\Logger;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use SilverStripe\Core\Config\Config;
@@ -20,9 +21,23 @@ class ChimpleSubscriberTest extends SapphireTest
 
     protected $usesDatabase = true;
 
-    private static $test_email_domain = "";// e.g example.com
-    private static $test_email_user = "";// e.g bob.smith
-    private static $test_use_plus = true;// use plus notation in email address
+    /**
+     * e.g example.com
+     * @var string
+     */
+    private static $test_email_domain = "";
+
+    /**
+     * e.g bob.smith
+     * @var string
+     */
+    private static $test_email_user = "";
+
+    /**
+     * use plus notation in email address
+     * @var bool
+     */
+    private static $test_use_plus = true;
 
     public function testSubscriber()
     {
@@ -55,12 +70,13 @@ class ChimpleSubscriberTest extends SapphireTest
         }
         $email_address_for_test .= "@{$test_email_domain}";
 
+        $tags = ['TestOne','TestTwo'];
         $record = [
             'Name' => "{$fname} {$lname}",
             'Email' => $email_address_for_test,
             'FailNoticeSent' => 0,
             'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
-            'DoubleOptIn' => 0// turn off double option for test
+            'TagsValue' => json_encode($tags)
         ];
         $subscriber =  MailchimpSubscriber::create($record);
         $subscriber->write();
@@ -73,7 +89,7 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertEquals($subscriber->Surname, $lname, "Subscriber shold have lname of {$lname}");
 
-        $client = $subscriber->getMailchimp();
+        $client = MailchimpSubscriber::api();
 
         $this->assertTrue($client instanceof MailchimpApiClient, "Client is not a valid mailchimp instance");
 
@@ -86,11 +102,11 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertTrue( !empty($subscribe_record), "Record is empty");
 
+        $this->assertTrue( isset($subscribe_record['merge_fields']), "Record merge_fields is not set");
+
+        $this->assertTrue( !empty($subscribe_record['email_type']), "Record email_type is empty");
+
         $this->assertEquals( $subscriber->Email, $subscribe_record['email_address'], "Subscribed email_address value is not the same as subsciber record Email field value");
-
-        $this->assertEquals( MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_SUBSCRIBED, $subscribe_record['status'], "Subscribed email is not the same as subsciber record Email field value");
-
-        $this->assertFalse( $subscribe_record['double_optin'], "Subscriber record double_optin value should be false/0");
 
         // check merge fields
         $sync_fields = $subscriber->config()->get('sync_fields');
@@ -99,13 +115,8 @@ class ChimpleSubscriberTest extends SapphireTest
             $this->assertTrue( isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), "Merge field tag {$tag} value does not match subscriber {$field} value");
         }
 
-        $this->assertEquals( $subscriber->UpdateExisting, $subscribe_record['update_existing'], "Subscribed update_existing does not match record");
-
-        $this->assertEquals( $subscriber->SendWelcome, $subscribe_record['send_welcome'], "Subscribed send_welcome does not match record");
-
-        $this->assertEquals( $subscriber->ReplaceInterests, $subscribe_record['replace_interests'], "Subscribed replace_interests does not match record");
-
         $email = $subscriber->Email;
+
         if($subscriber->subscribe()) {
 
             $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS, "Status of subscriber should be subscribed");
@@ -122,6 +133,24 @@ class ChimpleSubscriberTest extends SapphireTest
 
             $this->assertTrue(substr_count($subscriber->Surname, $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
 
+            $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
+
+            $this->assertTrue(!empty($mc_record['id']), "The subscriber does not exist in the list {$list_id} - it should");
+            $this->assertEquals(MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_PENDING, $mc_record['status'], "The subscriber is not pending status");
+
+            // check tags
+            $this->assertEquals(count($tags), count($mc_record['tags']), "Tag count mismatch");
+
+            $mc_tags_list = [];
+            array_walk($mc_record['tags'], function($value,  $key) use (&$mc_tags_list) {
+                $mc_tags_list[] = $value['name'];
+            });
+
+            sort($tags);
+            sort($mc_tags_list);
+
+            $this->assertEquals($tags, $mc_tags_list, "Tags sent do not match tags retrieved");
+
         } else {
 
             // failed
@@ -135,6 +164,9 @@ class ChimpleSubscriberTest extends SapphireTest
             $this->assertEmpty($subscriber->SubscribedWebId, "SubscribedWebId should be empty");
 
             $this->assertEmpty($subscriber->SubscribedId, "SubscribedId should be empty");
+
+            $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
+            $this->assertTrue(empty($mc_record['id']), "The subscriber exists in the list {$list_id} it should not");
 
         }
 

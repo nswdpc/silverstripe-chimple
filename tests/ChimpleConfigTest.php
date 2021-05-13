@@ -10,6 +10,7 @@ use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\SiteConfig\SiteConfig;
 
@@ -21,8 +22,6 @@ class ChimpleConfigTest extends SapphireTest
 {
 
     protected $usesDatabase = true;
-
-    // protected static $tempDB = true;
 
     public function testConfiguration()
     {
@@ -49,11 +48,7 @@ class ChimpleConfigTest extends SapphireTest
             'IsGlobal' => 1,
             'Heading' => 'My Default Config',
             'MailchimpListId' => 'different_list_id',
-            'ArchiveLink' => 'https://example.com',
-            'UpdateExisting' => 1,
-            'SendWelcome' => 1,
-            'ReplaceInterests' => 1,
-            'DoubleOptIn' => 0 // tests turn off DoubleOptin
+            'ArchiveLink' => 'https://example.com'
         ];
 
         $config = MailchimpConfig::create($record);
@@ -75,8 +70,6 @@ class ChimpleConfigTest extends SapphireTest
         $retrieved_config = MailchimpConfig::getConfig('','', $config->Code);
 
         $this->assertEquals($retrieved_config->ID, $config->ID, "Configs should be the same");
-
-        $this->assertTrue($retrieved_config->DoubleOptIn == 0, "Double Opt In setting should be false");
 
         // test configuration form retrieval
         $form = $config->SubscribeForm(true);
@@ -106,15 +99,10 @@ class ChimpleConfigTest extends SapphireTest
 
         $static_form = MailchimpConfig::get_chimple_subscribe_form($code_value);
 
-        $this->assertTrue( $static_form instanceof Form, "Static form for code {$code_value} was not returned");
+        $this->assertTrue( $static_form instanceof DBHTMLText, "Static form for code {$code_value} was not returned");
 
-        $static_fields = $static_form->Fields();
-
-        $static_code = $static_fields->dataFieldByName('code');
-        $this->assertTrue( $static_code instanceof HiddenField, "'code' field is not present");
-
-        $static_code_value = $static_code->dataValue();
-        $this->assertEquals($static_code_value, $config->Code, "Code value from static form is not the same as config value");
+        $needle = " value=\"{$code_value}\" ";
+        $this->assertTrue( strpos($static_form->forTemplate(), $needle) !== false, "Missing {$code_value} input from form HTML");
 
     }
 }

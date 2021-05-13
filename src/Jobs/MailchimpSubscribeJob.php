@@ -14,7 +14,7 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
 {
     use Configurable;
 
-    private static $run_in_seconds = 300;
+    private static $run_in_seconds = 60;
     private static $default_limit = 100;
 
     public function __construct($limit = 100, $report_only = 0)
@@ -90,9 +90,9 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
     {
         $run_datetime = new DateTime();
         $seconds  = (int)$this->config()->get('run_in_seconds');
-        if ($seconds <= 120) {
-            // min every 2 minutes
-            $seconds = 120;
+        if ($seconds <= 30) {
+            // min every 30s
+            $seconds = 30;
         }
         $run_datetime->modify("+{$seconds} seconds");
         singleton(QueuedJobService::class)->queueJob(

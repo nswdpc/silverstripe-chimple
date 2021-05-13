@@ -1,113 +1,43 @@
 # Chimple - Simple Mailchimp handling in Silverstripe
 
-This module allows you to manage list subscriptions from a silverstripe app/website.
+This module allows you to create and update Mailchimp list subscriptions via a Silverstripe app/website.
 
-It provides:
+## Developers
+
+It supports:
 
 + a subscription controller
-+ multiple configuration records for setting multiple list/audience configurations
++ multiple configuration records for setting multiple list/audience combinations
++ multiple forms on the same page, for the same list
++ a spam protection module
 + a default configuration record assigned in Settings/SiteConfig
 + configurable defaults in yaml
 + queued jobs to handle subscription and failure checking
-+ a Mailchimp model admin to view subscriptions and subscription results
-+ an elemental subscription form element
-+ Merge Fields support
-+ Tags for subscribers
-+ ability to submit a form with or without (via XHR) redirecting.
++ a Mailchimp model admin to view current subscriptions and subscription results
++ an [Elemental](https://github.com/silverstripe/silverstripe-elemental) subscription form element - [documentation](./docs/en/003_elemental.md)
++ merge fields support
++ tags for subscribers
++ ability to submit a form with or without (via XHR) redirecting
++ patch previously subscribed list/audience members
++ optionally remove current subscriber tags
 
-### Setup
+It doesn't support:
 
-+ Configure your Mailchimp API key and list (audience)
-+ Set up one or more configurations, assign one as the default
-+ Ensure queues are running
++ Managing audience members, use the Mailchimp administration area for that.
+
+## Setup
+
++ Configure your Mailchimp API key and list (audience). You will find this in the Mailchimp account settings and relevant audience, respectively.
++ In your website, set up one or more configurations
++ Assign one of those as the default for the website
++ Ensure queues are running, or get a developer to do this for you.
 + Test a subscription to your lists
 
 [Further documentation beyond the basics is available](./docs/en/001_index.md)
 
-### Templating
-
-To include a subscribe form using the default configuration:
-
-Use the include provided by the module
-```
-<% include ChimpleGlobalSubscribeForm %>
-```
-OR, call the global template variable in a template
-```
-$ChimpleGlobalSubscribeForm
-```
-
-To include a subscriber form using the a specific configuration record, specify the `MailchimpConfiguration.Code` value:
-
-Use the include provided by the module
-```
-<% include ChimpleSubscribeForm Code='footer-form' %>
-```
-OR
-```
-$ChimpleSubscribeForm('footer-form')
-```
-
-### Specifying XHR submission in the template
-
-The administration area allows users with permissions to set whether a form should submit via XHR. This can be modified in the template using a 2nd argument:
-
-
-#### Allow the configuration record to decide:
-```
-$ChimpleGlobalSubscribeForm('footer-form')
-```
-
-#### Force XHR off
-```
-$ChimpleGlobalSubscribeForm('footer-form', 0)
-```
-
-#### Force XHR on
-```
-$ChimpleGlobalSubscribeForm('footer-form')
-```
-
-
-### Submission endpoint
-
-Forms will post to the module's controller endpoint
-
-### DOM id clashes
-
-If, for some reason you want to add the same subscription for multiple times in a page, add multiple configurations for the same List (audience) ID and have one form/element per configuration.
-
-### CSS and JS
-
-The module provides basic HTML and no CSS by default, further integration into your project is up to you or your developer.
-
-### Content element
-
-A subscription element for use with the Elemental module is provided. Content authors can add a subscription form to a page and configure:
-
-+ submitting with/without redirect
-+ the audience ID value
-+ before/after HTML content to render with the form
-
-## Requirements
-
-See [composer.json](./composer.json)
-
-## Installation
-
-```
-composer require nswdpc/silverstripe-chimple
-```
-
-## License
-
-BSD-3-Clause
-
-See [License](./LICENSE.md)
-
 ## Configuration
 
-Example project configuration for your project
+Example project configuration:
 
 ```yaml
 ---
@@ -124,6 +54,44 @@ NSWDPC\Chimple\Models\MailchimpConfig:
   list_id: '<list id>'
 ```
 
+[Further integration](./docs/en/002_integration.md)
+
+## Spam protection
+
+Use a [spam protection module](https://github.com/silverstripe/silverstripe-spamprotection) to block spammy submission attempts on the form. The [NSWDPC reCAPTCHAv3 module](https://github.com/nswdpc/silverstripe-recaptcha-v3) is a good option.
+
+If a module is installed, the subscription form will detect this and enable the default spam protector on the form.
+
+## Cache-control support
+
+All forms in Silverstripe [set cache control headers to a non-cacheable state](https://docs.silverstripe.org/en/4/developer_guides/performance/http_cache_headers/#http-cache-headers), unless they use GET as a form submission method and the CSRF token is turned off.
+
+To set cache control headers for a cacheable state:
+
+1. enable `use_get` and  `disable_security_token` on the [controller](/blob/master/src/Controllers/ChimpleController.php)
+1. use the XHR option as this will POST form data to the backend
+1. use a form spam protection module to avoid/minimise robotic submissions (see above)
+
+Note that other forms included in the page may disable a cacheable state.
+
+## Requirements
+
+See [composer.json](./composer.json)
+
+## Installation
+
+The only supported method of installation is via composer:
+
+```shell
+composer require nswdpc/silverstripe-chimple
+```
+
+## License
+
+BSD-3-Clause
+
+See [License](./LICENSE.md)
+
 ## Maintainers
 
 NSW DPC Digital
@@ -135,6 +103,10 @@ This module is a combination of work contributed to various projects over the ye
 ## Bugtracker
 
 Please raise bugs (with instructions on how to reproduce), questions and feature requests on the Github bug tracker
+
+## Security
+
+If you have found a security issue with this module, please email digital[@]dpc.nsw.gov.au in the first instance, detailing your findings.
 
 ## Development and contribution
 

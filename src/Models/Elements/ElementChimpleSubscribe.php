@@ -2,11 +2,13 @@
 
 namespace NSWDPC\Chimple\Models\Elements;
 
-use SilverStripe\Forms\CheckboxField;
 use DNADesign\Elemental\Models\BaseElement;
 use NSWDPC\Chimple\Models\MailchimpConfig;
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Assets\Image;
+use SilverStripe\Control\Controller;
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
@@ -131,9 +133,15 @@ class ElementChimpleSubscribe extends BaseElement
 
     /**
      * Provide $SubscribeForm for template
-     * @return Form
+     * When called in the context of the administration area, return null
+     * @return Form|null
      */
     public function getSubscribeForm() {
+
+        if(Controller::curr() instanceof LeftAndMain) {
+            return null;
+        }
+
         if($config = $this->MailchimpConfig()) {
             // render the form with this element's XHR setting overriding the config being used
             $form = $config->SubscribeForm( $this->UseXHR == 1 );

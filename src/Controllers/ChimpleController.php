@@ -11,6 +11,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\Validator;
 use SilverStripe\View\ArrayData;
 use SilverStripe\View\Requirements;
 use SilverStripe\CMS\Controllers\ContentController;
@@ -138,7 +139,7 @@ class ChimpleController extends PageController
             ->addExtraClass('signup')
         );
 
-        $form = Form::create($this, 'SubscribeForm', $fields, $actions);
+        $form = Form::create($this, 'SubscribeForm', $fields, $actions, $this->getValidator());
         $form->addExtraClass('subscribe chimple');
         $form->setTemplate('MailchimpSubscriberForm');
         $form->setFormMethod('POST');
@@ -161,6 +162,14 @@ class ChimpleController extends PageController
         $form->extend('updateChimpleSubscribeForm');
 
         return $form;
+    }
+
+    /**
+     * Return the default validator for the form
+     */
+    protected function getValidator() : Validator {
+        $validator = RequiredFields::create('Name','Email');
+        return $validator;
     }
 
     /**

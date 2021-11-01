@@ -124,10 +124,12 @@ class ChimpleController extends PageController
             $name = TextField::create('Name', _t(__CLASS__. '.NAME', 'Name'))
                         ->setAttribute('placeholder', _t(__CLASS__. '.YOUR_NAME', 'Your name'))
                         ->setAttribute('title', _t(__CLASS__. '.NAME', 'Name'))
+                        ->setAttribute('required', 'required')
                         ->setTitle(''),
             $email = EmailField::create('Email', _t(__CLASS__. '.EMAIL', 'Email'))
                         ->setAttribute('placeholder', _t(__CLASS__. '.EMAIL_ADDRESS', 'Email address'))
                         ->setAttribute('title', _t(__CLASS__. '.EMAIL', 'Email'))
+                        ->setAttribute('required', 'required')
                         ->setTitle('')
         );
 
@@ -165,11 +167,12 @@ class ChimpleController extends PageController
     }
 
     /**
-     * Return the default validator for the form
+     * Return the default validator for the form.
+     * Note: returning a validator with Required Fields disables cache
+     * @returns Validator|null
      */
-    protected function getValidator() : Validator {
-        $validator = RequiredFields::create('Name','Email');
-        return $validator;
+    protected function getValidator() : ?Validator {
+        return null;
     }
 
     /**

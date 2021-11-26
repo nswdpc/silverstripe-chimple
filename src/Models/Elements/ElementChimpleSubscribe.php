@@ -34,7 +34,8 @@ class ElementChimpleSubscribe extends BaseElement
     private static $db = [
         'UseXHR' => 'Boolean',// whether to submit without redirect
         'BeforeFormContent' => 'HTMLText',
-        'AfterFormContent' => 'HTMLText'
+        'AfterFormContent' => 'HTMLText',
+        'ImageAlignment' => 'Varchar(32)',
     ];
 
     private static $defaults = [
@@ -124,7 +125,18 @@ class ElementChimpleSubscribe extends BaseElement
                     )
                 )->setFolderName('blocks/content/' . $this->owner->ID)
                 ->setAllowedMaxFileNumber(1)
-                ->setIsMultiUpload(false)
+                ->setIsMultiUpload(false),
+                DropdownField::create(
+                    'ImageAlignment',
+                    _t(__CLASS__ . '.IMAGE_ALIGNMENT', 'Image alignment'),
+                    [
+                        'left' => _t(__CLASS__ . '.LEFT', 'Left'),
+                        'right' => _t(__CLASS__ . '.RIGHT', 'Right')
+                    ]
+                )->setEmptyString('Choose an option')
+                ->setDescription(
+                    _t(__CLASS__ . '.IMAGE_ALIGNMENT_DESCRIPTION', 'Use of this option is dependent on the theme')
+                )
             ]
         );
 

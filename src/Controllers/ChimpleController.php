@@ -160,6 +160,8 @@ class ChimpleController extends PageController
             $form->enableSpamProtection();
         }
 
+        $form->setValidationResponseCallback($this->getCallbackForValidation());
+
         // allow extensions to manipulate the form
         $form->extend('updateChimpleSubscribeForm');
 
@@ -173,6 +175,28 @@ class ChimpleController extends PageController
      */
     protected function getValidator() : ?Validator {
         return null;
+    }
+
+    /**
+     * Returns the validation callback. A response is returned only upon errors in XHR submissions
+     * @return callable|false
+     */
+    protected function getCallbackForValidation() {
+        $callback = function(ValidationResult $result) {
+            if(!$this->request->isAjax()) {
+                // fall back to default behaviour
+                return false;
+            }
+            if($result->isValid()) {
+                // carry on... subscribe() action handling will provide a success/error response
+                return false;
+            }
+            // Fail, using the first message returned from the validation result
+            $messages = $result->getMessages();
+            $message = (!empty($messages[0]['message']) ? $messages[0]['message'] : '');
+            return $this->xhrError(400, $message);
+        };
+        return $callback;
     }
 
     /**

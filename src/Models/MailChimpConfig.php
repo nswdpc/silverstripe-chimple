@@ -391,7 +391,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             }
 
             // ensure the form has a unique name per code
-            $form->setName( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
+            $form->setHTMLID( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
             // apply the code for this config to the form
             $code_field = HiddenField::create('code', 'code', $this->Code);
             $code_field->setForm($form);

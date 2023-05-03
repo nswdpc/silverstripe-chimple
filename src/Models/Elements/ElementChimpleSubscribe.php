@@ -159,7 +159,12 @@ class ElementChimpleSubscribe extends BaseElement
             $form = $config->SubscribeForm( $this->UseXHR == 1 );
             if($form) {
                 // ensure for ID attribute is unique
-                $form->setHTMLID($form->getHTMLID() . "_e{$this->ID}");
+                $prefix = $form->getHTMLID();
+                if(!$prefix) {
+                    $prefix = "subscribe";
+                }
+                $id = "{$prefix}_e{$this->ID}";
+                $form->setHTMLID($id);
             }
             return $form;
         }

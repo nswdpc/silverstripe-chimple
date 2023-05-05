@@ -51,11 +51,12 @@
     "autoload": {
         "psr-4": {
             "NSWDPC\\Chimple\\Models\\": "src/Models/",
-            "NSWDPC\\Chimple\\Models\\Elements\\" : "src/Models/Elements",
+            "NSWDPC\\Chimple\\Models\\Elements\\" : "src/Models/Elements/",
             "NSWDPC\\Chimple\\Controllers\\" : "src/Controllers/",
             "NSWDPC\\Chimple\\Extensions\\" : "src/Extensions/",
             "NSWDPC\\Chimple\\Jobs\\" : "src/Jobs/",
-            "NSWDPC\\Chimple\\Services\\" : "src/Services/"
+            "NSWDPC\\Chimple\\Services\\" : "src/Services/",
+            "NSWDPC\\Chimple\\Forms\\" : "src/Forms/"
         }
     },
     "autoload-dev": {

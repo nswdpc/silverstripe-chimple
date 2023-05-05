@@ -37,8 +37,7 @@ class ChimpleController extends PageController
     private static $use_get = false;
 
     private static $allowed_actions = [
-        'SubscribeForm',
-        'subscribe'
+        'SubscribeForm'
     ];
 
     public function init()

@@ -34,8 +34,7 @@ class ChimpleController extends PageController
     private static $hide_generic_form = true;
 
     private static $allowed_actions = [
-        'SubscribeForm',
-        'subscribe'
+        'SubscribeForm'
     ];
 
     public function init()

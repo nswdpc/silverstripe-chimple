@@ -2,6 +2,7 @@
 
 namespace NSWDPC\Chimple\Controllers;
 
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Exceptions\RequestException;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
@@ -31,10 +32,6 @@ class ChimpleController extends PageController
     private static $url_segment = 'mc-subscribe/v1';
 
     private static $hide_generic_form = true;
-
-    private static $disable_security_token = false;
-
-    private static $use_get = false;
 
     private static $allowed_actions = [
         'SubscribeForm',
@@ -139,20 +136,10 @@ class ChimpleController extends PageController
             ->addExtraClass('signup')
         );
 
-        $form = Form::create($this, 'SubscribeForm', $fields, $actions, $this->getValidator());
+        $form = SubscribeForm::create($this, 'SubscribeForm', $fields, $actions, $this->getValidator());
         $form->addExtraClass('subscribe chimple');
         $form->setTemplate('MailchimpSubscriberForm');
-        $form->setFormMethod('POST');
         $form->setFormAction( $this->Link('SubscribeForm') );
-
-        if($this->config()->get('disable_security_token')) {
-            $form->disableSecurityToken();
-        }
-
-        if($this->config()->get('use_get')) {
-            // 2nd param required as XHR forms use POST
-            $form->setFormMethod("GET", false);
-        }
 
         if($form->hasMethod('enableSpamProtection')) {
             $form->enableSpamProtection();
@@ -168,11 +155,10 @@ class ChimpleController extends PageController
 
     /**
      * Return the default validator for the form.
-     * Note: returning a validator with Required Fields disables cache
      * @returns Validator|null
      */
     protected function getValidator() : ?Validator {
-        return null;
+        return RequiredFields::create(['Name','Email']);
     }
 
     /**
@@ -247,19 +233,16 @@ class ChimpleController extends PageController
                 throw new RequestException("Forbidden", 403);
             }
 
-            if(!$this->config()->get('disable_security_token')) {
+            if(!$token = $form->getSecurityToken()) {
+                throw new RequestException("Forbidden", 403);
+            }
 
-                if(!$token = $form->getSecurityToken()) {
-                    throw new RequestException("Forbidden", 403);
-                }
+            $token_name = $token->getName();
+            $token_value = isset( $data[ $token_name ] ) ?? '';
 
-                $token_name = $token->getName();
-                $token_value = isset( $data[ $token_name ] ) ?? '';
-
-                $check = $token->check($token_value);
-                if(!$token_value || !$check) {
-                    throw new RequestException("Forbidden", 403);
-                }
+            $check = $token->check($token_value);
+            if(!$token_value || !$check) {
+                throw new RequestException("Forbidden", 403);
             }
 
             $mc_config = null;
@@ -402,7 +385,7 @@ class ChimpleController extends PageController
                 $query['code'] = $code;
             }
             $query_string = http_build_query($query);
-            return $this->redirect($this->Link($query));
+            return $this->redirect($this->Link("?" . $query_string));
         }
 
     }

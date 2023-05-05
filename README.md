@@ -62,18 +62,6 @@ Use a [spam protection module](https://github.com/silverstripe/silverstripe-spam
 
 If a module is installed, the subscription form will detect this and enable the default spam protector on the form.
 
-## Cache-control support
-
-All forms in Silverstripe [set cache control headers to a non-cacheable state](https://docs.silverstripe.org/en/4/developer_guides/performance/http_cache_headers/#http-cache-headers), unless they use GET as a form submission method and the CSRF token is turned off.
-
-To set cache control headers for a cacheable state:
-
-1. enable `use_get` and  `disable_security_token` on the [controller](/blob/master/src/Controllers/ChimpleController.php)
-1. use the XHR option as this will POST form data to the backend
-1. use a form spam protection module to avoid/minimise robotic submissions (see above)
-
-Note that other forms included in the page may disable a cacheable state.
-
 ## Requirements
 
 See [composer.json](./composer.json)

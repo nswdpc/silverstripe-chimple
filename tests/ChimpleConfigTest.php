@@ -2,6 +2,7 @@
 
 namespace NSWDPC\Chimple\Tests;
 
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
@@ -23,9 +24,8 @@ class ChimpleConfigTest extends SapphireTest
 
     protected $usesDatabase = true;
 
-    public function testConfiguration()
-    {
 
+    protected function getMailchimpConfig() {
         // Some test values to check saving
 
         $site_config = SiteConfig::current_site_config();
@@ -34,13 +34,10 @@ class ChimpleConfigTest extends SapphireTest
 
         $config_api_key = "test_only";
         $default_list_id = 'test_default_list';
-        $disable_security_token = false;
 
         Config::inst()->update(MailchimpConfig::class, 'api_key', $config_api_key);
 
         Config::inst()->update(MailchimpConfig::class, 'list_id', $default_list_id);
-
-        Config::inst()->update(ChimpleController::class, 'disable_security_token', $disable_security_token);
 
         $record = [
             'Title' => 'Test configuration',
@@ -48,7 +45,8 @@ class ChimpleConfigTest extends SapphireTest
             'IsGlobal' => 1,
             'Heading' => 'My Default Config',
             'MailchimpListId' => 'different_list_id',
-            'ArchiveLink' => 'https://example.com'
+            'ArchiveLink' => 'https://example.com',
+            'UseXHR' => 0
         ];
 
         $config = MailchimpConfig::create($record);
@@ -71,8 +69,18 @@ class ChimpleConfigTest extends SapphireTest
 
         $this->assertEquals($retrieved_config->ID, $config->ID, "Configs should be the same");
 
+        return $retrieved_config;
+
+    }
+
+    public function testConfiguration()
+    {
+
+        $forceXhr = true;
+        $config = $this->getMailchimpConfig();
+
         // test configuration form retrieval
-        $form = $config->SubscribeForm(true);
+        $form = $config->SubscribeForm($forceXhr);
 
         $this->assertTrue( $form instanceof Form, "SubscribeForm is not an instance of Form");
 
@@ -103,6 +111,33 @@ class ChimpleConfigTest extends SapphireTest
 
         $needle = " value=\"{$code_value}\" ";
         $this->assertTrue( strpos($static_form->forTemplate(), $needle) !== false, "Missing {$code_value} input from form HTML");
+
+    }
+
+
+    public function testCanBeCached() {
+
+        $config = $this->getMailchimpConfig();
+
+        // test forcing XHR
+        $forceXhr = true;
+        $form = $config->SubscribeForm($forceXhr);
+        $this->assertTrue( $form->checkCanBeCached() );
+
+        // test not forcing XHR
+        $forceXhr = false;
+        $form = $config->SubscribeForm($forceXhr);
+        $this->assertFalse( $form->checkCanBeCached() );
+
+        // test using config value
+        // config is turned off
+        $config->UseXHR = 0;
+        $form = $config->SubscribeForm();// default null value
+        $this->assertFalse( $form->checkCanBeCached() );
+        // config turned on
+        $config->UseXHR = 1;
+        $form = $config->SubscribeForm();// default null value
+        $this->assertTrue( $form->checkCanBeCached() );
 
     }
 }

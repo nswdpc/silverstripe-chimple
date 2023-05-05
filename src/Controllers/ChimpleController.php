@@ -232,18 +232,6 @@ class ChimpleController extends PageController
                 throw new RequestException("Forbidden", 403);
             }
 
-            if(!$token = $form->getSecurityToken()) {
-                throw new RequestException("Forbidden", 403);
-            }
-
-            $token_name = $token->getName();
-            $token_value = isset( $data[ $token_name ] ) ?? '';
-
-            $check = $token->check($token_value);
-            if(!$token_value || !$check) {
-                throw new RequestException("Forbidden", 403);
-            }
-
             $mc_config = null;
 
             if(empty($data['code'])) {

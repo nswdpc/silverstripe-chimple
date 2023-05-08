@@ -22,51 +22,71 @@ use SilverStripe\SiteConfig\SiteConfig;
 class ChimpleConfigTest extends SapphireTest
 {
 
+    /**
+     * @inheritdoc
+     */
     protected $usesDatabase = true;
 
+    /**
+     * @var string
+     */
+    protected $test_api_key = 'test_only';
 
-    protected function getMailchimpConfig() {
-        // Some test values to check saving
+    /**
+     * @var string
+     */
+    protected $default_list_id = 'test_default_list';
 
+    /**
+     * @var string
+     */
+    protected $test_list_id = 'different_list_id';
+
+    /**
+     * @inheritdoc
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        // Create default configuration
         $site_config = SiteConfig::current_site_config();
         $site_config->MailchimpEnabled = 1;
         $site_config->write();
 
-        $config_api_key = "test_only";
-        $default_list_id = 'test_default_list';
+        Config::inst()->update(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Config::inst()->update(MailchimpConfig::class, 'list_id', $this->default_list_id);
 
-        Config::inst()->update(MailchimpConfig::class, 'api_key', $config_api_key);
-
-        Config::inst()->update(MailchimpConfig::class, 'list_id', $default_list_id);
-
+        // Config record
         $record = [
             'Title' => 'Test configuration',
             'Code' => 'Test-manual-code',
             'IsGlobal' => 1,
             'Heading' => 'My Default Config',
-            'MailchimpListId' => 'different_list_id',
+            'MailchimpListId' => $this->test_list_id,
             'ArchiveLink' => 'https://example.com',
             'UseXHR' => 0
         ];
-
         $config = MailchimpConfig::create($record);
         $config->write();
+    }
 
-        $this->assertTrue($config->exists(), "Configuration does not exist in DB");
+    protected function getMailchimpConfig() {
 
+        // get config for the test list
+        $config = MailchimpConfig::get()->filter(['MailchimpListId' => $this->test_list_id])->first();
+        $this->assertTrue($config && $config->exists(), "Configuration does not exist in DB");
+
+        // Api key check
         $api_key = $config->getApiKey();
+        $this->assertEquals($api_key, $this->test_api_key, "API key equals");
 
+        // list check
         $list_id = $config->getMailchimpListId();
-
-        $this->assertEquals($api_key, $config_api_key, "API key is not equal");
-
-        $this->assertNotEquals($list_id, $default_list_id, "List Id should not be the same as default list id");
-
+        $this->assertNotEquals($list_id, $this->default_list_id, "List Id should not be the same as default list id");
         $this->assertTrue( $config->HasMailchimpListId(), "Config should have a list id");
 
-        // test config retrieval
+        // test config retrieval via Code
         $retrieved_config = MailchimpConfig::getConfig('','', $config->Code);
-
         $this->assertEquals($retrieved_config->ID, $config->ID, "Configs should be the same");
 
         return $retrieved_config;

@@ -478,14 +478,19 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 // ignore non-existent fields
                 continue;
             }
-            $value = trim($this->getField($field));
+            $value = $this->getField($field);
+            if(!is_string($value)) {
+                $value = '';
+            } else {
+                $value = trim($value);
+            }
             if ($value === '') {
                 // do not set empty values, MailChimp does not like this
                 // "The resource submitted could not be validated"
                 continue;
             }
             $tag = strtoupper(trim($tag));
-            $merge_fields[$tag] = trim($value);
+            $merge_fields[$tag] = $value;
         }
 
         return $merge_fields;

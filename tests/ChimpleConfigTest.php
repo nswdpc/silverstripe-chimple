@@ -36,11 +36,11 @@ class ChimpleConfigTest extends SapphireTest
         $default_list_id = 'test_default_list';
         $disable_security_token = false;
 
-        Config::inst()->update(MailchimpConfig::class, 'api_key', $config_api_key);
+        Config::modify()->set(MailchimpConfig::class, 'api_key', $config_api_key);
 
-        Config::inst()->update(MailchimpConfig::class, 'list_id', $default_list_id);
+        Config::modify()->set(MailchimpConfig::class, 'list_id', $default_list_id);
 
-        Config::inst()->update(ChimpleController::class, 'disable_security_token', $disable_security_token);
+        Config::modify()->set(ChimpleController::class, 'disable_security_token', $disable_security_token);
 
         $record = [
             'Title' => 'Test configuration',

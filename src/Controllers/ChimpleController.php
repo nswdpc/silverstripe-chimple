@@ -241,6 +241,7 @@ class ChimpleController extends PageController
 
             $response = null;
             $code = "";// MailchimpConfig.Code
+            $list_id = "";
 
             if(!$form) {
                 throw new RequestException("Forbidden", 403);
@@ -324,13 +325,14 @@ class ChimpleController extends PageController
                         );
                     }
                     $list_id = $mc_config->getMailchimpListId();
-                    if (!$list_id) {
-                        $error_message = _t(
-                            __CLASS__ . ".GENERIC_ERROR_3",
-                            "Sorry, the sign-up could not be completed"
-                        );
-                    }
                 }
+            }
+
+            if (!$list_id) {
+                $error_message = _t(
+                    __CLASS__ . ".GENERIC_ERROR_3",
+                    "Sorry, the sign-up could not be completed"
+                );
             }
 
             // failed prior to subscription

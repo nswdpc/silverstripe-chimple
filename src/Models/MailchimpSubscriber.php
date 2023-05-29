@@ -143,7 +143,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         'Name' => 'Name',
         'Surname' => 'Surname',
         'Email' => 'Email',
-        'Created.Nice' => 'Created',
         //'FailNoticeSent.Nice' => 'Fail Notice Sent',
         'MailchimpListId' => 'List',
         'HasLastError' => 'Error?',
@@ -163,7 +162,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     ];
 
     /**
-     * @var DrewM\MailChimp\MailChimp
+     * @var MailchimpApiClient
      * The Mailchimp API client instance
      */
     protected static $mailchimp = null;
@@ -183,8 +182,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         return $this->Status == self::CHIMPLE_STATUS_SUCCESS;
     }
     /**
-     * CMS Fields
-     * @return FieldList
+     * @inheritdoc
      */
     public function getCMSFields()
     {
@@ -402,7 +400,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     public function HasLastError()
     {
-        return trim($this->LastError) !== '' ? "yes" : "no";
+        return trim($this->LastError ?? '') !== '' ? "yes" : "no";
     }
 
     /**
@@ -418,7 +416,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Get the API client
-     * @return DrewM\Mailchimp\Mailchimp
+     * @return MailchimpApiClient
      */
     public static function api() : MailchimpApiClient {
         // already set up..
@@ -557,7 +555,11 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @return string
      */
     public static function getMailchimpSubscribedId($email) {
-        return MailchimpApiClient::subscriberHash($email);
+        if(!is_string($email) || !$email) {
+            return '';
+        } else {
+            return MailchimpApiClient::subscriberHash($email);
+        }
     }
 
     /**
@@ -589,15 +591,15 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // attempt to get the subscriber
-        $hash = self::getMailchimpSubscribedId($email);
-        $result = self::api()->get(
-            "lists/{$list_id}/members/{$hash}"
-        );
-
-        // an existing member will return an 'id' value matching the hash
-        // id = The MD5 hash of the lowercase version of the list member's email address.
-        if(isset($result['id']) && $result['id'] == $hash) {
-            return $result;
+        if( $hash = self::getMailchimpSubscribedId($email) ) {
+            $result = self::api()->get(
+                "lists/{$list_id}/members/{$hash}"
+            );
+            // an existing member will return an 'id' value matching the hash
+            // id = The MD5 hash of the lowercase version of the list member's email address.
+            if(isset($result['id']) && $result['id'] == $hash) {
+                return $result;
+            }
         }
 
         return false;
@@ -703,7 +705,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         $list_id = $this->MailchimpListId;
-        $subscriber_hash = self::getMailchimpSubscribedId($this->Email);
+        $subscriber_hash = self::getMailchimpSubscribedId($this->Email ?? '');
 
         if(!$list_id || !$subscriber_hash) {
             $this->_cache_tags = null;
@@ -788,7 +790,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
         // operating on the current record
         $list_id = $this->MailchimpListId;
-        $subscriber_hash = self::getMailchimpSubscribedId($this->Email);
+        $subscriber_hash = self::getMailchimpSubscribedId($this->Email ?? '');
         $operation_path = "/lists/{$list_id}/members/{$subscriber_hash}/tags";
 
         // submit payload to API

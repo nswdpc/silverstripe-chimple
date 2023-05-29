@@ -35,7 +35,7 @@
         "key" : "value"
     },
     "require": {
-        "dnadesign/silverstripe-elemental": "^4.9.0",
+        "dnadesign/silverstripe-elemental": "^5",
         "silverstripe/framework" : "^5",
         "silverstripe/siteconfig" : "^5",
         "symbiote/silverstripe-queuedjobs": "^5",

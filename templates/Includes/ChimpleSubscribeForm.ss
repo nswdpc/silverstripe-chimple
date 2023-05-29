@@ -1,3 +1,7 @@
 <div class="form">
-    {$ChimpleSubscribeForm($Code)}
+    <% if $Code %>
+        {$ChimpleSubscribeForm($Code)}
+    <% else %>
+        {$ChimpleGlobalSubscribeForm}
+    <% end_if %>
 </div>

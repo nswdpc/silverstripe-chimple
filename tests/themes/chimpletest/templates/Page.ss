@@ -1,0 +1,3 @@
+<!-- chimpletest page template -->
+
+{$Layout}

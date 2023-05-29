@@ -2,6 +2,7 @@
 
 namespace NSWDPC\Chimple\Tests;
 
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
@@ -21,58 +22,85 @@ use SilverStripe\SiteConfig\SiteConfig;
 class ChimpleConfigTest extends SapphireTest
 {
 
+    /**
+     * @inheritdoc
+     */
     protected $usesDatabase = true;
 
-    public function testConfiguration()
-    {
+    /**
+     * @var string
+     */
+    protected $test_api_key = 'test_only';
 
-        // Some test values to check saving
+    /**
+     * @var string
+     */
+    protected $default_list_id = 'test_default_list';
 
+    /**
+     * @var string
+     */
+    protected $test_list_id = 'different_list_id';
+
+    /**
+     * @inheritdoc
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        // Create default configuration
         $site_config = SiteConfig::current_site_config();
         $site_config->MailchimpEnabled = 1;
         $site_config->write();
 
-        $config_api_key = "test_only";
-        $default_list_id = 'test_default_list';
-        $disable_security_token = false;
+        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->default_list_id);
 
-        Config::modify()->set(MailchimpConfig::class, 'api_key', $config_api_key);
-
-        Config::modify()->set(MailchimpConfig::class, 'list_id', $default_list_id);
-
-        Config::modify()->set(ChimpleController::class, 'disable_security_token', $disable_security_token);
-
+        // Config record
         $record = [
             'Title' => 'Test configuration',
             'Code' => 'Test-manual-code',
             'IsGlobal' => 1,
             'Heading' => 'My Default Config',
-            'MailchimpListId' => 'different_list_id',
-            'ArchiveLink' => 'https://example.com'
+            'MailchimpListId' => $this->test_list_id,
+            'ArchiveLink' => 'https://example.com',
+            'UseXHR' => 0
         ];
-
         $config = MailchimpConfig::create($record);
         $config->write();
+    }
 
-        $this->assertTrue($config->exists(), "Configuration does not exist in DB");
+    protected function getMailchimpConfig() {
 
+        // get config for the test list
+        $config = MailchimpConfig::get()->filter(['MailchimpListId' => $this->test_list_id])->first();
+        $this->assertTrue($config && $config->exists(), "Configuration does not exist in DB");
+
+        // Api key check
         $api_key = $config->getApiKey();
+        $this->assertEquals($api_key, $this->test_api_key, "API key equals");
 
+        // list check
         $list_id = $config->getMailchimpListId();
-
-        $this->assertEquals($api_key, $config_api_key, "API key is not equal");
-
-        $this->assertNotEquals($list_id, $default_list_id, "List Id should not be the same as default list id");
-
+        $this->assertNotEquals($list_id, $this->default_list_id, "List Id should not be the same as default list id");
         $this->assertTrue( $config->HasMailchimpListId(), "Config should have a list id");
 
-        // test config retrieval
+        // test config retrieval via Code
         $retrieved_config = MailchimpConfig::getConfig('','', $config->Code);
-
         $this->assertEquals($retrieved_config->ID, $config->ID, "Configs should be the same");
 
+        return $retrieved_config;
+
+    }
+
+    public function testConfiguration()
+    {
+
+        $forceXhr = true;
+        $config = $this->getMailchimpConfig();
+
         // test configuration form retrieval
-        $form = $config->SubscribeForm(true);
+        $form = $config->SubscribeForm($forceXhr);
 
         $this->assertTrue( $form instanceof Form, "SubscribeForm is not an instance of Form");
 
@@ -103,6 +131,33 @@ class ChimpleConfigTest extends SapphireTest
 
         $needle = " value=\"{$code_value}\" ";
         $this->assertTrue( strpos($static_form->forTemplate(), $needle) !== false, "Missing {$code_value} input from form HTML");
+
+    }
+
+
+    public function testCanBeCached() {
+
+        $config = $this->getMailchimpConfig();
+
+        // test forcing XHR
+        $forceXhr = true;
+        $form = $config->SubscribeForm($forceXhr);
+        $this->assertTrue( $form->checkCanBeCached() );
+
+        // test not forcing XHR
+        $forceXhr = false;
+        $form = $config->SubscribeForm($forceXhr);
+        $this->assertFalse( $form->checkCanBeCached() );
+
+        // test using config value
+        // config is turned off
+        $config->UseXHR = 0;
+        $form = $config->SubscribeForm();// default null value
+        $this->assertFalse( $form->checkCanBeCached() );
+        // config turned on
+        $config->UseXHR = 1;
+        $form = $config->SubscribeForm();// default null value
+        $this->assertTrue( $form->checkCanBeCached() );
 
     }
 }

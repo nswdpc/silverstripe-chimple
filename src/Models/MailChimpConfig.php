@@ -201,8 +201,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     }
 
     /**
-     * CMS Fields
-     * @return FieldList
+     * @inheritdoc
      */
     public function getCMSFields()
     {
@@ -481,7 +480,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * This first parameter is the list code (not the MC audience ID)
      * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
-     * @param array
+     * @param array $args
      * @return DBHTMLText|null
      */
     public static function get_chimple_subscribe_form(...$args)

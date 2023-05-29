@@ -60,7 +60,7 @@ class ChimpleSubscriberTest extends SapphireTest
         $list_id = Config::inst()->get(MailchimpConfig::class, 'list_id');
 
         // set a obfuscation chr
-        Config::inst()->update(MailchimpSubscriber::class, 'obfuscation_chr', "•");
+        Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', "•");
 
         $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
 

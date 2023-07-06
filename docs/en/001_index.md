@@ -70,18 +70,7 @@ If you are a content author, you can select a Mailchimp Configuration and option
 
 By default, the global form will submit in place via an AJAX (XHR) submission.
 
-The global form is one added to your template via the `$ChimpleGlobalSubscribeForm` template variable. It will use the `use_xhr` value specified in config.yml
-
-```yaml
-NSWDPC\Chimple\Models\MailchimpConfig:
-  use_xhr: true|false|null
-```
-
-+ `true`: submit using XHR
-+ `false`: submit with a redirect
-+ `null`: let the checkbox value for the Default configuration record in the administration area decide
-
-Note that using XHR submissions will assist in maintaining cacheable cache-control headers.
+The global form is one added to your template via the `$ChimpleGlobalSubscribeForm` template variable. It will use the configuration declared as the default configuration for the website.
 
 ## Adding multiple forms for the same audience
 

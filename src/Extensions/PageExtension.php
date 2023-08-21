@@ -18,8 +18,7 @@ class PageExtension extends Extension
     public function  ChimpleGlobalSubscribeForm() {
         $config = MailchimpConfig::getGlobalConfig();
         if ($config) {
-            $use_xhr = Config::inst()->get(MailchimpConfig::class, 'use_xhr');
-            return $config->SubscribeForm($use_xhr);
+            return $config->SubscribeForm();
         }
         return null;
     }

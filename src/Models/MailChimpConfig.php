@@ -32,7 +32,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static $list_id = "";// default list (audience) ID
     private static $api_key = "";// API key provided by Mailchimp
-    private static $use_xhr = true;//whether to use XHR for submissions
 
     private static $success_message = "Thank you for subscribing. You will receive an email to confirm your subscription shortly.";
     private static $error_message = "Sorry, we could not subscribe that email address at the current time. Please try again later.";
@@ -365,10 +364,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Use the form provided by the controller
-     * @param bool $force_use_xhr whether to submit in place via XHR or not, the default is to let the config decide
+     * @param bool $force_xhr whether to submit in place via XHR or not, the default is to let the config decide
      * @return Form
      */
-    public function SubscribeForm($force_use_xhr = null)
+    public function SubscribeForm($force_xhr = null)
     {
         // No form available if not enabled
         $enabled = self::isEnabled();
@@ -381,8 +380,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
             // handle use of XHR submission
             $use_xhr = $this->UseXHR;// use the default
-            if(!is_null($force_use_xhr)) {
-                $use_xhr = $force_use_xhr;
+            if(!is_null($force_xhr)) {
+                $use_xhr = $force_xhr;
             }
             if($use_xhr) {
                 $form->setAttribute('data-xhr',1);
@@ -466,9 +465,9 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * Render this record using a template
      * @return DBHTMLText|null
      */
-    public function forTemplate($force_use_xhr = null)
+    public function forTemplate($force_xhr = null)
     {
-        $form = $this->SubscribeForm($force_use_xhr);
+        $form = $this->SubscribeForm($force_xhr);
         if($form) {
             return $this->customise(['Form'=>$form])->renderWith( self::class );
         }
@@ -490,17 +489,17 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             $config = self::getConfig('', '', $code);
             if ($config) {
                 // default to let the config decide
-                $force_use_xhr = null;
+                $force_xhr = null;
                 if(isset($args[1])) {
                     if($args[1] === '0') {
                         // string '0' passed in as an arg in the template
-                        $force_use_xhr = false;
+                        $force_xhr = false;
                     } else if($args[1] === '1') {
                         // string '1' passed in as an arg in the template
-                        $force_use_xhr = true;
+                        $force_xhr = true;
                     }
                 }
-                return $config->forTemplate($force_use_xhr);
+                return $config->forTemplate($force_xhr);
             }
         }
         return null;
@@ -515,8 +514,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     {
         $config = self::getGlobalConfig();
         if ($config) {
-            $use_xhr = static::config()->get('use_xhr');
-            return $config->forTemplate($use_xhr);
+            return $config->forTemplate();
         }
         return null;
     }

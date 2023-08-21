@@ -56,11 +56,7 @@
             "NSWDPC\\Chimple\\Jobs\\" : "src/Jobs/",
             "NSWDPC\\Chimple\\Services\\" : "src/Services/",
             "NSWDPC\\Chimple\\Forms\\" : "src/Forms/",
-            "NSWDPC\\Chimple\\Exceptions\\" : "src/Exceptions/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
+            "NSWDPC\\Chimple\\Exceptions\\" : "src/Exceptions/",
             "NSWDPC\\Chimple\\Tests\\": "tests/"
         }
     }

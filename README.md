@@ -46,8 +46,6 @@ After:
   - '#silverstripe-chimple'
 ---
 NSWDPC\Chimple\Models\MailchimpConfig:
-  # override the XHR submission setting for the global form only
-  use_xhr: true|false
   # account API key
   api_key: '<api key>'
   # default list id

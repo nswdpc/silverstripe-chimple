@@ -75,7 +75,6 @@ class ChimpleFunctionalTest extends FunctionalTest
 
         Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
         Config::modify()->set(MailchimpConfig::class, 'list_id', $this->default_list_id);
-        Config::modify()->set(MailchimpConfig::class, 'use_xhr', false);
 
         // Config record
         $record = [

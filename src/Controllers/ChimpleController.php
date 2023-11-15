@@ -347,7 +347,7 @@ class ChimpleController extends PageController
             $response = $this->handleSuccess(200, "OK", $form);
             if($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
-                return $response->output();
+                return $response;
             } else {
                 return $this->redirect($this->Link("?complete=y&code={$code}"));
             }
@@ -365,7 +365,7 @@ class ChimpleController extends PageController
         $response = $this->handleError($error_code, $error_message, $form);
         // handle XHR error responses
         if($response && ($response instanceof HTTPResponse)) {
-            return $response->output();
+            return $response;
         } else {
             $query = [
                 'complete' => 'n'
@@ -387,6 +387,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
+        $response->addHeader('X-Submission-OK', 0);
         $response->addHeader('X-Submission-Description', $message);
         return $response;
     }
@@ -399,6 +400,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
+        $response->addHeader('X-Submission-OK', 1);
         $response->addHeader('X-Submission-Description', $description);
         return $response;
     }

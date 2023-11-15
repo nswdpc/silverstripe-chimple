@@ -33,12 +33,19 @@ if(typeof window.FormData != 'undefined') {
       this.client.addEventListener(
         "load",
         function(event) {
-          var success = this.status === 0 || (this.status >= 200 && this.status < 400);
+          var ok = this.getResponseHeader("X-Submission-OK");
+          var success = (ok == 1 && this.status == 200);
           _self.addFormMessage(success ? 'good' : 'error');
         }
       );
       this.client.addEventListener(
         "error",
+        function( event ) {
+          _self.addFormMessage('error');
+        }
+      );
+      this.client.addEventListener(
+        "abort",
         function( event ) {
           _self.addFormMessage('error');
         }

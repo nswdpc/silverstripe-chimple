@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Tests;
 
 use NSWDPC\Chimple\Forms\SubscribeForm;
+use NSWDPC\Chimple\Forms\XhrSubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
@@ -97,6 +98,8 @@ class ChimpleConfigTest extends SapphireTest
     {
 
         $forceXhr = true;
+
+        Config::modify()->set(XhrSubscribeForm::class, 'disable_security_token', false);
         $config = $this->getMailchimpConfig();
 
         // test configuration form retrieval

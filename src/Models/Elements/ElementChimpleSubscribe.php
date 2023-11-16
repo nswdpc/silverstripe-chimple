@@ -157,15 +157,6 @@ class ElementChimpleSubscribe extends BaseElement
         if($config = $this->MailchimpConfig()) {
             // render the form with this element's XHR setting overriding the config being used
             $form = $config->SubscribeForm( $this->UseXHR == 1 );
-            if($form) {
-                // ensure for ID attribute is unique
-                $prefix = $form->getHTMLID();
-                if(!$prefix) {
-                    $prefix = "subscribe";
-                }
-                $id = "{$prefix}_e{$this->ID}";
-                $form->setHTMLID($id);
-            }
             return $form;
         }
         return null;

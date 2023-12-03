@@ -3,9 +3,11 @@
 namespace NSWDPC\Chimple\Controllers;
 
 use NSWDPC\Chimple\Forms\SubscribeForm;
+use NSWDPC\Chimple\Forms\XhrSubscribeForm;
 use NSWDPC\Chimple\Exceptions\RequestException;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
+use NSWDPC\Chimple\Services\Logger;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -29,22 +31,29 @@ use PageController;
  */
 class ChimpleController extends PageController
 {
+
+    /**
+     * @var string
+     */
     private static $url_segment = 'mc-subscribe/v1';
 
+    /**
+     * @var bool
+     */
     private static $hide_generic_form = true;
 
+    /**
+     * @var array
+     */
     private static $allowed_actions = [
-        'SubscribeForm'
+        'SubscribeForm',
+        'XhrSubscribeForm'
     ];
 
-    public function init()
-    {
-        parent::init();
-    }
+    protected $formNameSuffix = "";
 
     public function index()
     {
-        $form = $this->SubscribeForm();
         // work out if complete or not
         $is_complete = $this->request->getVar('complete');
         $data = ArrayData::create([
@@ -101,21 +110,125 @@ class ChimpleController extends PageController
     }
 
     /**
+     * Set a suffix form the form name
+     */
+    public function setFormNameSuffix(string $suffix = '') : self {
+        $suffix = trim($suffix);
+        $this->formNameSuffix = $suffix;
+        return $this;
+    }
+
+    /**
+     * Return a suffix to use with the form name
+     */
+    public function getFormNameSuffix() : string {
+        if($this->formNameSuffix) {
+            $suffix = "_{$this->formNameSuffix}";
+        } else {
+            $suffix = "";
+        }
+        return $suffix;
+    }
+
+    /**
+     * Get a subscription form based on parameters
+     */
+    public function getSubscriptionForm($useXhr = false) : ?SubscribeForm {
+        if($useXhr) {
+            $form = $this->XhrSubscribeForm();
+        } else {
+            $form = $this->SubscribeForm();
+        }
+        return $form;
+    }
+
+    /**
      * Return a subscription form if it is enabled
      * @link MailchimpConfig::SubscribeForm
      */
-    public function SubscribeForm()
+    public function XhrSubscribeForm() : XhrSubscribeForm
     {
+
         $enabled = MailchimpConfig::isEnabled();
         if(!$enabled) {
             return null;
         }
 
+        $form = XhrSubscribeForm::create(
+            $this,
+            "SubscribeForm{$this->getFormNameSuffix()}",
+            $this->getFields(),
+            $this->getActions(),
+            $this->getValidator()
+        );
+
+        $form = $this->configureForm($form);
+        $form->setFormAction( $this->Link('XhrSubscribeForm') );
+
+        // Set a validation response callback handling for XHR form submissions
+        $form->setValidationResponseCallback($this->getCallbackForXhrValidation());
+
+        // this form doesn't need to retain state
+        $form->clearMessage();
+
+        return $form;
+    }
+
+    /**
+     * Return a subscription form if it is enabled
+     * @link MailchimpConfig::SubscribeForm
+     */
+    public function SubscribeForm()
+    {
+
+        $enabled = MailchimpConfig::isEnabled();
+        if(!$enabled) {
+            return null;
+        }
+
+        $form = SubscribeForm::create(
+            $this,
+            "SubscribeForm{$this->getFormNameSuffix()}",
+            $this->getFields(),
+            $this->getActions(),
+            $this->getValidator()
+        );
+
+        $form = $this->configureForm($form);
+        $form->setFormAction( $this->Link('SubscribeForm') );
+
+        // Handle error validation with custom callback
+        $form->setValidationResponseCallback($this->getCallbackForValidation($form));
+
+        return $form;
+    }
+
+    /**
+     * Apply common configuration to a subscription form
+     */
+    protected function configureForm(SubscribeForm $form) : SubscribeForm {
         // Form JS, incl XHR handling
         Requirements::javascript(
             'nswdpc/silverstripe-chimple:client/static/js/chimple.js'
         );
 
+        $form->addExtraClass('subscribe chimple');
+        $form->setTemplate('MailchimpSubscriberForm');
+
+        if($form->hasMethod('enableSpamProtection')) {
+            $form->enableSpamProtection();
+        }
+
+        // allow extensions to manipulate the form
+        $form->extend('updateChimpleSubscribeForm');
+
+        return $form;
+    }
+
+    /**
+     * Get fields for the form
+     */
+    protected function getFields() : FieldList {
         $fields = FieldList::create(
             $name = TextField::create('Name', _t(__CLASS__. '.NAME', 'Name'))
                         ->setAttribute('placeholder', _t(__CLASS__. '.YOUR_NAME', 'Your name'))
@@ -126,7 +239,13 @@ class ChimpleController extends PageController
                         ->setAttribute('title', _t(__CLASS__. '.EMAIL', 'Email'))
                         ->setAttribute('required', 'required')
         );
+        return $fields;
+    }
 
+    /**
+     * Get actions for the form
+     */
+    protected function getActions() : FieldList {
         $actions = FieldList::create(
             FormAction::create(
                 'subscribe',
@@ -134,22 +253,7 @@ class ChimpleController extends PageController
             )->setUseButtonTag(true)
             ->addExtraClass('signup')
         );
-
-        $form = SubscribeForm::create($this, 'SubscribeForm', $fields, $actions, $this->getValidator());
-        $form->addExtraClass('subscribe chimple');
-        $form->setTemplate('MailchimpSubscriberForm');
-        $form->setFormAction( $this->Link('SubscribeForm') );
-
-        if($form->hasMethod('enableSpamProtection')) {
-            $form->enableSpamProtection();
-        }
-
-        $form->setValidationResponseCallback($this->getCallbackForValidation());
-
-        // allow extensions to manipulate the form
-        $form->extend('updateChimpleSubscribeForm');
-
-        return $form;
+        return $actions;
     }
 
     /**
@@ -161,35 +265,41 @@ class ChimpleController extends PageController
     }
 
     /**
-     * Returns the validation callback. A response is returned only upon errors in XHR submissions
-     * @return callable|false
+     * Returns the validation callback upon errors
+     * A response is returned only upon errors in XHR submissions
+     * See FormRequestHandler::getValidationErrorResponse();
+     * @return callable
      */
-    protected function getCallbackForValidation() {
-        $callback = function(ValidationResult $result) {
-            if(!$this->request->isAjax()) {
-                // fall back to default behaviour
-                return false;
-            }
-            if($result->isValid()) {
-                // carry on... subscribe() action handling will provide a success/error response
-                return false;
-            }
+    protected function getCallbackForXhrValidation() : callable {
+        return function(ValidationResult $result) {
             // Fail, using the first message returned from the validation result
             $messages = $result->getMessages();
             $message = (!empty($messages[0]['message']) ? $messages[0]['message'] : '');
             return $this->xhrError(400, $message);
         };
-        return $callback;
+    }
+
+    /**
+     * Callback validator for SubscribeForm, avoid redirectBack()
+     */
+    protected function getCallbackForValidation(SubscribeForm $form) : callable {
+        return function(ValidationResult $result) use ($form) {
+            // Prior to redirection, persist this result in session to re-display on redirect
+            $form->setSessionValidationResult($result);
+            $form->setSessionData($form->getData());
+            // Create a redirect response for incomplete form
+            $query = [
+                'complete' => 'n'
+            ];
+            $query_string = http_build_query($query);
+            return $this->redirect($this->Link("?" . $query_string));
+        };
     }
 
     /**
      * Handle errors, based on the request type
      */
     private function handleError($code, $error_message, Form $form = null) {
-        if($form) {
-            // clear messages prior to setting any new ones
-            $form->clearMessage();
-        }
         if($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
         } else if($form) {
@@ -204,10 +314,6 @@ class ChimpleController extends PageController
      */
     private function handleSuccess($code, $message, Form $form = null) {
         $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
-        if($form) {
-            // clear messages prior to setting any new ones
-            $form->clearMessage();
-        }
         if($this->request->isAjax()) {
             return $this->xhrSuccess($code, $message, $success_message);
         } else if($form) {
@@ -347,9 +453,14 @@ class ChimpleController extends PageController
             $response = $this->handleSuccess(200, "OK", $form);
             if($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
-                return $response->output();
+                return $response;
             } else {
-                return $this->redirect($this->Link("?complete=y&code={$code}"));
+                // Create a redirect response for success
+                $query = [
+                    'complete' => 'y'
+                ];
+                $query_string = http_build_query($query);
+                return $this->redirect($this->Link("?" . $query_string));
             }
 
         } catch (RequestException $e) {
@@ -361,18 +472,16 @@ class ChimpleController extends PageController
             $error_code = 500;
         }
 
-        // only handle failures
+        // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
-        // handle XHR error responses
         if($response && ($response instanceof HTTPResponse)) {
-            return $response->output();
+            // handle XHR error responses
+            return $response;
         } else {
+            // Create a redirect response for errors
             $query = [
                 'complete' => 'n'
             ];
-            if($code) {
-                $query['code'] = $code;
-            }
             $query_string = http_build_query($query);
             return $this->redirect($this->Link("?" . $query_string));
         }
@@ -387,6 +496,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
+        $response->addHeader('X-Submission-OK', 0);
         $response->addHeader('X-Submission-Description', $message);
         return $response;
     }
@@ -399,6 +509,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
+        $response->addHeader('X-Submission-OK', 1);
         $response->addHeader('X-Submission-Description', $description);
         return $response;
     }

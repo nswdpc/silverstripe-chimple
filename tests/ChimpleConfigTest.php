@@ -140,6 +140,8 @@ class ChimpleConfigTest extends SapphireTest
 
     public function testCanBeCached() {
 
+        Config::modify()->set(XhrSubscribeForm::class, 'disable_security_token', true);
+
         $config = $this->getMailchimpConfig();
 
         // test forcing XHR

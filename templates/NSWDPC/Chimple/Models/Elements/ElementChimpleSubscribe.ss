@@ -18,9 +18,9 @@
             {$SubscribeForm}
         </div>
 
-        <% if $BeforeFormContent %>
+        <% if $AfterFormContent %>
             <div class="content post">
-                {$BeforeFormContent}
+                {$AfterFormContent}
             </div>
         <% end_if %>
 

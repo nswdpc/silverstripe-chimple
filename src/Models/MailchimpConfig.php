@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Models;
 
 use NSWDPC\Chimple\Controllers\ChimpleController;
+use NSWDPC\Chimple\Services\Logger;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
@@ -374,22 +375,20 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         if(!$enabled) {
             return null;
         }
-        $form = Injector::inst()->create(ChimpleController::class)->SubscribeForm();
+
+        // handle use of XHR submission
+        $use_xhr = $this->UseXHR;// use the default
+        if(!is_null($force_xhr)) {
+            $use_xhr = $force_xhr;
+        }
+
+        // ensure the form has a unique name per code
+        $formNameSuffix = ($this->Code ?? '');
+        $form = Injector::inst()->create(ChimpleController::class)
+            ->setFormNameSuffix($formNameSuffix)
+            ->getSubscriptionForm($use_xhr);
         // to return a form, there must be one and the Code must exist
         if($form && $this->Code) {
-
-            // handle use of XHR submission
-            $use_xhr = $this->UseXHR;// use the default
-            if(!is_null($force_xhr)) {
-                $use_xhr = $force_xhr;
-            }
-            if($use_xhr) {
-                $form->setAttribute('data-xhr',1);
-                $form->clearMessage();
-            }
-
-            // ensure the form has a unique name per code
-            $form->setHTMLID( Convert::raw2htmlid( $form->FormName() . " " . $this->Code) );
             // apply the code for this config to the form
             $code_field = HiddenField::create('code', 'code', $this->Code);
             $code_field->setForm($form);

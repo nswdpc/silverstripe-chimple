@@ -57,6 +57,7 @@
             "NSWDPC\\Chimple\\Services\\" : "src/Services/",
             "NSWDPC\\Chimple\\Forms\\" : "src/Forms/",
             "NSWDPC\\Chimple\\Exceptions\\" : "src/Exceptions/",
+            "NSWDPC\\Chimple\\Traits\\": "src/Traits/",
             "NSWDPC\\Chimple\\Tests\\": "tests/"
         }
     }

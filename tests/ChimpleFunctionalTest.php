@@ -73,8 +73,8 @@ class ChimpleFunctionalTest extends FunctionalTest
         $site_config->MailchimpEnabled = 1;
         $site_config->write();
 
-        Config::inst()->update(MailchimpConfig::class, 'api_key', $this->test_api_key);
-        Config::inst()->update(MailchimpConfig::class, 'list_id', $this->default_list_id);
+        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->default_list_id);
 
         // Config record
         $record = [

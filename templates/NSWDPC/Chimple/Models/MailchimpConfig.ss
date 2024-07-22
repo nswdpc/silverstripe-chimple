@@ -6,7 +6,7 @@
 
 <% if $BeforeFormContent %>
     <div class="content pre">
-        {$BeforeFormContent.RAW}
+        {$BeforeFormContent}
     </div>
 <% end_if %>
 
@@ -22,7 +22,7 @@
 
 <% if $AfterFormContent %>
     <div class="content post">
-        {$AfterFormContent.RAW}
+        {$AfterFormContent}
     </div>
 <% end_if %>
 

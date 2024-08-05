@@ -2,7 +2,7 @@
 
 namespace NSWDPC\Chimple\Extensions;
 
-use Silverstripe\Core\Extension;
+use SilverStripe\Core\Extension;
 
 /**
  * This extension can be applied at the project level in situations where

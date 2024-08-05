@@ -7,4 +7,4 @@ on:
 jobs:
     rector:
         name: Rector
-        uses: nswdpc/ci-files/github/workflows/rector.yaml
+        uses: nswdpc/ci-files/.github/workflows/rector.yaml

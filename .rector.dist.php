@@ -37,7 +37,7 @@ return $builder
     ])
 
     ->withSets([
-        SilverstripeLevelSetList::UP_TO_SILVERSTRIPE_52,
+        // SilverstripeLevelSetList::UP_TO_SILVERSTRIPE_52,
         // SilverstripeLevelSetList::UP_TO_SILVERSTRIPE_413,
         SilverstripeSetList::CODE_QUALITY
     ])

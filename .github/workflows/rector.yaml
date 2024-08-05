@@ -25,13 +25,16 @@ jobs:
                     coverage: none
 
             -
-                name: 'Composer install'
-                uses: "ramsey/composer-install@v3"
+                name: 'Composer config'
                 run:
                     composer config allow-plugins.composer/installers true
                     composer config allow-plugins.silverstripe/recipe-plugin true
                     composer config allow-plugins.silverstripe/vendor-plugin true
                     composer config allow-plugins.phpstan/extension-installer true
+
+            -
+                name: 'Composer install'
+                uses: "ramsey/composer-install@v3"
 
             -
                 name: 'Rector'

@@ -31,9 +31,12 @@
             "client/static"
         ]
     },
-    "support": {
-        "key" : "value"
-    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/nswdpc/ci-files.git"
+        }
+    ],
     "require": {
         "dnadesign/silverstripe-elemental": "^5",
         "silverstripe/framework" : "^5",
@@ -49,7 +52,8 @@
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^1",
         "syntro/silverstripe-phpstan": "^5",
-        "vlucas/phpdotenv": "^5"
+        "vlucas/phpdotenv": "^5",
+        "nswdpc/ci-files": "*"
     },
     "autoload": {
         "psr-4": {

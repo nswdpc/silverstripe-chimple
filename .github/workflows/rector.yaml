@@ -27,10 +27,10 @@ jobs:
             -
                 name: 'Composer config'
                 run:
-                    composer config allow-plugins.composer/installers true
-                    composer config allow-plugins.silverstripe/recipe-plugin true
-                    composer config allow-plugins.silverstripe/vendor-plugin true
-                    composer config allow-plugins.phpstan/extension-installer true
+                    composer config --no-plugins allow-plugins.composer/installers true
+                    composer config --no-plugins allow-plugins.silverstripe/recipe-plugin true
+                    composer config --no-plugins allow-plugins.silverstripe/vendor-plugin true
+                    composer config --no-plugins allow-plugins.phpstan/extension-installer true
 
             -
                 name: 'Composer install'

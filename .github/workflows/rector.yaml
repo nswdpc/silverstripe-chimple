@@ -10,6 +10,7 @@ jobs:
         if: github.event.pull_request.head.repo.full_name == 'nswdpc/silverstripe-chimple'
         steps:
             -
+                name: 'Prep'
                 if: github.event.pull_request.head.repo.full_name == github.repository
                 uses: actions/checkout@v4
                 with:
@@ -17,18 +18,29 @@ jobs:
                     token: ${{ secrets.ACCESS_TOKEN }}
 
             -
+                name: 'Setup PHP'
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: 8.2
                     coverage: none
 
-            -   uses: "ramsey/composer-install@v3"
+            -
+                name: 'Composer install'
+                uses: "ramsey/composer-install@v3"
+                run:
+                    composer config allow-plugins.composer/installers true
+                    composer config allow-plugins.silverstripe/recipe-plugin true
+                    composer config allow-plugins.silverstripe/vendor-plugin true
+                    composer config allow-plugins.phpstan/extension-installer true
 
-            -   run: vendor/bin/rector --ansi
-            # @todo apply coding standard if used
+            -
+                name: 'Rector'
+                run: vendor/bin/rector --ansi --config .rector.dist.php
+                # @todo apply coding standard if used
 
             -
                 # commit only to core contributors who have repository access
+                name: 'Commit action'
                 uses: stefanzweifel/git-auto-commit-action@v5
                 with:
                     commit_message: '[rector] Rector fixes'

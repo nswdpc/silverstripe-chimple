@@ -2,10 +2,10 @@
 name: Rector
 
 on:
-    pull_request: null
+  pull_request: null
 
 jobs:
-    rector:
-        name: Rector
-        # reference to re-usable workflow
-        uses: nswdpc/ci-files/.github/workflows/rector.yaml@main
+  rector:
+    name: Rector
+    # reference to re-usable workflow
+    uses: nswdpc/ci-files/.github/workflows/rector.yaml@main

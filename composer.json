@@ -48,7 +48,7 @@
         "phpstan/phpstan": "^1",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^1",
-        "syntro/silverstripe-phpstan": "^1.0",
+        "syntro/silverstripe-phpstan": "^5",
         "vlucas/phpdotenv": "^5"
     },
     "autoload": {

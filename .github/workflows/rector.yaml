@@ -9,3 +9,4 @@ jobs:
     name: Rector
     # reference to re-usable workflow
     uses: nswdpc/ci-files/.github/workflows/rector.yaml@main
+    secrets: inherit

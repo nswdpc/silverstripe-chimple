@@ -11,7 +11,7 @@ use SilverStripe\Security\Security;
  */
 class Logger
 {
-    public static function log($message, $level = "DEBUG")
+    public static function log($message, $level = "DEBUG"): void
     {
         Injector::inst()->get(LoggerInterface::class)->log($level, $message);
     }

@@ -51,13 +51,14 @@ class ChimpleFunctionalTest extends FunctionalTest
     protected $test_form_code = 'functionalformcode';
 
 
+    #[\Override]
     public function setUp() : void {
         parent::setUp();
 
 
         // Inject test form
         Injector::inst()->registerService(
-            new TestSubscribeForm(), SubscribeForm::class
+            \NSWDPC\Chimple\Tests\TestSubscribeForm::create(), SubscribeForm::class
         );
 
         // Suppress themes
@@ -90,16 +91,16 @@ class ChimpleFunctionalTest extends FunctionalTest
         $config->write();
     }
 
-    public function testFormSubmission()
+    public function testFormSubmission(): void
     {
 
-        $this->useTestTheme(__DIR__, 'chimpletest', function () {
+        $this->useTestTheme(__DIR__, 'chimpletest', function (): void {
 
             // request default route
             $url = "/mc-subscribe/v1/";
             $page = $this->get($url);
 
-            $formId = "TestSubscribeForm_SubscribeForm_{$this->test_form_code}";
+            $formId = 'TestSubscribeForm_SubscribeForm_' . $this->test_form_code;
             $email = 'functionaltester@example.org';
             $response = $this->submitForm(
                 $formId,

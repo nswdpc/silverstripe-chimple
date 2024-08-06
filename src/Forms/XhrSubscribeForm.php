@@ -17,9 +17,8 @@ class XhrSubscribeForm extends SubscribeForm {
 
     /**
      * Set to true if forms of this class will appear on a publicly cacheable page
-     * @var bool
      */
-    private static $disable_security_token = false;
+    private static bool $disable_security_token = false;
 
     public function __construct(
         RequestHandler $controller = null,
@@ -37,6 +36,7 @@ class XhrSubscribeForm extends SubscribeForm {
     /**
      * @inheritdoc
      */
+    #[\Override]
     protected function canBeCached()
     {
         $token = $this->getSecurityToken();
@@ -51,6 +51,7 @@ class XhrSubscribeForm extends SubscribeForm {
      * @inheritdoc
      * Add attributes
      */
+    #[\Override]
     protected function getDefaultAttributes(): array
     {
         $attributes = parent::getDefaultAttributes();

@@ -11,40 +11,40 @@ use SilverStripe\Forms\DropdownField;
 
 class SiteConfigExtension extends DataExtension
 {
-    private static $db = [
+    private static array $db = [
         'MailchimpEnabled' => 'Boolean'
     ];
 
-    private static $has_one = [
+    private static array $has_one = [
         'MailchimpConfig' => MailchimpConfig::class // global element for configuration
     ];
 
-    public function updateCmsFields(FieldList $fields)
+    #[\Override]
+    public function updateCmsFields(FieldList $fields): void
     {
         $fields->addFieldsToTab(
             'Root.Mailchimp',
             [
                 CheckboxField::create(
                     'MailchimpEnabled',
-                    _t(__CLASS__. '.MAILCHIMP_ENABLED', 'Mailchimp subscriptions enabled')
+                    _t(self::class. '.MAILCHIMP_ENABLED', 'Mailchimp subscriptions enabled')
                 ),
                 DropdownField::create(
                     'MailchimpConfigID',
-                    _t(__CLASS__. '.DEFAULT_MAILCHIMP_CONFIG', 'Default Mailchimp configuration'),
+                    _t(self::class. '.DEFAULT_MAILCHIMP_CONFIG', 'Default Mailchimp configuration'),
                     MailchimpConfig::get()->map('ID', 'TitleCode')
                 )->setEmptyString('')
             ]
         );
     }
 
-    public function onAfterWrite()
+    #[\Override]
+    public function onAfterWrite(): void
     {
         parent::onAfterWrite();
-        if($this->owner->MailchimpConfigID) {
-            if($config = MailchimpConfig::get()->byId($this->owner->MailchimpConfigID)) {
-                $config->IsGlobal = 1;
-                $config->write();
-            }
+        if ($this->getOwner()->MailchimpConfigID && ($config = MailchimpConfig::get()->byId($this->getOwner()->MailchimpConfigID))) {
+            $config->IsGlobal = 1;
+            $config->write();
         }
     }
 

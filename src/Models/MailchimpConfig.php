@@ -31,12 +31,19 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
     public $Title;
+
     public $Code;
+
     public $IsGlobal;
+
     public $ID;
+
     public $UseXHR;
+
     public $Heading;
+
     private static string $list_id = "";
+
     // default list (audience) ID
     private static string $api_key = "";// API key provided by Mailchimp
 
@@ -163,7 +170,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         if($this->IsGlobal == 1) {
             // Ensure only this config is marked global
             DB::query(
-                'UPDATE `ChimpleConfig`  SET IsGlobal = 0  WHERE IsGlobal = 1  AND ID <> \'' . Convert::raw2sql($this->ID) . "'"
+                "UPDATE `ChimpleConfig`  SET IsGlobal = 0  WHERE IsGlobal = 1  AND ID <> '" . Convert::raw2sql($this->ID) . "'"
             );
         }
     }

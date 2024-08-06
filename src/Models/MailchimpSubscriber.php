@@ -413,6 +413,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if (isset($parts[1]) && ($parts[1] !== '' && $parts[1] !== '0')) {
             return $parts[1];
         }
+
         return null;
     }
 
@@ -514,6 +515,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if(!$email_type || $email_type != self::MAILCHIMP_EMAIL_TYPE_HTML || $email_type != self::MAILCHIMP_EMAIL_TYPE_TEXT) {
             $email_type = self::MAILCHIMP_EMAIL_TYPE_HTML;
         }
+
         return [
             'email_address' => $this->Email,
             'email_type' => $email_type,
@@ -555,6 +557,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             if($sub_length <= 0) {
                 return str_repeat($chr, $length);
             }
+
             return substr_replace($in, str_repeat($chr, $sub_length), 1, $sub_length);
         };
         $this->Email = $obfuscate($this->Email);
@@ -642,7 +645,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
             $result = false;
 
-            if(!$existing) {
+            if($existing === [] || $existing === false) {
                 $operation_path = sprintf('lists/%s/members', $list_id);
                 $params = $this->getSubscribeRecord();
                 // add tags

@@ -93,6 +93,7 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
 
             $this->addMessage(sprintf('Deleted %d subscribers with status ', $success_deletes) . MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS);
         }
+
         $this->currentStep = $success_deletes;
         $this->totalSteps = $success_deletes;
 
@@ -116,6 +117,7 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
 
             $this->addMessage(sprintf('Deleted %d subscribers with status ', $failed_deletes) . MailchimpSubscriber::CHIMPLE_STATUS_FAIL);
         }
+
         $this->currentStep = $success_deletes + $failed_deletes;
         $this->totalSteps = $success_deletes + $failed_deletes;
 

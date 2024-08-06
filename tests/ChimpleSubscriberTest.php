@@ -16,7 +16,6 @@ use SilverStripe\Dev\SapphireTest;
  */
 class ChimpleSubscriberTest extends SapphireTest
 {
-
     use Configurable;
 
     protected $usesDatabase = true;
@@ -98,21 +97,21 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $subscribe_record = $subscriber->getSubscribeRecord();
 
-        $this->assertTrue( is_array($subscribe_record), "Record is not an array of values");
+        $this->assertTrue(is_array($subscribe_record), "Record is not an array of values");
 
-        $this->assertTrue( !empty($subscribe_record), "Record is empty");
+        $this->assertTrue(!empty($subscribe_record), "Record is empty");
 
-        $this->assertTrue( isset($subscribe_record['merge_fields']), "Record merge_fields is not set");
+        $this->assertTrue(isset($subscribe_record['merge_fields']), "Record merge_fields is not set");
 
-        $this->assertTrue( !empty($subscribe_record['email_type']), "Record email_type is empty");
+        $this->assertTrue(!empty($subscribe_record['email_type']), "Record email_type is empty");
 
-        $this->assertEquals( $subscriber->Email, $subscribe_record['email_address'], "Subscribed email_address value is not the same as subsciber record Email field value");
+        $this->assertEquals($subscriber->Email, $subscribe_record['email_address'], "Subscribed email_address value is not the same as subsciber record Email field value");
 
         // check merge fields
         $sync_fields = $subscriber->config()->get('sync_fields');
         $merge_fields = $subscribe_record['merge_fields'];
-        foreach($sync_fields as $field => $tag ) {
-            $this->assertTrue( isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), "Merge field tag {$tag} value does not match subscriber {$field} value");
+        foreach($sync_fields as $field => $tag) {
+            $this->assertTrue(isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), "Merge field tag {$tag} value does not match subscriber {$field} value");
         }
 
         $email = $subscriber->Email;
@@ -142,7 +141,7 @@ class ChimpleSubscriberTest extends SapphireTest
             $this->assertEquals(count($tags), count($mc_record['tags']), "Tag count mismatch");
 
             $mc_tags_list = [];
-            array_walk($mc_record['tags'], function($value,  $key) use (&$mc_tags_list) {
+            array_walk($mc_record['tags'], function ($value, $key) use (&$mc_tags_list) {
                 $mc_tags_list[] = $value['name'];
             });
 

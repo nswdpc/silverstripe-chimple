@@ -30,7 +30,6 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
-
     private static $list_id = "";// default list (audience) ID
     private static $api_key = "";// API key provided by Mailchimp
 
@@ -99,11 +98,13 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'UseXHR' => 1
     ];
 
-    public function TitleCode() {
+    public function TitleCode()
+    {
         return "{$this->Title} ({$this->Code})";
     }
 
-    public static function isEnabled() {
+    public static function isEnabled()
+    {
         $site_config = SiteConfig::current_site_config();
         return $site_config->MailchimpEnabled == 1;
     }
@@ -122,7 +123,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * Returns the data centre (dc) component based on the API key e.g us2
      * @return string
      */
-    public static function getDataCentre() : string {
+    public static function getDataCentre(): string
+    {
         $dc = '';
         $key = self::getApiKey();
         $parts = [];
@@ -132,11 +134,13 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         return !empty($parts[1]) ? $parts[1] : '';
     }
 
-    public function TitleWithCode() {
+    public function TitleWithCode()
+    {
         return $this->Title . " - (code {$this->Code})";
     }
 
-    public function TitleWithDetails() {
+    public function TitleWithDetails()
+    {
         $title = $this->Title;
         $list_id = $this->getMailchimpListId();
         $title .= " (list {$list_id})";
@@ -165,7 +169,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Return the current global config
      */
-    public static function getGlobalConfig() {
+    public static function getGlobalConfig()
+    {
         return MailchimpConfig::get()->filter(['IsGlobal' => 1])->first();
     }
 
@@ -267,7 +272,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                     . _t(
                         __CLASS__. '.CONFIG_IS_GLOBAL',
                         'This configuration is the default for this website'
-                        )
+                    )
                     . '</p>'
                 ),
                 'Title'
@@ -298,22 +303,24 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         );
 
         $fields->addFieldsToTab(
-            'Root.Main', [
-            HTMLEditorField::create(
-                'BeforeFormContent',
-                _t(
-                    __CLASS__ . '.BEFORE_CONTENT',
-                    'Content to show before form'
-                )
-            )->setRows(6),
-            HTMLEditorField::create(
-                'AfterFormContent',
-                _t(
-                    __CLASS__ . '.AFTER_CONTENT',
-                    'Content to show after form'
-                )
-            )->setRows(6)
-        ]);
+            'Root.Main',
+            [
+                HTMLEditorField::create(
+                    'BeforeFormContent',
+                    _t(
+                        __CLASS__ . '.BEFORE_CONTENT',
+                        'Content to show before form'
+                    )
+                )->setRows(6),
+                HTMLEditorField::create(
+                    'AfterFormContent',
+                    _t(
+                        __CLASS__ . '.AFTER_CONTENT',
+                        'Content to show after form'
+                    )
+                )->setRows(6)
+            ]
+        );
 
         if($heading = $fields->dataFieldByName('Heading')) {
             $heading->setDescription(_t(
@@ -468,7 +475,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     {
         $form = $this->SubscribeForm($force_xhr);
         if($form) {
-            return $this->customise(['Form'=>$form])->renderWith( self::class );
+            return $this->customise(['Form' => $form])->renderWith(self::class);
         }
         return null;
     }
@@ -493,7 +500,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                     if($args[1] === '0') {
                         // string '0' passed in as an arg in the template
                         $force_xhr = false;
-                    } else if($args[1] === '1') {
+                    } elseif($args[1] === '1') {
                         // string '1' passed in as an arg in the template
                         $force_xhr = true;
                     }

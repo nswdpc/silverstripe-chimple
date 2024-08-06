@@ -97,8 +97,8 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         $fail_datetime = new DateTime();
         $fail_datetime->modify('-7 days');
         $failed = MailchimpSubscriber::get()->filter([
-                'Status' => MailchimpSubscriber::CHIMPLE_STATUS_FAIL,
-                'Created:LessThan' => $fail_datetime->format('Y-m-d H:i:s')
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_FAIL,
+            'Created:LessThan' => $fail_datetime->format('Y-m-d H:i:s')
         ]);
 
         if ($this->report_only) {

@@ -12,7 +12,8 @@ use Silverstripe\Core\Extension;
  */
 class DisableSecurityTokenExtension extends Extension
 {
-    public function updateChimpleSubscribeForm() {
+    public function updateChimpleSubscribeForm()
+    {
         $this->owner->disableSecurityToken();
     }
 }

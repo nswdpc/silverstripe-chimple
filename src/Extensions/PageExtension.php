@@ -10,12 +10,12 @@ use SilverStripe\Forms\Form;
 
 class PageExtension extends Extension
 {
-
     /**
      * Returns a form for the configuration marked 'IsGlobal'
      * @return Form|null
      */
-    public function  ChimpleGlobalSubscribeForm() {
+    public function ChimpleGlobalSubscribeForm()
+    {
         $config = MailchimpConfig::getGlobalConfig();
         if ($config) {
             return $config->SubscribeForm();

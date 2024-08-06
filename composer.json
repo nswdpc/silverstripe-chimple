@@ -68,5 +68,7 @@
             "NSWDPC\\Chimple\\Traits\\": "src/Traits/",
             "NSWDPC\\Chimple\\Tests\\": "tests/"
         }
-    }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }

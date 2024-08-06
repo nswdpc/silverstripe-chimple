@@ -20,6 +20,7 @@ class PageExtension extends Extension
         if ($config) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 
@@ -34,6 +35,7 @@ class PageExtension extends Extension
         if($config) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 }

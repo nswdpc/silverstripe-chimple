@@ -22,23 +22,20 @@ class ChimpleSubscriberTest extends SapphireTest
 
     /**
      * e.g example.com
-     * @var string
      */
-    private static $test_email_domain = "";
+    private static string $test_email_domain = "";
 
     /**
      * e.g bob.smith
-     * @var string
      */
-    private static $test_email_user = "";
+    private static string $test_email_user = "";
 
     /**
      * use plus notation in email address
-     * @var bool
      */
-    private static $test_use_plus = true;
+    private static bool $test_use_plus = true;
 
-    public function testSubscriber()
+    public function testSubscriber(): void
     {
         $fname = "Test";
         $lname = "Tester";
@@ -67,11 +64,12 @@ class ChimpleSubscriberTest extends SapphireTest
         if($test_use_plus) {
             $email_address_for_test .= "+unittest" . bin2hex(random_bytes(2));
         }
-        $email_address_for_test .= "@{$test_email_domain}";
+
+        $email_address_for_test .= '@' . $test_email_domain;
 
         $tags = ['TestOne','TestTwo'];
         $record = [
-            'Name' => "{$fname} {$lname}",
+            'Name' => sprintf('%s %s', $fname, $lname),
             'Email' => $email_address_for_test,
             'FailNoticeSent' => 0,
             'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
@@ -84,9 +82,9 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_NEW, "Subscriber should be 'new' status");
 
-        $this->assertEquals($subscriber->Name, $fname, "Subscriber should have fname of {$fname}");
+        $this->assertEquals($subscriber->Name, $fname, 'Subscriber should have fname of ' . $fname);
 
-        $this->assertEquals($subscriber->Surname, $lname, "Subscriber shold have lname of {$lname}");
+        $this->assertEquals($subscriber->Surname, $lname, 'Subscriber shold have lname of ' . $lname);
 
         $client = MailchimpSubscriber::api();
 
@@ -99,7 +97,7 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertTrue(is_array($subscribe_record), "Record is not an array of values");
 
-        $this->assertTrue(!empty($subscribe_record), "Record is empty");
+        $this->assertTrue($subscribe_record !== [], "Record is empty");
 
         $this->assertTrue(isset($subscribe_record['merge_fields']), "Record merge_fields is not set");
 
@@ -111,7 +109,7 @@ class ChimpleSubscriberTest extends SapphireTest
         $sync_fields = $subscriber->config()->get('sync_fields');
         $merge_fields = $subscribe_record['merge_fields'];
         foreach($sync_fields as $field => $tag) {
-            $this->assertTrue(isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), "Merge field tag {$tag} value does not match subscriber {$field} value");
+            $this->assertTrue(isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), sprintf('Merge field tag %s value does not match subscriber %s value', $tag, $field));
         }
 
         $email = $subscriber->Email;
@@ -120,28 +118,28 @@ class ChimpleSubscriberTest extends SapphireTest
 
             $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS, "Status of subscriber should be subscribed");
             // check ID matches md5
-            $this->assertEquals(md5(strtolower($email)), $subscriber->SubscribedId, "Email does not match returned id {$subscriber->SubscribedId}");
+            $this->assertEquals(md5(strtolower($email)), $subscriber->SubscribedId, 'Email does not match returned id ' . $subscriber->SubscribedId);
 
             $this->assertNotEmpty($subscriber->SubscribedWebId, "SubscribedWebId should not be empty");
 
             $this->assertNotEmpty($subscriber->SubscribedUniqueEmailId, "SubscribedUniqueEmailId should not be empty");
 
-            $this->assertTrue(substr_count($subscriber->Email, $obfuscation_chr) > 0, "Email is not obfuscated, it should be");
+            $this->assertTrue(substr_count($subscriber->Email, (string) $obfuscation_chr) > 0, "Email is not obfuscated, it should be");
 
-            $this->assertTrue(substr_count($subscriber->Name, $obfuscation_chr) > 0, "Name is not obfuscated, it should be");
+            $this->assertTrue(substr_count($subscriber->Name, (string) $obfuscation_chr) > 0, "Name is not obfuscated, it should be");
 
-            $this->assertTrue(substr_count($subscriber->Surname, $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
+            $this->assertTrue(substr_count($subscriber->Surname, (string) $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
 
             $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
 
-            $this->assertTrue(!empty($mc_record['id']), "The subscriber does not exist in the list {$list_id} - it should");
+            $this->assertTrue(!empty($mc_record['id']), sprintf('The subscriber does not exist in the list %s - it should', $list_id));
             $this->assertEquals(MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_PENDING, $mc_record['status'], "The subscriber is not pending status");
 
             // check tags
             $this->assertEquals(count($tags), count($mc_record['tags']), "Tag count mismatch");
 
             $mc_tags_list = [];
-            array_walk($mc_record['tags'], function ($value, $key) use (&$mc_tags_list) {
+            array_walk($mc_record['tags'], function (array $value, $key) use (&$mc_tags_list): void {
                 $mc_tags_list[] = $value['name'];
             });
 
@@ -165,7 +163,7 @@ class ChimpleSubscriberTest extends SapphireTest
             $this->assertEmpty($subscriber->SubscribedId, "SubscribedId should be empty");
 
             $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
-            $this->assertTrue(empty($mc_record['id']), "The subscriber exists in the list {$list_id} it should not");
+            $this->assertTrue(empty($mc_record['id']), sprintf('The subscriber exists in the list %s it should not', $list_id));
 
         }
 

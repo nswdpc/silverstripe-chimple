@@ -1,0 +1,10 @@
+name: Automated tasks
+
+on:
+  pull_request: null
+
+jobs:
+  Bundle:
+    name: Run automated code quality workflows
+    uses: nswdpc/ci-files/.github/workflows/bundle.yml@main
+    secrets: inherit

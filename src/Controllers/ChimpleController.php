@@ -107,18 +107,14 @@ class ChimpleController extends PageController
      * Return a suffix to use with the form name
      */
     public function getFormNameSuffix() : string {
-        $suffix = $this->formNameSuffix ? '_' . $this->formNameSuffix : "";
-
-        return $suffix;
+        return $this->formNameSuffix ? '_' . $this->formNameSuffix : "";
     }
 
     /**
      * Get a subscription form based on parameters
      */
     public function getSubscriptionForm($useXhr = false) : ?SubscribeForm {
-        $form = $useXhr ? $this->XhrSubscribeForm() : $this->SubscribeForm();
-
-        return $form;
+        return $useXhr ? $this->XhrSubscribeForm() : $this->SubscribeForm();
     }
 
     /**
@@ -247,7 +243,7 @@ class ChimpleController extends PageController
      * See FormRequestHandler::getValidationErrorResponse();
      */
     protected function getCallbackForXhrValidation() : callable {
-        return function(ValidationResult $result) {
+        return function(ValidationResult $result): \SilverStripe\Control\HTTPResponse {
             // Fail, using the first message returned from the validation result
             $messages = $result->getMessages();
             $message = (empty($messages[0]['message']) ? '' : $messages[0]['message']);
@@ -275,20 +271,21 @@ class ChimpleController extends PageController
     /**
      * Handle errors, based on the request type
      */
-    private function handleError($code, $error_message, Form $form = null) {
+    private function handleError($code, $error_message, Form $form = null): ?\SilverStripe\Control\HTTPResponse {
         if ($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
         } elseif ($form instanceof \SilverStripe\Forms\Form) {
             // set session error on the form
             $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
         }
+
         return null;
     }
 
     /**
      * Handle successful submissions, based on the request type
      */
-    private function handleSuccess(int $code, Form $form = null) {
+    private function handleSuccess(int $code, Form $form = null): ?\SilverStripe\Control\HTTPResponse {
         $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
         if ($this->request->isAjax()) {
             return $this->xhrSuccess($code, $success_message);
@@ -296,6 +293,7 @@ class ChimpleController extends PageController
             // set session message on the form
             $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
         }
+
         return null;
     }
 

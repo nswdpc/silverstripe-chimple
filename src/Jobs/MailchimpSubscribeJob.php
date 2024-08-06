@@ -47,7 +47,7 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
         $this->totalSteps = 1;
     }
 
-    private function getTotalResults($results): int|float
+    private function getTotalResults(array|bool $results): int|float
     {
         $total = 0;
         foreach ($results as $count) {
@@ -57,7 +57,7 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
         return $total;
     }
 
-    private function getTotalNonFailedResults(array $results)
+    private function getTotalNonFailedResults(array $results): int|float
     {
         $copy = $results;
         unset($copy[ MailchimpSubscriber::CHIMPLE_STATUS_FAIL]);

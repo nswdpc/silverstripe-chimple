@@ -327,7 +327,7 @@ class ChimpleController extends PageController
         try {
 
             $response = null;
-            $code = "";// MailchimpConfig.Code
+            $code = strip_tags(trim($data['code'] ?? ''));// MailchimpConfig.Code
             $list_id = "";
             $mc_config = null;
             $error_message = "";
@@ -337,20 +337,16 @@ class ChimpleController extends PageController
                 throw new RequestException("Forbidden", 403);
             }
 
-            if(empty($data['code'])) {
+            if($code === "") {
                 // fail with error
                 $error_message = _t(
                     __CLASS__ . '.NO_CODE',
                     "No code was provided"
                 );
                 $error_code = 400;// default to invalid data
-
             } else {
-
-                $code = strip_tags(trim($data['code'] ?: ''));
                 $error_message = "";
                 $error_code = 400;// default to invalid data
-
             }
 
             $enabled = MailchimpConfig::isEnabled();
@@ -389,13 +385,13 @@ class ChimpleController extends PageController
                     );
                 } else {
                     $mc_config = MailchimpConfig::getConfig('', '', $code);
-                    if (empty($mc_config->ID)) {
+                    if ($mc_config) {
+                        $list_id = $mc_config->getMailchimpListId();
+                    } else {
                         $error_message = _t(
                             __CLASS__ . ".GENERIC_ERROR_2",
                             "Sorry, the sign-up could not be completed"
                         );
-                    } else {
-                        $list_id = $mc_config->getMailchimpListId();
                     }
                 }
             }

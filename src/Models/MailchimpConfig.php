@@ -13,7 +13,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
-use Silverstripe\ORM\DataObject;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\PermissionProvider;

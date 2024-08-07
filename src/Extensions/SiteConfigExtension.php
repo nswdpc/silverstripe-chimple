@@ -4,10 +4,10 @@ namespace NSWDPC\Chimple\Extensions;
 
 use NSWDPC\Chimple\Models\MailchimpConfig;
 
-use Silverstripe\ORM\DataExtension;
+use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\CheckboxField;
-use Silverstripe\Forms\FieldList;
-use Silverstripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
 
 class SiteConfigExtension extends DataExtension
 {

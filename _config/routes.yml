@@ -3,7 +3,7 @@ Name: silverstripe-chimple-routes
 After:
   - '#coreroutes'
 ---
-Silverstripe\Control\Director:
+SilverStripe\Control\Director:
   rules:
     'mc-subscribe/v1': 'NSWDPC\Chimple\Controllers\ChimpleController'
 ---

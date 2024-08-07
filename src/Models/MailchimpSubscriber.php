@@ -324,7 +324,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         );
 
         // get profile link
-        $dc = MailChimpConfig::getDataCentre();
+        $dc = MailchimpConfig::getDataCentre();
         if($dc && $this->SubscribedWebId) {
             $subscriber_profile_link = "https://{$dc}.admin.mailchimp.com/lists/members/view?id={$this->SubscribedWebId}";
         } else {

@@ -366,9 +366,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Use the form provided by the controller
      * @param bool $force_xhr whether to submit in place via XHR or not, the default is to let the config decide
-     * @return Form
      */
-    public function SubscribeForm($force_xhr = null)
+    public function SubscribeForm($force_xhr = null) : ?SubscribeForm
     {
         // No form available if not enabled
         $enabled = self::isEnabled();

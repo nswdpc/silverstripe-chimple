@@ -5,6 +5,10 @@ on:
 
 jobs:
   Bundle:
-    name: Run automated code quality workflows
+    name: 'Run automated code quality workflows'
     uses: nswdpc/ci-files/.github/workflows/bundle.yml@main
+    secrets: inherit
+  PHPStan:
+    name: 'PHPStan (analyse)'
+    uses: nswdpc/ci-files/.github/workflows/phpstan.yml@main
     secrets: inherit

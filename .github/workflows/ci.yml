@@ -1,11 +1,11 @@
-name: Automated tasks
+name: CI
 
 on:
   pull_request: null
 
 jobs:
   Bundle:
-    name: 'Run automated code quality workflows'
+    name: 'Automated fixes'
     uses: nswdpc/ci-files/.github/workflows/bundle.yml@main
     secrets: inherit
   PHPStan:

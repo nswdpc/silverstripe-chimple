@@ -12,3 +12,4 @@ jobs:
     name: 'PHPStan (analyse)'
     uses: nswdpc/ci-files/.github/workflows/phpstan.yml@main
     secrets: inherit
+    needs: Bundle

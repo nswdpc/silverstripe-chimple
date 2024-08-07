@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  pull_request: null
+
+jobs:
+  Bundle:
+    name: 'Automated fixes'
+    uses: nswdpc/ci-files/.github/workflows/bundle.yml@main
+    secrets: inherit
+  PHPStan:
+    name: 'PHPStan (analyse)'
+    uses: nswdpc/ci-files/.github/workflows/phpstan.yml@main
+    secrets: inherit
+    needs: Bundle

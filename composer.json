@@ -31,9 +31,12 @@
             "client/static"
         ]
     },
-    "support": {
-        "key" : "value"
-    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/nswdpc/ci-files.git"
+        }
+    ],
     "require": {
         "dnadesign/silverstripe-elemental": "^5",
         "silverstripe/framework" : "^5",
@@ -43,9 +46,14 @@
         "symbiote/silverstripe-multivaluefield" : "^6"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
+        "cambis/silverstripe-rector": "^0.5.1",
         "friendsofphp/php-cs-fixer": "^3",
-        "vlucas/phpdotenv": "^5"
+        "phpstan/phpstan": "^1",
+        "phpunit/phpunit": "^9.5",
+        "rector/rector": "^1",
+        "syntro/silverstripe-phpstan": "^5",
+        "vlucas/phpdotenv": "^5",
+        "nswdpc/ci-files": "*"
     },
     "autoload": {
         "psr-4": {
@@ -59,6 +67,16 @@
             "NSWDPC\\Chimple\\Exceptions\\" : "src/Exceptions/",
             "NSWDPC\\Chimple\\Traits\\": "src/Traits/",
             "NSWDPC\\Chimple\\Tests\\": "tests/"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/recipe-plugin": true,
+            "silverstripe/vendor-plugin": true,
+            "phpstan/extension-installer": true
         }
     }
 }

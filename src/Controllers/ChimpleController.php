@@ -96,7 +96,7 @@ class ChimpleController extends PageController
     /**
      * Set a suffix form the form name
      */
-    public function setFormNameSuffix(string $suffix = ''): self
+    public function setFormNameSuffix(string $suffix = '') : self
     {
         $suffix = trim($suffix);
         $this->formNameSuffix = $suffix;

@@ -173,7 +173,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * If not configured in the database, return the value in yml
      */
-    public function getMailchimpListId()
+    public function getMailchimpListId(): ?string
     {
         $list_id = $this->getField('MailchimpListId');
         if (!$list_id) {
@@ -187,7 +187,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         return $this->getMailchimpListId() != '';
     }
 
-    public static function getConfig($id = '', $list_id = '', $code = '')
+    public static function getConfig($id = '', $list_id = '', $code = ''): ?self
     {
         if ($id) {
             return MailchimpConfig::get()->byId($id);
@@ -198,7 +198,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         if ($code) {
             return MailchimpConfig::get()->filter('Code', $code)->first();
         }
-        return false;
+        return null;
     }
 
     /**

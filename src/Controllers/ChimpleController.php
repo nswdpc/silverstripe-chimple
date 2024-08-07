@@ -130,7 +130,7 @@ class ChimpleController extends PageController
     /**
      * Get a subscription form based on parameters
      */
-    public function getSubscriptionForm($useXhr = false) : ?SubscribeForm {
+    public function getSubscriptionForm($useXhr = false) : SubscribeForm|XhrSubscribeForm|null {
         if($useXhr) {
             $form = $this->XhrSubscribeForm();
         } else {

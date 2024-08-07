@@ -141,7 +141,6 @@ class ChimpleController extends PageController
 
     /**
      * Return a subscription form if it is enabled
-     * @link MailchimpConfig::SubscribeForm
      */
     public function XhrSubscribeForm() : ?XhrSubscribeForm
     {
@@ -173,7 +172,6 @@ class ChimpleController extends PageController
 
     /**
      * Return a subscription form if it is enabled
-     * @link MailchimpConfig::SubscribeForm
      */
     public function SubscribeForm() : ?SubscribeForm
     {

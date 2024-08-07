@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Models;
 
 use NSWDPC\Chimple\Controllers\ChimpleController;
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Services\Logger;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Config\Config;

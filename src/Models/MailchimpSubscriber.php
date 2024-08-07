@@ -61,7 +61,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Default chr for obfuscation
-     * @var array
+     * @var string
      */
     private static $obfuscation_chr = "•";
 
@@ -76,7 +76,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * attempts to update their subscription
      * This is a potentially destructive action as it will remove tags added to
      * a subscriber via other means
-     * @var string
+     * @var bool
      */
     private static $remove_subscriber_tags = false;
 
@@ -817,7 +817,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Retrieve all subscribers marked new and attempt to subscribe them
      * @return array
      */
-    public static function batch_subscribe($limit = 100, $report_only = false)
+    public static function batch_subscribe($limit = 100, $report_only = false) : array
     {
         $results = [];
         try {
@@ -855,7 +855,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             Logger::log("FAIL: could not batch_subscribe, error=" . $e->getMessage(), 'NOTICE');
         }
 
-        return false;
+        return [];
     }
 
     public function canView($member = null)

@@ -436,7 +436,7 @@ class ChimpleController extends PageController
                 $sub->Tags = $mc_config->Tags;
                 $sub_id = $sub->write();
                 if (!$sub_id) {
-                    throw new RequestException("502", "Bad Gateway");
+                    throw new RequestException("Bad Gateway", 502);
                 }
             }
 

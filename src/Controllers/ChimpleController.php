@@ -146,7 +146,7 @@ class ChimpleController extends PageController
      * Return a subscription form if it is enabled
      * @link MailchimpConfig::SubscribeForm
      */
-    public function XhrSubscribeForm() : XhrSubscribeForm
+    public function XhrSubscribeForm() : ?XhrSubscribeForm
     {
 
         $enabled = MailchimpConfig::isEnabled();

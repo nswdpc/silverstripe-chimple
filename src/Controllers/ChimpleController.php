@@ -70,13 +70,10 @@ class ChimpleController extends PageController
         switch($complete) {
             case 'y':
                 return _t(__CLASS__. '.DEFAULT_TITLE_SUCCESSFUL', 'Thanks for subscribing');
-                break;
             case 'n':
                 return _t(__CLASS__. '.DEFAULT_TITLE_NOT_SUCCESSFUL', 'Sorry, there was an error');
-                break;
             default:
                 return _t(__CLASS__. '.DEFAULT_TITLE', 'Subscribe');
-                break;
         }
     }
 

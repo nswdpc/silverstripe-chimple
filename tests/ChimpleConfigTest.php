@@ -133,7 +133,7 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue( $static_form instanceof DBHTMLText, "Static form for code {$code_value} was not returned");
 
         $needle = " value=\"{$code_value}\" ";
-        $this->assertTrue( strpos($static_form->forTemplate(), $needle) !== false, "Missing {$code_value} input from form HTML");
+        $this->assertTrue( str_contains($static_form->forTemplate(), $needle), "Missing {$code_value} input from form HTML");
 
     }
 
@@ -196,10 +196,10 @@ class ChimpleConfigTest extends SapphireTest
         $config->write();
         // Use config value
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue( strpos($template, "data-xhr=\"1\"") === false, "Attribute is not in template");
+        $this->assertTrue( !str_contains($template, "data-xhr=\"1\""), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue( strpos($template, "data-xhr=\"1\"") !== false, "Attribute is in template");
+        $this->assertTrue( str_contains($template, "data-xhr=\"1\""), "Attribute is in template");
     }
 }

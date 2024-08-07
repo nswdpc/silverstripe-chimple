@@ -3,7 +3,7 @@
 namespace NSWDPC\Chimple\Tests;
 
 use NSWDPC\Chimple\Forms\SubscribeForm;
-use SilverStripe\Dev\Testonly;
+use SilverStripe\Dev\TestOnly;
 
 /**
  * Test subscribe form handling

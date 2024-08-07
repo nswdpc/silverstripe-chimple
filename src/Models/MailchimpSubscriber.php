@@ -416,7 +416,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Get the API client
-     * @return MailchimpApiClient
      */
     public static function api() : MailchimpApiClient {
         // already set up..
@@ -452,9 +451,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Applies merge fields prior to subscription attempt
-     * @return array
      */
-    protected function applyMergeFields() {
+    protected function applyMergeFields(): array {
         $merge_fields = [];
 
         // get subscriber meta data
@@ -498,7 +496,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Get the default subscription record data for adding/updating member in list
-     * @return array
      */
     public function getSubscribeRecord() : array {
         // merge fields to send
@@ -530,10 +527,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Called after a successful subscription, obfuscates email, name and surname
-     * @return void
      */
     private function obfuscate() {
-        $obfuscate = function($in) {
+        $obfuscate = function(string $in) : string {
             $length = strlen($in);
             if($length == 0) {
                 return "";
@@ -550,16 +546,15 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             $replaced = substr_replace($in, str_repeat($chr, $sub_length), 1, $sub_length);
             return $replaced;
         };
-        $this->Email = $obfuscate($this->Email);
-        $this->Name = $obfuscate($this->Name);
-        $this->Surname = $obfuscate($this->Surname);
+        $this->Email = $obfuscate($this->Email ?? '');
+        $this->Name = $obfuscate($this->Name ?? '');
+        $this->Surname = $obfuscate($this->Surname ?? '');
     }
 
     /**
      * Get the hash that is used as the MC subscribed Id value
-     * @return string
      */
-    public static function getMailchimpSubscribedId($email) {
+    public static function getMailchimpSubscribedId($email): string {
         if(!is_string($email) || !$email) {
             return '';
         } else {
@@ -572,9 +567,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @param string $list_id the Audience ID
      * @param string $email an email address, this is hashed using the MC hashing strategy
      * @param string $api_key @deprecated
-     * @return boolean|array
      */
-    public static function checkExistsInList(string $list_id, string $email, string $api_key = '') {
+    public static function checkExistsInList(string $list_id, string $email, string $api_key = '') : array|false {
 
         // sanity check on input
         if(!$email) {
@@ -612,9 +606,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Subscribe *this* particular record
-     * @return bool
      */
-    public function subscribe()
+    public function subscribe() : bool
     {
         try {
 
@@ -700,7 +693,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Return all current tags for a subscriber and handle pagination at the time of the API call
      * @param bool $force whether to get the tags from the remote or use previously retrieved tags
      * @param int $count the number of records to return per request
-     * @return array an array of values, each value is a string tag
      */
     private function getCurrentSubscriberTags(bool $force = false, int $count = 10) : array {
 
@@ -815,7 +807,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Batch subscribe via API - hit from MailchimpSubscribeJob
      * Retrieve all subscribers marked new and attempt to subscribe them
-     * @return array
      */
     public static function batch_subscribe($limit = 100, $report_only = false) : array
     {

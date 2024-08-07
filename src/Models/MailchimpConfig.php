@@ -121,7 +121,6 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Returns the data centre (dc) component based on the API key e.g us2
-     * @return string
      */
     public static function getDataCentre() : string {
         $dc = '';
@@ -329,9 +328,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Return signup link
-     * @return string
      */
-    public function MailchimpLink()
+    public function MailchimpLink() : string
     {
         return singleton(ChimpleController::class)->Link();
     }
@@ -405,9 +403,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Return alerts for the form
-     * @return string
      */
-    public function Alerts()
+    public function Alerts(): string
     {
         return '<div class="hidden alert alert-success" data-type="success">'
         . _t(__CLASS__ . '.SUBSCRIBE_SUCCESS', htmlspecialchars($this->config()->get('success_message')))
@@ -462,9 +459,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Render this record using a template
-     * @return DBHTMLText|null
      */
-    public function forTemplate($force_xhr = null)
+    public function forTemplate($force_xhr = null) : ?DBHTMLText
     {
         $form = $this->SubscribeForm($force_xhr);
         if($form) {
@@ -479,9 +475,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
      * @param array $args
-     * @return DBHTMLText|null
      */
-    public static function get_chimple_subscribe_form(...$args)
+    public static function get_chimple_subscribe_form(...$args) : ?DBHTMLText
     {
         $code = isset($args[0]) ? $args[0] : '';
         if ($code) {
@@ -507,9 +502,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Get the subscribe form for the current global config
      * This is called from a template calling $ChimpleSubscribeForm('code')
-     * @return DBHTMLText|null
      */
-    public static function get_chimple_global_subscribe_form()
+    public static function get_chimple_global_subscribe_form() : ?DBHTMLText
     {
         $config = self::getGlobalConfig();
         if ($config) {

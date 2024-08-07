@@ -253,7 +253,6 @@ class ChimpleController extends PageController
 
     /**
      * Return the default validator for the form.
-     * @returns Validator|null
      */
     protected function getValidator() : ?Validator {
         return RequiredFields::create(['Name','Email']);
@@ -263,7 +262,6 @@ class ChimpleController extends PageController
      * Returns the validation callback upon errors
      * A response is returned only upon errors in XHR submissions
      * See FormRequestHandler::getValidationErrorResponse();
-     * @return callable
      */
     protected function getCallbackForXhrValidation() : callable {
         return function(ValidationResult $result) {
@@ -481,9 +479,8 @@ class ChimpleController extends PageController
 
     /**
      * Return error response for XHR
-     * @return HTTPResponse
      */
-    private function xhrError($code = 500, $message = "", $description = "") {
+    private function xhrError($code = 500, $message = "", $description = ""): HTTPResponse {
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
@@ -494,9 +491,8 @@ class ChimpleController extends PageController
 
     /**
      * Return success response for XHR
-     * @return HTTPResponse
      */
-    private function xhrSuccess($code = 200, $message = "", $description = "") {
+    private function xhrSuccess($code = 200, $message = "", $description = ""): HTTPResponse {
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');

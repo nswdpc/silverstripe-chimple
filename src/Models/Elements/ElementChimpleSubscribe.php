@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Models\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Assets\Image;
@@ -146,9 +147,8 @@ class ElementChimpleSubscribe extends BaseElement
     /**
      * Provide $SubscribeForm for template
      * When called in the context of the administration area, return null
-     * @return Form|null
      */
-    public function getSubscribeForm() {
+    public function getSubscribeForm(): ?SubscribeForm {
 
         if(Controller::curr() instanceof LeftAndMain) {
             return null;

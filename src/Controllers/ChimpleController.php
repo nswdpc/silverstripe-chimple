@@ -329,12 +329,13 @@ class ChimpleController extends PageController
             $response = null;
             $code = "";// MailchimpConfig.Code
             $list_id = "";
+            $mc_config = null;
+            $error_message = "";
+            $email = $data['Email'] ?? '';
 
             if(!$form) {
                 throw new RequestException("Forbidden", 403);
             }
-
-            $mc_config = null;
 
             if(empty($data['code'])) {
                 // fail with error
@@ -349,7 +350,6 @@ class ChimpleController extends PageController
                 $code = strip_tags(trim($data['code'] ?: ''));
                 $error_message = "";
                 $error_code = 400;// default to invalid data
-                $mc_config = null;
 
             }
 
@@ -363,14 +363,13 @@ class ChimpleController extends PageController
 
             // proceed with Email checking...
             if (!$error_message) {
-                if (empty($data['Email'])) {
+                if ($email === '') {
                     // fail with error
                     $error_message = _t(
                         __CLASS__ . '.NO_EMAIL_ADDRESS',
                         "No e-mail address was provided"
                     );
-                }
-                if (!Email::is_valid_address($data['Email'])) {
+                } elseif (!Email::is_valid_address($email)) {
                     $error_message = _t(
                         __CLASS__ . '.INVALID_EMAIL_ADDRESS',
                         "Please provide a valid e-mail address, '{email}' is not valid",
@@ -395,8 +394,9 @@ class ChimpleController extends PageController
                             __CLASS__ . ".GENERIC_ERROR_2",
                             "Sorry, the sign-up could not be completed"
                         );
+                    } else {
+                        $list_id = $mc_config->getMailchimpListId();
                     }
-                    $list_id = $mc_config->getMailchimpListId();
                 }
             }
 
@@ -421,17 +421,17 @@ class ChimpleController extends PageController
                     ])
                     // for the Email or the MD5 of it
                     ->filterAny([
-                        'Email' => $data['Email'],// match on email address provided
-                        'SubscribedId' => MailchimpSubscriber::getMailchimpSubscribedId($data['Email'])// OR may not have the email anymore
+                        'Email' => $email,// match on email address provided
+                        'SubscribedId' => MailchimpSubscriber::getMailchimpSubscribedId($email)// OR may not have the email anymore
                     ])->first();
 
             if (empty($sub->ID)) {
                 $sub = MailchimpSubscriber::create();
-                $sub->Name = $data['Name'];
-                $sub->Email = $data['Email'];
+                $sub->Name = $data['Name'] ?? '';
+                $sub->Email = $email;
                 $sub->MailchimpListId = $list_id;//list they are subscribing to
                 $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-                $sub->Tags = $mc_config->Tags;
+                $sub->Tags = $mc_config ? $mc_config->Tags : null;
                 $sub_id = $sub->write();
                 if (!$sub_id) {
                     throw new RequestException("Bad Gateway", 502);

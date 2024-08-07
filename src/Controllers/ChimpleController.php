@@ -493,7 +493,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-OK', 0);
+        $response->addHeader('X-Submission-OK', '0');
         $response->addHeader('X-Submission-Description', $message);
         return $response;
     }
@@ -506,7 +506,7 @@ class ChimpleController extends PageController
         $response = new HTTPResponse();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-OK', 1);
+        $response->addHeader('X-Submission-OK', '1');
         $response->addHeader('X-Submission-Description', $description);
         return $response;
     }

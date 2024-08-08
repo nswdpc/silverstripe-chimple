@@ -20,6 +20,7 @@ class PageExtension extends Extension
         if ($config) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 
@@ -30,9 +31,10 @@ class PageExtension extends Extension
     public function ChimpleSubscribeForm(string $config_code): ?SubscribeForm
     {
         $config = MailchimpConfig::getConfig('', '', $config_code);
-        if($config) {
+        if($config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 }

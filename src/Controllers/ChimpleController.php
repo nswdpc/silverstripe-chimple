@@ -31,20 +31,11 @@ use PageController;
  */
 class ChimpleController extends PageController
 {
-    /**
-     * @var string
-     */
-    private static $url_segment = 'mc-subscribe/v1';
+    private static string $url_segment = 'mc-subscribe/v1';
 
-    /**
-     * @var bool
-     */
-    private static $hide_generic_form = true;
+    private static bool $hide_generic_form = true;
 
-    /**
-     * @var array
-     */
-    private static $allowed_actions = [
+    private static array $allowed_actions = [
         'SubscribeForm',
         'XhrSubscribeForm'
     ];
@@ -66,14 +57,11 @@ class ChimpleController extends PageController
 
     public function pageTitle($complete = null)
     {
-        switch($complete) {
-            case 'y':
-                return _t(__CLASS__. '.DEFAULT_TITLE_SUCCESSFUL', 'Thanks for subscribing');
-            case 'n':
-                return _t(__CLASS__. '.DEFAULT_TITLE_NOT_SUCCESSFUL', 'Sorry, there was an error');
-            default:
-                return _t(__CLASS__. '.DEFAULT_TITLE', 'Subscribe');
-        }
+        return match ($complete) {
+            'y' => _t(self::class. '.DEFAULT_TITLE_SUCCESSFUL', 'Thanks for subscribing'),
+            'n' => _t(self::class. '.DEFAULT_TITLE_NOT_SUCCESSFUL', 'Sorry, there was an error'),
+            default => _t(self::class. '.DEFAULT_TITLE', 'Subscribe'),
+        };
     }
 
     public function Link($action = null)
@@ -120,11 +108,8 @@ class ChimpleController extends PageController
      */
     public function getFormNameSuffix(): string
     {
-        if($this->formNameSuffix) {
-            $suffix = "_{$this->formNameSuffix}";
-        } else {
-            $suffix = "";
-        }
+        $suffix = $this->formNameSuffix ? "_{$this->formNameSuffix}" : "";
+
         return $suffix;
     }
 
@@ -133,11 +118,8 @@ class ChimpleController extends PageController
      */
     public function getSubscriptionForm($useXhr = false): SubscribeForm|XhrSubscribeForm|null
     {
-        if($useXhr) {
-            $form = $this->XhrSubscribeForm();
-        } else {
-            $form = $this->SubscribeForm();
-        }
+        $form = $useXhr ? $this->XhrSubscribeForm() : $this->SubscribeForm();
+
         return $form;
     }
 
@@ -229,17 +211,16 @@ class ChimpleController extends PageController
      */
     protected function getFields(): FieldList
     {
-        $fields = FieldList::create(
-            $name = TextField::create('Name', _t(__CLASS__. '.NAME', 'Name'))
-                        ->setAttribute('placeholder', _t(__CLASS__. '.YOUR_NAME', 'Your name'))
-                        ->setAttribute('title', _t(__CLASS__. '.NAME', 'Name'))
+        return FieldList::create(
+            $name = TextField::create('Name', _t(self::class. '.NAME', 'Name'))
+                        ->setAttribute('placeholder', _t(self::class. '.YOUR_NAME', 'Your name'))
+                        ->setAttribute('title', _t(self::class. '.NAME', 'Name'))
                         ->setAttribute('required', 'required'),
-            $email = EmailField::create('Email', _t(__CLASS__. '.EMAIL', 'Email'))
-                        ->setAttribute('placeholder', _t(__CLASS__. '.EMAIL_ADDRESS', 'Email address'))
-                        ->setAttribute('title', _t(__CLASS__. '.EMAIL', 'Email'))
+            $email = EmailField::create('Email', _t(self::class. '.EMAIL', 'Email'))
+                        ->setAttribute('placeholder', _t(self::class. '.EMAIL_ADDRESS', 'Email address'))
+                        ->setAttribute('title', _t(self::class. '.EMAIL', 'Email'))
                         ->setAttribute('required', 'required')
         );
-        return $fields;
     }
 
     /**
@@ -247,14 +228,13 @@ class ChimpleController extends PageController
      */
     protected function getActions(): FieldList
     {
-        $actions = FieldList::create(
+        return FieldList::create(
             FormAction::create(
                 'subscribe',
-                _t(__CLASS__ . '.SUBSCRIBE', 'Subscribe')
+                _t(self::class . '.SUBSCRIBE', 'Subscribe')
             )->setUseButtonTag(true)
             ->addExtraClass('signup')
         );
-        return $actions;
     }
 
     /**
@@ -272,10 +252,10 @@ class ChimpleController extends PageController
      */
     protected function getCallbackForXhrValidation(): callable
     {
-        return function (ValidationResult $result) {
+        return function (ValidationResult $result): \SilverStripe\Control\HTTPResponse {
             // Fail, using the first message returned from the validation result
             $messages = $result->getMessages();
-            $message = (!empty($messages[0]['message']) ? $messages[0]['message'] : '');
+            $message = (empty($messages[0]['message']) ? '' : $messages[0]['message']);
             return $this->xhrError(400, $message);
         };
     }
@@ -301,30 +281,30 @@ class ChimpleController extends PageController
     /**
      * Handle errors, based on the request type
      */
-    private function handleError($code, $error_message, Form $form = null)
+    private function handleError($code, $error_message, Form $form = null): ?\SilverStripe\Control\HTTPResponse
     {
         if($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
-        } elseif($form) {
+        } elseif($form instanceof \SilverStripe\Forms\Form) {
             // set session error on the form
             $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
         }
-        return;
+        return null;
     }
 
     /**
      * Handle successful submissions, based on the request type
      */
-    private function handleSuccess($code, $message, Form $form = null)
+    private function handleSuccess(int $code, Form $form = null): ?\SilverStripe\Control\HTTPResponse
     {
         $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
         if($this->request->isAjax()) {
-            return $this->xhrSuccess($code, $message, $success_message);
-        } elseif($form) {
+            return $this->xhrSuccess($code, $success_message);
+        } elseif($form instanceof \SilverStripe\Forms\Form) {
             // set session message on the form
             $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
         }
-        return;
+        return null;
     }
 
     /**
@@ -342,14 +322,14 @@ class ChimpleController extends PageController
             $error_message = "";
             $email = $data['Email'] ?? '';
 
-            if(!$form) {
+            if(!$form instanceof \SilverStripe\Forms\Form) {
                 throw new RequestException("Forbidden", 403);
             }
 
             if($code === "") {
                 // fail with error
                 $error_message = _t(
-                    __CLASS__ . '.NO_CODE',
+                    self::class . '.NO_CODE',
                     "No code was provided"
                 );
                 $error_code = 400;// default to invalid data
@@ -361,7 +341,7 @@ class ChimpleController extends PageController
             $enabled = MailchimpConfig::isEnabled();
             if(!$enabled) {
                 $error_message = _t(
-                    __CLASS__ . '.SUBSCRIPTIONS_NOT_AVAILABLE',
+                    self::class . '.SUBSCRIPTIONS_NOT_AVAILABLE',
                     "Subscriptions are not available at the moment"
                 );
             }
@@ -371,15 +351,15 @@ class ChimpleController extends PageController
                 if ($email === '') {
                     // fail with error
                     $error_message = _t(
-                        __CLASS__ . '.NO_EMAIL_ADDRESS',
+                        self::class . '.NO_EMAIL_ADDRESS',
                         "No e-mail address was provided"
                     );
                 } elseif (!Email::is_valid_address($email)) {
                     $error_message = _t(
-                        __CLASS__ . '.INVALID_EMAIL_ADDRESS',
+                        self::class . '.INVALID_EMAIL_ADDRESS',
                         "Please provide a valid e-mail address, '{email}' is not valid",
                         [
-                            'email' => htmlspecialchars($data['Email'])
+                            'email' => htmlspecialchars((string) $data['Email'])
                         ]
                     );
                 }
@@ -387,27 +367,27 @@ class ChimpleController extends PageController
 
             if (!$error_message) {
                 // check code provided
-                if (!$code) {
+                if ($code === '' || $code === '0') {
                     $error_message = _t(
-                        __CLASS__ . ".GENERIC_ERROR_1",
+                        self::class . ".GENERIC_ERROR_1",
                         "Sorry, the sign-up could not be completed"
                     );
                 } else {
                     $mc_config = MailchimpConfig::getConfig('', '', $code);
-                    if ($mc_config) {
+                    if ($mc_config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {
                         $list_id = $mc_config->getMailchimpListId();
                     } else {
                         $error_message = _t(
-                            __CLASS__ . ".GENERIC_ERROR_2",
+                            self::class . ".GENERIC_ERROR_2",
                             "Sorry, the sign-up could not be completed"
                         );
                     }
                 }
             }
 
-            if (!$list_id) {
+            if ($list_id === null || $list_id === '' || $list_id === '0') {
                 $error_message = _t(
-                    __CLASS__ . ".GENERIC_ERROR_3",
+                    self::class . ".GENERIC_ERROR_3",
                     "Sorry, the sign-up could not be completed"
                 );
             }
@@ -436,7 +416,7 @@ class ChimpleController extends PageController
                 $sub->Email = $email;
                 $sub->MailchimpListId = $list_id;//list they are subscribing to
                 $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-                $sub->Tags = $mc_config ? $mc_config->Tags : null;
+                $sub->Tags = $mc_config instanceof \NSWDPC\Chimple\Models\MailchimpConfig ? $mc_config->Tags : null;
                 $sub_id = $sub->write();
                 if (!$sub_id) {
                     throw new RequestException("Bad Gateway", 502);
@@ -450,7 +430,7 @@ class ChimpleController extends PageController
             }
 
             // handle a successful subscription
-            $response = $this->handleSuccess(200, "OK", $form);
+            $response = $this->handleSuccess(200, $form);
             if($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
                 return $response;
@@ -466,7 +446,7 @@ class ChimpleController extends PageController
         } catch (RequestException $e) {
             $error_message = $e->getMessage();
             $error_code = $e->getCode();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // general exceptin
             $error_message = Config::inst()->get(MailchimpConfig::class, 'error_message');
             $error_code = 500;
@@ -491,9 +471,9 @@ class ChimpleController extends PageController
     /**
      * Return error response for XHR
      */
-    private function xhrError($code = 500, $message = "", $description = ""): HTTPResponse
+    private function xhrError($code = 500, $message = ""): HTTPResponse
     {
-        $response = new HTTPResponse();
+        $response = \SilverStripe\Control\HTTPResponse::create();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
         $response->addHeader('X-Submission-OK', '0');
@@ -504,9 +484,9 @@ class ChimpleController extends PageController
     /**
      * Return success response for XHR
      */
-    private function xhrSuccess($code = 200, $message = "", $description = ""): HTTPResponse
+    private function xhrSuccess(int $code = 200, $description = ""): HTTPResponse
     {
-        $response = new HTTPResponse();
+        $response = \SilverStripe\Control\HTTPResponse::create();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
         $response->addHeader('X-Submission-OK', '1');

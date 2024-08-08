@@ -10,4 +10,4 @@ jobs:
   PHPStan:
     name: 'PHPStan (analyse)'
     uses: nswdpc/ci-files/.github/workflows/phpstan.silverstripe.yml@main
-    needs: Bundle
+    needs: Silverstripe

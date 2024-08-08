@@ -20,8 +20,10 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
 
     public function __construct($limit = 100, $report_only = 0)
     {
+        $limit = (int)$limit;
+        $report_only = (int)$report_only;
         $this->report_only = $report_only;
-        $this->limit = (int)$limit;
+        $this->limit = $limit > 0 ? $limit : 0;
     }
 
     #[\Override]

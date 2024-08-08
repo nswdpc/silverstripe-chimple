@@ -4,8 +4,8 @@ on:
   pull_request: null
 
 jobs:
-  Bundle:
-    name: 'Automated fixes'
+  Silverstripe:
+    name: 'Silverstripe (bundle)'
     uses: nswdpc/ci-files/.github/workflows/silverstripe.yml@main
   PHPStan:
     name: 'PHPStan (analyse)'

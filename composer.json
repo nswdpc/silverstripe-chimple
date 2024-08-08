@@ -54,7 +54,7 @@
         "rector/rector": "^1",
         "syntro/silverstripe-phpstan": "^5",
         "vlucas/phpdotenv": "^5",
-        "nswdpc/ci-files": "*"
+        "nswdpc/ci-files": "dev-main"
     },
     "autoload": {
         "psr-4": {

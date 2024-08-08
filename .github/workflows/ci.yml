@@ -6,8 +6,8 @@ on:
 jobs:
   Bundle:
     name: 'Automated fixes'
-    uses: nswdpc/ci-files/.github/workflows/bundle.yml@main
+    uses: nswdpc/ci-files/.github/workflows/silverstripe.yml@main
   PHPStan:
     name: 'PHPStan (analyse)'
-    uses: nswdpc/ci-files/.github/workflows/phpstan.yml@main
+    uses: nswdpc/ci-files/.github/workflows/phpstan.silverstripe.yml@main
     needs: Bundle

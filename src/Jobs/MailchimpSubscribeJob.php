@@ -23,7 +23,8 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
         $limit = (int)$limit;
         $report_only = (int)$report_only;
         $this->report_only = $report_only;
-        $this->limit = $limit > 0 ? $limit : 0;
+
+        $this->limit = max($limit, 0);
     }
 
     public function getTitle()

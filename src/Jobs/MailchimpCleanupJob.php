@@ -27,8 +27,9 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         $limit = (int)$limit;
         $report_only = (int)$report_only;
         $this->report_only = $report_only;
+
         $this->minutes_ago = $minutes_ago > 0 ? $minutes_ago : 30;
-        $this->limit = $limit > 0 ? $limit : 0;
+        $this->limit = max($limit, 0);
     }
 
     public function getTitle()

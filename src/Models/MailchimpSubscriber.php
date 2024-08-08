@@ -18,23 +18,23 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
 
 class MailchimpSubscriber extends DataObject implements PermissionProvider
 {
-    const CHIMPLE_STATUS_UNKNOWN = '';
-    const CHIMPLE_STATUS_NEW = 'NEW';
-    const CHIMPLE_STATUS_PROCESSING = 'PROCESSING';
-    const CHIMPLE_STATUS_BATCHED = 'BATCHED';
-    const CHIMPLE_STATUS_SUCCESS = 'SUCCESS';
-    const CHIMPLE_STATUS_FAIL = 'FAIL';
+    public const CHIMPLE_STATUS_UNKNOWN = '';
+    public const CHIMPLE_STATUS_NEW = 'NEW';
+    public const CHIMPLE_STATUS_PROCESSING = 'PROCESSING';
+    public const CHIMPLE_STATUS_BATCHED = 'BATCHED';
+    public const CHIMPLE_STATUS_SUCCESS = 'SUCCESS';
+    public const CHIMPLE_STATUS_FAIL = 'FAIL';
 
-    const MAILCHIMP_SUBSCRIBER_PENDING = 'pending';
-    const MAILCHIMP_SUBSCRIBER_SUBSCRIBED = 'subscribed';
-    const MAILCHIMP_SUBSCRIBER_UNSUBSCRIBED = 'unsubscribed';
-    const MAILCHIMP_SUBSCRIBER_CLEANED = 'cleaned';
+    public const MAILCHIMP_SUBSCRIBER_PENDING = 'pending';
+    public const MAILCHIMP_SUBSCRIBER_SUBSCRIBED = 'subscribed';
+    public const MAILCHIMP_SUBSCRIBER_UNSUBSCRIBED = 'unsubscribed';
+    public const MAILCHIMP_SUBSCRIBER_CLEANED = 'cleaned';
 
-    const MAILCHIMP_TAG_INACTIVE = 'inactive';
-    const MAILCHIMP_TAG_ACTIVE = 'active';
+    public const MAILCHIMP_TAG_INACTIVE = 'inactive';
+    public const MAILCHIMP_TAG_ACTIVE = 'active';
 
-    const MAILCHIMP_EMAIL_TYPE_HTML = 'html';
-    const MAILCHIMP_EMAIL_TYPE_TEXT = 'text';
+    public const MAILCHIMP_EMAIL_TYPE_HTML = 'html';
+    public const MAILCHIMP_EMAIL_TYPE_TEXT = 'text';
 
     /**
      * @var string
@@ -230,7 +230,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 && !empty($this->Status)) {
                 // these status are readonly in CMS fields
                 $status_field = $status_field->performReadonlyTransformation();
-            } else if($this->Status == self::CHIMPLE_STATUS_PROCESSING) {
+            } elseif($this->Status == self::CHIMPLE_STATUS_PROCESSING) {
                 // stuck processing - can reset to new
                 $status_field->setDescription(
                     _t(
@@ -243,7 +243,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                     self::CHIMPLE_STATUS_NEW => _t(__CLASS__ . '.STATUS_NEW', 'NEW (the subscriber has not yet been subscribed)'),
                     self::CHIMPLE_STATUS_PROCESSING =>  _t(__CLASS__ . '.STATUS_PROCESSING', 'PROCESSING (the subscriber is in the process of being subscribed)'),
                 ]);
-            } else if($this->Status == self::CHIMPLE_STATUS_FAIL) {
+            } elseif($this->Status == self::CHIMPLE_STATUS_FAIL) {
                 // handling when failed
                 $status_field->setDescription(
                     _t(
@@ -379,7 +379,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * By default MergeFields doesn't allow HTML tags as keys or as values
      * @param array $meta
      */
-    public function updateMergeFields(array $meta) {
+    public function updateMergeFields(array $meta)
+    {
         if(empty($meta)) {
             return;
         }
@@ -390,8 +391,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 // ignore values that cannot be saved
                 continue;
             }
-            $key = strtoupper( trim( strip_tags($k) ) );
-            $value = trim( strip_tags($v) );
+            $key = strtoupper(trim(strip_tags($k)));
+            $value = trim(strip_tags($v));
             $data[ $key ] = $value;
         }
         $this->MergeFields = $data;
@@ -417,7 +418,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Get the API client
      */
-    public static function api() : MailchimpApiClient {
+    public static function api(): MailchimpApiClient
+    {
         // already set up..
         if(self::$mailchimp instanceof MailchimpApiClient) {
             return self::$mailchimp;
@@ -433,7 +435,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * @deprecated use self::api() instead
      */
-    public function getMailchimp() {
+    public function getMailchimp()
+    {
         return self::api();
     }
 
@@ -452,7 +455,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Applies merge fields prior to subscription attempt
      */
-    protected function applyMergeFields(): array {
+    protected function applyMergeFields(): array
+    {
         $merge_fields = [];
 
         // get subscriber meta data
@@ -497,7 +501,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Get the default subscription record data for adding/updating member in list
      */
-    public function getSubscribeRecord() : array {
+    public function getSubscribeRecord(): array
+    {
         // merge fields to send
         $merge_fields = $this->applyMergeFields();
         // ensure sane email type either html or text, default html if invalid
@@ -516,7 +521,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Return tags for this subscriber
      */
-    public function getSubscriberTags() {
+    public function getSubscriberTags()
+    {
         $tags = $this->Tags->getValue();
         if(!is_array($tags)) {
             return [];
@@ -528,8 +534,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Called after a successful subscription, obfuscates email, name and surname
      */
-    private function obfuscate() {
-        $obfuscate = function(string $in) : string {
+    private function obfuscate()
+    {
+        $obfuscate = function (string $in): string {
             $length = strlen($in);
             if($length == 0) {
                 return "";
@@ -554,7 +561,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Get the hash that is used as the MC subscribed Id value
      */
-    public static function getMailchimpSubscribedId($email): string {
+    public static function getMailchimpSubscribedId($email): string
+    {
         if(!is_string($email) || !$email) {
             return '';
         } else {
@@ -568,7 +576,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @param string $email an email address, this is hashed using the MC hashing strategy
      * @param string $api_key @deprecated
      */
-    public static function checkExistsInList(string $list_id, string $email, string $api_key = '') : array|false {
+    public static function checkExistsInList(string $list_id, string $email, string $api_key = ''): array|false
+    {
 
         // sanity check on input
         if(!$email) {
@@ -590,7 +599,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // attempt to get the subscriber
-        if( $hash = self::getMailchimpSubscribedId($email) ) {
+        if($hash = self::getMailchimpSubscribedId($email)) {
             $result = self::api()->get(
                 "lists/{$list_id}/members/{$hash}"
             );
@@ -607,7 +616,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Subscribe *this* particular record
      */
-    public function subscribe() : bool
+    public function subscribe(): bool
     {
         try {
 
@@ -694,7 +703,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @param bool $force whether to get the tags from the remote or use previously retrieved tags
      * @param int $count the number of records to return per request
      */
-    private function getCurrentSubscriberTags(bool $force = false, int $count = 10) : array {
+    private function getCurrentSubscriberTags(bool $force = false, int $count = 10): array
+    {
 
         // if already retrieved,
         if(is_array($this->_cache_tags) && !$force) {
@@ -719,7 +729,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $tags = isset($result['tags']) && is_array($result['tags']) ? $result['tags'] : [];
 
         // populate the list of tags
-        $walker = function($value, $key) use (&$list) {
+        $walker = function ($value, $key) use (&$list) {
             $list[] = $value['name'];
         };
         array_walk($tags, $walker);
@@ -746,7 +756,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Modify this subscriber's tags based on their current tags
      */
-    protected function modifySubscriberTags() : bool {
+    protected function modifySubscriberTags(): bool
+    {
 
         $current = $this->getCurrentSubscriberTags();
         $tags_for_update = $this->getSubscriberTags();
@@ -756,7 +767,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
         // if enabled: remove tags that do not exist in the modification list
         if($this->config()->get('remove_subscriber_tags')) {
-            $inactive = array_diff($current,$tags_for_update);
+            $inactive = array_diff($current, $tags_for_update);
             // Mark removed tags as inactive
             foreach($inactive as $tag) {
                 $params['tags'][] = [
@@ -767,7 +778,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // Retain active tags that are in both lists
-        $retained = array_intersect($current,$tags_for_update);
+        $retained = array_intersect($current, $tags_for_update);
         foreach($retained as $tag) {
             $params['tags'][] = [
                 'name' => $tag,
@@ -808,7 +819,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Batch subscribe via API - hit from MailchimpSubscribeJob
      * Retrieve all subscribers marked new and attempt to subscribe them
      */
-    public static function batch_subscribe($limit = 100, $report_only = false) : array
+    public static function batch_subscribe($limit = 100, $report_only = false): array
     {
         $results = [];
         try {

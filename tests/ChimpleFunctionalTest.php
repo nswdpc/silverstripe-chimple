@@ -24,7 +24,6 @@ use SilverStripe\View\SSViewer;
  */
 class ChimpleFunctionalTest extends FunctionalTest
 {
-
     /**
      * @inheritdoc
      */
@@ -51,19 +50,21 @@ class ChimpleFunctionalTest extends FunctionalTest
     protected $test_form_code = 'functionalformcode';
 
 
-    public function setUp() : void {
+    public function setUp(): void
+    {
         parent::setUp();
 
 
         // Inject test form
         Injector::inst()->registerService(
-            new TestSubscribeForm(), SubscribeForm::class
+            new TestSubscribeForm(),
+            SubscribeForm::class
         );
 
         // Suppress themes
         SSViewer::set_themes(
             [
-            SSViewer::DEFAULT_THEME
+                SSViewer::DEFAULT_THEME
             ]
         );
 
@@ -115,7 +116,7 @@ class ChimpleFunctionalTest extends FunctionalTest
                 'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW
             ])->first();
 
-            $this->assertTrue( $subscriber && $subscriber->exists() );
+            $this->assertTrue($subscriber && $subscriber->exists());
 
         });
 

@@ -6,7 +6,7 @@ on:
 jobs:
   Silverstripe:
     name: 'Silverstripe (bundle)'
-    uses: nswdpc/ci-files/.github/workflows/silverstripe.yml@main
+    uses: nswdpc/ci-files/.github/workflows/silverstripe_5_81.yml@main
   PHPStan:
     name: 'PHPStan (analyse)'
     uses: nswdpc/ci-files/.github/workflows/phpstan.silverstripe.yml@main

@@ -48,10 +48,7 @@
     },
     "require-dev": {
         "cambis/silverstripe-rector": "^0.5.1",
-        "friendsofphp/php-cs-fixer": "^3",
-        "phpstan/phpstan": "^1",
         "phpunit/phpunit": "^9.5",
-        "rector/rector": "^1",
         "syntro/silverstripe-phpstan": "^5",
         "vlucas/phpdotenv": "^5",
         "nswdpc/ci-files": "dev-main"

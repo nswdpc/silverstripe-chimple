@@ -167,7 +167,8 @@ class ChimpleController extends PageController
         // this form doesn't need to retain state
         $form->clearMessage();
 
-        return $form;
+        // phpstan return type checking requirement
+        return $form instanceof XhrSubscribeForm ? $form : null;
     }
 
     /**

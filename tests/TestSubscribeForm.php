@@ -13,7 +13,7 @@ class TestSubscribeForm extends SubscribeForm implements TestOnly
     /**
      * No need to spam protection on tests
      */
-    public function enableSpamProtection(): null
+    public function enableSpamProtection(): mixed
     {
         return null;
     }

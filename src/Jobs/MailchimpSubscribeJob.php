@@ -26,15 +26,16 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
         $this->limit = $limit > 0 ? $limit : 0;
     }
 
-    #[\Override]
     public function getTitle()
     {
-        $title = _t(
+        return _t(
             self::class . '.TITLE',
-            "Batch subscribe emails to Mailchimp"
+            "Batch subscribe emails to Mailchimp (limit: {limit}, report only: {report_only})",
+            [
+                'limit' => $this->limit,
+                'report_only' => $this->report_only
+            ]
         );
-        $title .= " (limit:{$this->limit})";
-        return $title . ($this->report_only ? " - report only" : "");
     }
 
     #[\Override]

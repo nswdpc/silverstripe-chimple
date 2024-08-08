@@ -31,17 +31,16 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         $this->limit = $limit > 0 ? $limit : 0;
     }
 
-    #[\Override]
     public function getTitle()
     {
-        return sprintf(
-            _t(
-                self::class . '.TITLE',
-                "Mailchimp cleanup job - minutes=%s limit=%s report_only=%s"
-            ),
-            $this->minutes_ago,
-            $this->limit,
-            $this->report_only
+        return _t(
+            self::class . '.TITLE',
+            "Mailchimp cleanup job - minutes={minutes} limit={limit} report_only={report_only}",
+            [
+                'minutes' => $this->minutes_ago,
+                'limit' => $this->limit,
+                'report_only' => $this->report_only
+            ]
         );
     }
 

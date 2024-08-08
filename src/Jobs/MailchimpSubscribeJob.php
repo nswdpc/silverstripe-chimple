@@ -57,7 +57,7 @@ class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob
         return $total;
     }
 
-    private function getTotalNonFailedResults(array $results)
+    private function getTotalNonFailedResults(array $results): int|float
     {
         $copy = $results;
         unset($copy[ MailchimpSubscriber::CHIMPLE_STATUS_FAIL]);

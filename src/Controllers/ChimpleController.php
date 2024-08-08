@@ -108,9 +108,7 @@ class ChimpleController extends PageController
      */
     public function getFormNameSuffix(): string
     {
-        $suffix = $this->formNameSuffix ? "_{$this->formNameSuffix}" : "";
-
-        return $suffix;
+        return $this->formNameSuffix ? "_{$this->formNameSuffix}" : "";
     }
 
     /**
@@ -118,9 +116,7 @@ class ChimpleController extends PageController
      */
     public function getSubscriptionForm($useXhr = false): SubscribeForm|XhrSubscribeForm|null
     {
-        $form = $useXhr ? $this->XhrSubscribeForm() : $this->SubscribeForm();
-
-        return $form;
+        return $useXhr ? $this->XhrSubscribeForm() : $this->SubscribeForm();
     }
 
     /**
@@ -289,6 +285,7 @@ class ChimpleController extends PageController
             // set session error on the form
             $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
         }
+
         return null;
     }
 
@@ -304,6 +301,7 @@ class ChimpleController extends PageController
             // set session message on the form
             $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
         }
+
         return null;
     }
 
@@ -431,7 +429,7 @@ class ChimpleController extends PageController
 
             // handle a successful subscription
             $response = $this->handleSuccess(200, $form);
-            if($response && ($response instanceof HTTPResponse)) {
+            if($response instanceof \SilverStripe\Control\HTTPResponse && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
                 return $response;
             } else {
@@ -454,7 +452,7 @@ class ChimpleController extends PageController
 
         // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
-        if($response && ($response instanceof HTTPResponse)) {
+        if($response instanceof \SilverStripe\Control\HTTPResponse && ($response instanceof HTTPResponse)) {
             // handle XHR error responses
             return $response;
         } else {

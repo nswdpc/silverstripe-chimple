@@ -32,6 +32,7 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
     private static string $list_id = "";
+
     // default list (audience) ID
     private static string $api_key = "";// API key provided by Mailchimp
 

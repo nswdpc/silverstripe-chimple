@@ -88,7 +88,7 @@ class ChimpleController extends PageController
      * This returns false to avoid the form being included in generic $Form templates/layouts
      * Use $ChimpleSubscribeForm('some-code') in templates instead
      */
-    public function Form()
+    public function Form(): bool
     {
         return false;
     }
@@ -261,7 +261,7 @@ class ChimpleController extends PageController
      */
     protected function getCallbackForValidation(SubscribeForm $form): callable
     {
-        return function (ValidationResult $result) use ($form) {
+        return function (ValidationResult $result) use ($form): \SilverStripe\Control\HTTPResponse {
             // Prior to redirection, persist this result in session to re-display on redirect
             $form->setSessionValidationResult($result);
             $form->setSessionData($form->getData());

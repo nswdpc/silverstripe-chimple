@@ -2,7 +2,7 @@
 
 namespace NSWDPC\Chimple\Extensions;
 
-use Silverstripe\Core\Extension;
+use SilverStripe\Core\Extension;
 
 /**
  * This extension can be applied at the project level in situations where
@@ -12,7 +12,8 @@ use Silverstripe\Core\Extension;
  */
 class DisableSecurityTokenExtension extends Extension
 {
-    public function updateChimpleSubscribeForm() {
-        $this->owner->disableSecurityToken();
+    public function updateChimpleSubscribeForm()
+    {
+        $this->getOwner()->disableSecurityToken();
     }
 }

@@ -10,8 +10,8 @@ use SilverStripe\Forms\Form;
  * Subscription form subclass of {@link SilverStripe\Forms\Form}
  * Allows overrides of default form behaviour
  */
-class SubscribeForm extends Form {
-
+class SubscribeForm extends Form
+{
     use SubscriptionForm;
 
 }

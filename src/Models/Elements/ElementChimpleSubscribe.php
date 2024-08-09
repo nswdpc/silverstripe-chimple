@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Models\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Assets\Image;
@@ -23,46 +24,48 @@ use SilverStripe\SiteConfig\SiteConfig;
  */
 class ElementChimpleSubscribe extends BaseElement
 {
+    private static string $table_name = 'ElementChimpleSubscribe';
 
-    private static $table_name = 'ElementChimpleSubscribe';
+    private static string $singular_name = 'Mailchimp subscribe';
 
-    private static $singular_name = 'Mailchimp subscribe';
-    private static $plural_name = 'Mailchimp subscribe';
+    private static string $plural_name = 'Mailchimp subscribe';
 
-    private static $icon = 'font-icon-up-circled';
+    private static string $icon = 'font-icon-up-circled';
 
-    private static $db = [
+    private static array $db = [
         'UseXHR' => 'Boolean',// whether to submit without redirect
         'BeforeFormContent' => 'HTMLText',
         'AfterFormContent' => 'HTMLText',
         'ImageAlignment' => 'Varchar(32)',
     ];
 
-    private static $defaults = [
+    private static array $defaults = [
         'UseXHR' => 1
     ];
 
     /**
      * Has_one relationship
-     * @var array
      */
-    private static $has_one = [
+    private static array $has_one = [
         'MailchimpConfig' => MailchimpConfig::class,
         'Image' => Image::class
     ];
 
-    private static $owns = [
+    private static array $owns = [
         'Image'
     ];
 
+    #[\Override]
     public function getType()
     {
-        return _t(__CLASS__ . '.BlockType', 'Mailchimp Subscribe');
+        return _t(self::class . '.BlockType', 'Mailchimp Subscribe');
     }
 
-    private static $title = 'Mailchimp subscribe';
-    private static $description = 'Provide a mailchimp subscription form';
+    private static string $title = 'Mailchimp subscribe';
 
+    private static string $description = 'Provide a mailchimp subscription form';
+
+    #[\Override]
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -74,7 +77,7 @@ class ElementChimpleSubscribe extends BaseElement
                 LiteralField::create(
                     'NotEnabled',
                     '<p class="message warning">'
-                    . _t(__CLASS__ . 'NOT_ENABLED', 'Mailchimp is not enable in site configuration')
+                    . _t(self::class . 'NOT_ENABLED', 'Mailchimp is not enable in site configuration')
                     . '</p>'
                 )
             );
@@ -85,42 +88,43 @@ class ElementChimpleSubscribe extends BaseElement
         ]);
 
         $fields->addFieldsToTab(
-            'Root.Main', [
+            'Root.Main',
+            [
                 DropdownField::create(
                     'MailchimpConfigID',
                     _t(
-                        __CLASS__ . '.SELECT_CONFIGURATION',
+                        self::class . '.SELECT_CONFIGURATION',
                         'Select the list configuration to use for this subscription form'
                     ),
-                    MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
+                    MailchimpConfig::get()->sort('Title ASC')->map('ID', 'TitleWithDetails')
                 )->setEmptyString(''),
                 CheckboxField::create(
                     'UseXHR',
                     _t(
-                        __CLASS__ . '.USE_XHR',
+                        self::class . '.USE_XHR',
                         'Submit without redirecting'
                     ),
                 ),
                 HTMLEditorField::create(
                     'BeforeFormContent',
                     _t(
-                        __CLASS__ . '.BEFORE_CONTENT',
+                        self::class . '.BEFORE_CONTENT',
                         'Content to show before form'
                     )
                 )->setRows(6),
                 HTMLEditorField::create(
                     'AfterFormContent',
                     _t(
-                        __CLASS__ . '.AFTER_CONTENT',
+                        self::class . '.AFTER_CONTENT',
                         'Content to show after form'
                     )
                 )->setRows(6),
                 UploadField::create(
                     'Image',
-                    _t(__CLASS__ . '.IMAGE', 'Image')
+                    _t(self::class . '.IMAGE', 'Image')
                 )->setTitle(
                     _t(
-                        __CLASS__ . '.ADD_IMAGE_TO_CONTENT_BLOCK',
+                        self::class . '.ADD_IMAGE_TO_CONTENT_BLOCK',
                         'Add an image'
                     )
                 )->setFolderName('blocks/content/' . $this->owner->ID)
@@ -128,14 +132,14 @@ class ElementChimpleSubscribe extends BaseElement
                 ->setIsMultiUpload(false),
                 DropdownField::create(
                     'ImageAlignment',
-                    _t(__CLASS__ . '.IMAGE_ALIGNMENT', 'Image alignment'),
+                    _t(self::class . '.IMAGE_ALIGNMENT', 'Image alignment'),
                     [
-                        'left' => _t(__CLASS__ . '.LEFT', 'Left'),
-                        'right' => _t(__CLASS__ . '.RIGHT', 'Right')
+                        'left' => _t(self::class . '.LEFT', 'Left'),
+                        'right' => _t(self::class . '.RIGHT', 'Right')
                     ]
                 )->setEmptyString('Choose an option')
                 ->setDescription(
-                    _t(__CLASS__ . '.IMAGE_ALIGNMENT_DESCRIPTION', 'Use of this option is dependent on the theme')
+                    _t(self::class . '.IMAGE_ALIGNMENT_DESCRIPTION', 'Use of this option is dependent on the theme')
                 )
             ]
         );
@@ -146,9 +150,9 @@ class ElementChimpleSubscribe extends BaseElement
     /**
      * Provide $SubscribeForm for template
      * When called in the context of the administration area, return null
-     * @return Form|null
      */
-    public function getSubscribeForm() {
+    public function getSubscribeForm(): ?SubscribeForm
+    {
 
         if(Controller::curr() instanceof LeftAndMain) {
             return null;
@@ -156,9 +160,10 @@ class ElementChimpleSubscribe extends BaseElement
 
         if($config = $this->MailchimpConfig()) {
             // render the form with this element's XHR setting overriding the config being used
-            $form = $config->SubscribeForm( $this->UseXHR == 1 );
+            $form = $config->SubscribeForm($this->UseXHR == 1);
             return $form;
         }
+
         return null;
     }
 }

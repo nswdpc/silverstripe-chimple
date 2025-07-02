@@ -70,7 +70,7 @@ class ChimpleController extends PageController
     {
         return Director::absoluteURL(
             Controller::join_links(
-                $this->config()->url_segment,
+                ChimpleController::config()->get('url_segment'),
                 $action
             )
         );
@@ -125,7 +125,7 @@ class ChimpleController extends PageController
      * Return a subscription form if it is enabled
      * @link MailchimpConfig::SubscribeForm
      */
-    public function XhrSubscribeForm(): XhrSubscribeForm
+    public function XhrSubscribeForm(): ?XhrSubscribeForm
     {
 
         $enabled = MailchimpConfig::isEnabled();
@@ -150,7 +150,7 @@ class ChimpleController extends PageController
         // this form doesn't need to retain state
         $form->clearMessage();
 
-        return $form;
+        return ($form instanceof XhrSubscribeForm) ? $form : null;
     }
 
     /**
@@ -327,7 +327,7 @@ class ChimpleController extends PageController
 
             $mc_config = null;
 
-            if (empty($data['code'])) {
+            if (empty($data['code']) || !is_string($data['code'])) {
                 // fail with error
                 $error_message = _t(
                     self::class . '.NO_CODE',
@@ -337,7 +337,7 @@ class ChimpleController extends PageController
 
             } else {
 
-                $code = strip_tags(trim((string) ($data['code'] ?: '')));
+                $code = strip_tags(trim($data['code']));
                 $error_message = "";
                 $error_code = 400;// default to invalid data
                 $mc_config = null;
@@ -427,7 +427,7 @@ class ChimpleController extends PageController
                 $sub->Tags = $mc_config->Tags;
                 $sub_id = $sub->write();
                 if (!$sub_id) {
-                    throw new RequestException("502", "Bad Gateway");
+                    throw new RequestException("Bad Gateway", 502);
                 }
             }
 
@@ -484,7 +484,7 @@ class ChimpleController extends PageController
         $response = \SilverStripe\Control\HTTPResponse::create();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-OK', 0);
+        $response->addHeader('X-Submission-OK', '0');
         $response->addHeader('X-Submission-Description', $message);
         return $response;
     }
@@ -497,7 +497,7 @@ class ChimpleController extends PageController
         $response = \SilverStripe\Control\HTTPResponse::create();
         $response->setStatusCode($code);
         $response->addHeader('Content-Type', 'application/json');
-        $response->addHeader('X-Submission-OK', 1);
+        $response->addHeader('X-Submission-OK', '1');
         $response->addHeader('X-Submission-Description', $description);
         return $response;
     }

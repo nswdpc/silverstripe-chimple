@@ -79,11 +79,10 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Default sort ordering
      */
-    private static array $default_sort = ['Created' => 'DESC'];
+    private static string $default_sort = 'Created DESC';
 
     /**
      * Default chr for obfuscation
-     * @var array
      */
     private static string $obfuscation_chr = "•";
 
@@ -338,7 +337,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         );
 
         // get profile link
-        $dc = MailChimpConfig::getDataCentre();
+        $dc = MailchimpConfig::getDataCentre();
         if ($dc && $this->SubscribedWebId) {
             $subscriber_profile_link = "https://{$dc}.admin.mailchimp.com/lists/members/view?id={$this->SubscribedWebId}";
         } else {
@@ -528,8 +527,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         // merge fields to send
         $merge_fields = $this->applyMergeFields();
         // ensure sane email type either html or text, default html if invalid
-        $email_type = $this->config()->get('email_type');
-        if (!$email_type || $email_type != self::MAILCHIMP_EMAIL_TYPE_HTML || $email_type != self::MAILCHIMP_EMAIL_TYPE_TEXT) {
+        $email_type = self::config()->get('email_type') ?? '';
+        if(!in_array($email_type, [self::MAILCHIMP_EMAIL_TYPE_HTML, self::MAILCHIMP_EMAIL_TYPE_TEXT])) {
             $email_type = self::MAILCHIMP_EMAIL_TYPE_HTML;
         }
 
@@ -559,7 +558,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      */
     private function obfuscate()
     {
-        $obfuscate = function (string $in) {
+        $obfuscate = function (string $in): string|array {
             $length = strlen($in);
             if ($length == 0) {
                 return "";

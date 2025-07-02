@@ -34,11 +34,12 @@
     },
     "require": {
         "dnadesign/silverstripe-elemental": "^5",
-        "silverstripe/framework" : "^5",
-        "silverstripe/siteconfig" : "^5",
+        "silverstripe/asset-admin": "^2",
+        "silverstripe/framework": "^5",
+        "silverstripe/siteconfig": "^5",
         "symbiote/silverstripe-queuedjobs": "^5",
-        "drewm/mailchimp-api" : "^2.5",
-        "symbiote/silverstripe-multivaluefield" : "^6"
+        "drewm/mailchimp-api": "^2.5",
+        "symbiote/silverstripe-multivaluefield": "^6"
     },
     "require-dev": {
         "cambis/silverstripe-rector": "^1",

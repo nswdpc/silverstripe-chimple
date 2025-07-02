@@ -2,7 +2,8 @@
 
 namespace NSWDPC\Chimple\Extensions;
 
-use Silverstripe\Core\Extension;
+use NSWDPC\Chimple\Forms\SubscribeForm;
+use SilverStripe\Core\Extension;
 
 /**
  * This extension can be applied at the project level in situations where
@@ -15,6 +16,9 @@ class DisableSecurityTokenExtension extends Extension
 {
     public function updateChimpleSubscribeForm()
     {
-        $this->getOwner()->disableSecurityToken();
+        $form = $this->getOwner();
+        if($form instanceof SubscribeForm) {
+            $form->disableSecurityToken();
+        }
     }
 }

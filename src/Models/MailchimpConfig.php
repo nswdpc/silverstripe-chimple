@@ -3,6 +3,7 @@
 namespace NSWDPC\Chimple\Models;
 
 use NSWDPC\Chimple\Controllers\ChimpleController;
+use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Services\Logger;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Config\Config;
@@ -13,7 +14,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
-use Silverstripe\ORM\DataObject;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\PermissionProvider;
@@ -173,11 +174,11 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
         if ($this->IsGlobal == 1) {
             // Ensure only this config is marked global
-            DB::query(
-                "UPDATE `ChimpleConfig` "
-                . " SET IsGlobal = 0 "
-                . " WHERE IsGlobal = 1 "
-                . " AND ID <> '" . Convert::raw2sql($this->ID) . "'"
+            DB::prepared_query(
+                'UPDATE "ChimpleConfig" SET "IsGlobal" = 0 WHERE "IsGlobal" = 1 AND ID <> ?',
+                [
+                    $this->ID
+                ]
             );
         }
     }
@@ -369,6 +370,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     #[\Override]
     public function requireDefaultRecords()
     {
+        parent::requireDefaultRecords();
         $config = MailchimpConfig::get()->filter(['IsGlobal' => 1])->first();
         if (empty($config->ID)) {
             $config = MailchimpConfig::create([
@@ -395,10 +397,9 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Use the form provided by the controller
-     * @param bool $force_xhr whether to submit in place via XHR or not, the default is to let the config decide
-     * @return Form
+     * @param bool|null $force_xhr whether to submit in place via XHR or not, the default (null) is to let the config decide
      */
-    public function SubscribeForm($force_xhr = null)
+    public function SubscribeForm(?bool $force_xhr = null): ?SubscribeForm
     {
         // No form available if not enabled
         $enabled = self::isEnabled();
@@ -499,10 +500,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * Render this record using a template
      * @return DBHTMLText|null
      */
-    public function forTemplate($force_xhr = null)
+    public function forTemplate(?bool $force_xhr = null)
     {
         $form = $this->SubscribeForm($force_xhr);
-        if ($form) {
+        if ($form instanceof \NSWDPC\Chimple\Forms\SubscribeForm) {
             return $this->customise(['Form' => $form])->renderWith(self::class);
         }
 

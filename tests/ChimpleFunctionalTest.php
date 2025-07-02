@@ -50,6 +50,7 @@ class ChimpleFunctionalTest extends FunctionalTest
     protected $test_form_code = 'functionalformcode';
 
 
+    #[\Override]
     public function setUp(): void
     {
         parent::setUp();
@@ -57,7 +58,7 @@ class ChimpleFunctionalTest extends FunctionalTest
 
         // Inject test form
         Injector::inst()->registerService(
-            new TestSubscribeForm(),
+            \NSWDPC\Chimple\Tests\TestSubscribeForm::create(),
             SubscribeForm::class
         );
 
@@ -91,10 +92,10 @@ class ChimpleFunctionalTest extends FunctionalTest
         $config->write();
     }
 
-    public function testFormSubmission()
+    public function testFormSubmission(): void
     {
 
-        $this->useTestTheme(__DIR__, 'chimpletest', function () {
+        $this->useTestTheme(__DIR__, 'chimpletest', function (): void {
 
             // request default route
             $url = "/mc-subscribe/v1/";

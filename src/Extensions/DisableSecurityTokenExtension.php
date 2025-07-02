@@ -9,11 +9,12 @@ use Silverstripe\Core\Extension;
  * you want the form SecurityToken turned off.
  *
  * You should have an alternate method of form protection if this occurs.
+ * @extends \SilverStripe\Core\Extension<static>
  */
 class DisableSecurityTokenExtension extends Extension
 {
     public function updateChimpleSubscribeForm()
     {
-        $this->owner->disableSecurityToken();
+        $this->getOwner()->disableSecurityToken();
     }
 }

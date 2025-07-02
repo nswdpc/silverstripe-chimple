@@ -45,6 +45,7 @@ class ChimpleConfigTest extends SapphireTest
     /**
      * @inheritdoc
      */
+    #[\Override]
     public function setUp(): void
     {
         parent::setUp();
@@ -95,7 +96,7 @@ class ChimpleConfigTest extends SapphireTest
 
     }
 
-    public function testConfiguration()
+    public function testConfiguration(): void
     {
 
         $forceXhr = true;
@@ -116,7 +117,7 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue($email instanceof EmailField, "Email field is not an email field");
 
         $name = $fields->dataFieldByName('Name');
-        $this->assertTrue($email instanceof TextField, "Name field is not an text field");
+        $this->assertTrue($name instanceof TextField, "Name field is not an text field");
 
         $token_name = SecurityToken::get_default_name();
         $token = $fields->dataFieldByName($token_name);
@@ -134,12 +135,12 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue($static_form instanceof DBHTMLText, "Static form for code {$code_value} was not returned");
 
         $needle = " value=\"{$code_value}\" ";
-        $this->assertTrue(strpos($static_form->forTemplate(), $needle) !== false, "Missing {$code_value} input from form HTML");
+        $this->assertTrue(str_contains($static_form->forTemplate(), $needle), "Missing {$code_value} input from form HTML");
 
     }
 
 
-    public function testCanBeCached()
+    public function testCanBeCached(): void
     {
 
         Config::modify()->set(XhrSubscribeForm::class, 'disable_security_token', true);
@@ -168,7 +169,7 @@ class ChimpleConfigTest extends SapphireTest
 
     }
 
-    public function testSubscribeFormTemplateVariable()
+    public function testSubscribeFormTemplateVariable(): void
     {
         $config = $this->getMailchimpConfig();
         $config->UseXHR = 0;
@@ -176,34 +177,34 @@ class ChimpleConfigTest extends SapphireTest
 
         // Use config value
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, null);
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") === false, "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, null);
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") !== false, "Attribute is in template");
+        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
 
         // template override
         $config->UseXHR = 0;
         $config->write();
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '1');
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") !== false, "Attribute is in template");
+        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
         $config->UseXHR = 0;
         $config->write();
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '0');
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") === false, "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
     }
 
-    public function testGlobalSubscribeFormTemplateVariable()
+    public function testGlobalSubscribeFormTemplateVariable(): void
     {
         $config = $this->getMailchimpConfig();
         $config->UseXHR = 0;
         $config->write();
         // Use config value
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") === false, "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(strpos($template, "data-xhr=\"1\"") !== false, "Attribute is in template");
+        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
     }
 }

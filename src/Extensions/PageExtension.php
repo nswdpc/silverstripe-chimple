@@ -8,6 +8,9 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\Form;
 
+/**
+ * @extends \SilverStripe\Core\Extension<(\Page & static)>
+ */
 class PageExtension extends Extension
 {
     /**
@@ -20,6 +23,7 @@ class PageExtension extends Extension
         if ($config) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 
@@ -34,6 +38,7 @@ class PageExtension extends Extension
         if ($config) {
             return $config->SubscribeForm();
         }
+
         return null;
     }
 }

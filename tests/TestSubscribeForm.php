@@ -8,12 +8,13 @@ use SilverStripe\Dev\Testonly;
 /**
  * Test subscribe form handling
  */
-class TestSubscribeForm extends SubscribeForm implements TestOnly {
-
+class TestSubscribeForm extends SubscribeForm implements TestOnly
+{
     /**
      * No need to spam protection on tests
      */
-    public function enableSpamProtection() {
+    public function enableSpamProtection()
+    {
         return null;
     }
 }

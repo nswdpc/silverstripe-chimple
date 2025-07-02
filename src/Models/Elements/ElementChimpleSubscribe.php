@@ -23,7 +23,6 @@ use SilverStripe\SiteConfig\SiteConfig;
  */
 class ElementChimpleSubscribe extends BaseElement
 {
-
     private static $table_name = 'ElementChimpleSubscribe';
 
     private static $singular_name = 'Mailchimp subscribe';
@@ -68,7 +67,7 @@ class ElementChimpleSubscribe extends BaseElement
         $fields = parent::getCMSFields();
 
         $site_config = SiteConfig::current_site_config();
-        if($site_config && $site_config->MailchimpEnabled == 0) {
+        if ($site_config && $site_config->MailchimpEnabled == 0) {
             $fields->addFieldToTab(
                 'Root.Main',
                 LiteralField::create(
@@ -85,14 +84,15 @@ class ElementChimpleSubscribe extends BaseElement
         ]);
 
         $fields->addFieldsToTab(
-            'Root.Main', [
+            'Root.Main',
+            [
                 DropdownField::create(
                     'MailchimpConfigID',
                     _t(
                         __CLASS__ . '.SELECT_CONFIGURATION',
                         'Select the list configuration to use for this subscription form'
                     ),
-                    MailchimpConfig::get()->sort('Title ASC')->map('ID','TitleWithDetails')
+                    MailchimpConfig::get()->sort('Title ASC')->map('ID', 'TitleWithDetails')
                 )->setEmptyString(''),
                 CheckboxField::create(
                     'UseXHR',
@@ -148,15 +148,16 @@ class ElementChimpleSubscribe extends BaseElement
      * When called in the context of the administration area, return null
      * @return Form|null
      */
-    public function getSubscribeForm() {
+    public function getSubscribeForm()
+    {
 
-        if(Controller::curr() instanceof LeftAndMain) {
+        if (Controller::curr() instanceof LeftAndMain) {
             return null;
         }
 
-        if($config = $this->MailchimpConfig()) {
+        if ($config = $this->MailchimpConfig()) {
             // render the form with this element's XHR setting overriding the config being used
-            $form = $config->SubscribeForm( $this->UseXHR == 1 );
+            $form = $config->SubscribeForm($this->UseXHR == 1);
             return $form;
         }
         return null;

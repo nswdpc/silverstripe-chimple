@@ -18,23 +18,23 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
 
 class MailchimpSubscriber extends DataObject implements PermissionProvider
 {
-    const CHIMPLE_STATUS_UNKNOWN = '';
-    const CHIMPLE_STATUS_NEW = 'NEW';
-    const CHIMPLE_STATUS_PROCESSING = 'PROCESSING';
-    const CHIMPLE_STATUS_BATCHED = 'BATCHED';
-    const CHIMPLE_STATUS_SUCCESS = 'SUCCESS';
-    const CHIMPLE_STATUS_FAIL = 'FAIL';
+    public const CHIMPLE_STATUS_UNKNOWN = '';
+    public const CHIMPLE_STATUS_NEW = 'NEW';
+    public const CHIMPLE_STATUS_PROCESSING = 'PROCESSING';
+    public const CHIMPLE_STATUS_BATCHED = 'BATCHED';
+    public const CHIMPLE_STATUS_SUCCESS = 'SUCCESS';
+    public const CHIMPLE_STATUS_FAIL = 'FAIL';
 
-    const MAILCHIMP_SUBSCRIBER_PENDING = 'pending';
-    const MAILCHIMP_SUBSCRIBER_SUBSCRIBED = 'subscribed';
-    const MAILCHIMP_SUBSCRIBER_UNSUBSCRIBED = 'unsubscribed';
-    const MAILCHIMP_SUBSCRIBER_CLEANED = 'cleaned';
+    public const MAILCHIMP_SUBSCRIBER_PENDING = 'pending';
+    public const MAILCHIMP_SUBSCRIBER_SUBSCRIBED = 'subscribed';
+    public const MAILCHIMP_SUBSCRIBER_UNSUBSCRIBED = 'unsubscribed';
+    public const MAILCHIMP_SUBSCRIBER_CLEANED = 'cleaned';
 
-    const MAILCHIMP_TAG_INACTIVE = 'inactive';
-    const MAILCHIMP_TAG_ACTIVE = 'active';
+    public const MAILCHIMP_TAG_INACTIVE = 'inactive';
+    public const MAILCHIMP_TAG_ACTIVE = 'active';
 
-    const MAILCHIMP_EMAIL_TYPE_HTML = 'html';
-    const MAILCHIMP_EMAIL_TYPE_TEXT = 'text';
+    public const MAILCHIMP_EMAIL_TYPE_HTML = 'html';
+    public const MAILCHIMP_EMAIL_TYPE_TEXT = 'text';
 
     /**
      * @var string
@@ -211,7 +211,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         );
 
         // status field
-        if($this->exists()) {
+        if ($this->exists()) {
             $status_field = DropdownField::create(
                 'Status',
                 _t(__CLASS__ . '.STATUS', 'Status'),
@@ -225,12 +225,12 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             );
 
             // only failed, empty or stuck processing subscription status can have their status changed
-            if($this->Status != self::CHIMPLE_STATUS_FAIL
+            if ($this->Status != self::CHIMPLE_STATUS_FAIL
                 && $this->Status != self::CHIMPLE_STATUS_PROCESSING
                 && !empty($this->Status)) {
                 // these status are readonly in CMS fields
                 $status_field = $status_field->performReadonlyTransformation();
-            } else if($this->Status == self::CHIMPLE_STATUS_PROCESSING) {
+            } elseif ($this->Status == self::CHIMPLE_STATUS_PROCESSING) {
                 // stuck processing - can reset to new
                 $status_field->setDescription(
                     _t(
@@ -243,7 +243,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                     self::CHIMPLE_STATUS_NEW => _t(__CLASS__ . '.STATUS_NEW', 'NEW (the subscriber has not yet been subscribed)'),
                     self::CHIMPLE_STATUS_PROCESSING =>  _t(__CLASS__ . '.STATUS_PROCESSING', 'PROCESSING (the subscriber is in the process of being subscribed)'),
                 ]);
-            } else if($this->Status == self::CHIMPLE_STATUS_FAIL) {
+            } elseif ($this->Status == self::CHIMPLE_STATUS_FAIL) {
                 // handling when failed
                 $status_field->setDescription(
                     _t(
@@ -286,7 +286,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
         $tags = $this->getCurrentSubscriberTags();
         $tag_field_description = "";
-        if(!empty($tags)) {
+        if (!empty($tags)) {
             $tag_field_description = _t(
                 __CLASS__ . '.TAGS_FIELD_DESCRIPTION',
                 'The current tags for this subscriber are <code>{tags}</code><br>Tags not in the tag update list will be removed. New tags will be added.',
@@ -325,7 +325,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
         // get profile link
         $dc = MailChimpConfig::getDataCentre();
-        if($dc && $this->SubscribedWebId) {
+        if ($dc && $this->SubscribedWebId) {
             $subscriber_profile_link = "https://{$dc}.admin.mailchimp.com/lists/members/view?id={$this->SubscribedWebId}";
         } else {
             $subscriber_profile_link = "n/a";
@@ -338,11 +338,11 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             'SubscribedId' => _t(__CLASS__ . '.SUBSCRIBER_ID', "The MD5 hash of the lowercase version of the list member's email address.")
         ];
 
-        foreach($readonly_fields as $readonly_field => $description) {
+        foreach ($readonly_fields as $readonly_field => $description) {
             $field = $fields->dataFieldByName($readonly_field);
-            if($field) {
+            if ($field) {
                 $field = $field->performReadOnlyTransformation();
-                if($description) {
+                if ($description) {
                     $field->setDescription($description);
                 }
                 $fields->addFieldToTab(
@@ -359,7 +359,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         parent::onBeforeWrite();
 
-        if(!$this->exists()) {
+        if (!$this->exists()) {
             // new subscribers have a new status by default
             $this->Status = self::CHIMPLE_STATUS_NEW;
         }
@@ -379,19 +379,20 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * By default MergeFields doesn't allow HTML tags as keys or as values
      * @param array $meta
      */
-    public function updateMergeFields(array $meta) {
-        if(empty($meta)) {
+    public function updateMergeFields(array $meta)
+    {
+        if (empty($meta)) {
             return;
         }
 
         $data = [];
-        foreach($meta as $k => $v) {
-            if(!is_scalar($v)) {
+        foreach ($meta as $k => $v) {
+            if (!is_scalar($v)) {
                 // ignore values that cannot be saved
                 continue;
             }
-            $key = strtoupper( trim( strip_tags($k) ) );
-            $value = trim( strip_tags($v) );
+            $key = strtoupper(trim(strip_tags($k)));
+            $value = trim(strip_tags($v));
             $data[ $key ] = $value;
         }
         $this->MergeFields = $data;
@@ -418,9 +419,10 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Get the API client
      * @return MailchimpApiClient
      */
-    public static function api() : MailchimpApiClient {
+    public static function api(): MailchimpApiClient
+    {
         // already set up..
-        if(self::$mailchimp instanceof MailchimpApiClient) {
+        if (self::$mailchimp instanceof MailchimpApiClient) {
             return self::$mailchimp;
         }
         $api_key = MailchimpConfig::getApiKey();
@@ -434,7 +436,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * @deprecated use self::api() instead
      */
-    public function getMailchimp() {
+    public function getMailchimp()
+    {
         return self::api();
     }
 
@@ -454,14 +457,15 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Applies merge fields prior to subscription attempt
      * @return array
      */
-    protected function applyMergeFields() {
+    protected function applyMergeFields()
+    {
         $merge_fields = [];
 
         // get subscriber meta data
         $meta = $this->MergeFields->getValue();
-        if(is_array($meta) && !empty($meta)) {
-            foreach($meta as $k => $v) {
-                if($v === '') {
+        if (is_array($meta) && !empty($meta)) {
+            foreach ($meta as $k => $v) {
+                if ($v === '') {
                     // do not set empty values, MailChimp does not like this
                     continue;
                 }
@@ -479,7 +483,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 continue;
             }
             $value = $this->getField($field);
-            if(!is_string($value)) {
+            if (!is_string($value)) {
                 $value = '';
             } else {
                 $value = trim($value);
@@ -500,12 +504,13 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Get the default subscription record data for adding/updating member in list
      * @return array
      */
-    public function getSubscribeRecord() : array {
+    public function getSubscribeRecord(): array
+    {
         // merge fields to send
         $merge_fields = $this->applyMergeFields();
         // ensure sane email type either html or text, default html if invalid
         $email_type = $this->config()->get('email_type');
-        if(!$email_type || $email_type != self::MAILCHIMP_EMAIL_TYPE_HTML || $email_type != self::MAILCHIMP_EMAIL_TYPE_TEXT) {
+        if (!$email_type || $email_type != self::MAILCHIMP_EMAIL_TYPE_HTML || $email_type != self::MAILCHIMP_EMAIL_TYPE_TEXT) {
             $email_type = self::MAILCHIMP_EMAIL_TYPE_HTML;
         }
         $params = [
@@ -519,9 +524,10 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Return tags for this subscriber
      */
-    public function getSubscriberTags() {
+    public function getSubscriberTags()
+    {
         $tags = $this->Tags->getValue();
-        if(!is_array($tags)) {
+        if (!is_array($tags)) {
             return [];
         } else {
             return array_values($tags);
@@ -532,19 +538,20 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Called after a successful subscription, obfuscates email, name and surname
      * @return void
      */
-    private function obfuscate() {
-        $obfuscate = function($in) {
+    private function obfuscate()
+    {
+        $obfuscate = function ($in) {
             $length = strlen($in);
-            if($length == 0) {
+            if ($length == 0) {
                 return "";
             }
             $chr = $this->config()->get('obfuscation_chr');
-            if($chr === "") {
+            if ($chr === "") {
                 // if no chr configured, do not obfuscate (e.g not require by project)
                 return $in;
             }
             $sub_length = $length - 2;
-            if($sub_length <= 0) {
+            if ($sub_length <= 0) {
                 return str_repeat($chr, $length);
             }
             $replaced = substr_replace($in, str_repeat($chr, $sub_length), 1, $sub_length);
@@ -559,8 +566,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * Get the hash that is used as the MC subscribed Id value
      * @return string
      */
-    public static function getMailchimpSubscribedId($email) {
-        if(!is_string($email) || !$email) {
+    public static function getMailchimpSubscribedId($email)
+    {
+        if (!is_string($email) || !$email) {
             return '';
         } else {
             return MailchimpApiClient::subscriberHash($email);
@@ -574,10 +582,11 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @param string $api_key @deprecated
      * @return boolean|array
      */
-    public static function checkExistsInList(string $list_id, string $email, string $api_key = '') {
+    public static function checkExistsInList(string $list_id, string $email, string $api_key = '')
+    {
 
         // sanity check on input
-        if(!$email) {
+        if (!$email) {
             throw new \Exception(
                 _t(
                     __CLASS__ . ".EMAIL_NOT_PROVIDED",
@@ -586,7 +595,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             );
         }
 
-        if(!$list_id) {
+        if (!$list_id) {
             throw new \Exception(
                 _t(
                     __CLASS__ . ".AUDIENCE_NOT_PROVIDED",
@@ -596,13 +605,13 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // attempt to get the subscriber
-        if( $hash = self::getMailchimpSubscribedId($email) ) {
+        if ($hash = self::getMailchimpSubscribedId($email)) {
             $result = self::api()->get(
                 "lists/{$list_id}/members/{$hash}"
             );
             // an existing member will return an 'id' value matching the hash
             // id = The MD5 hash of the lowercase version of the list member's email address.
-            if(isset($result['id']) && $result['id'] == $hash) {
+            if (isset($result['id']) && $result['id'] == $hash) {
                 return $result;
             }
         }
@@ -624,7 +633,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 throw new Exception("No Mailchimp List/Audience Id configured!");
             }
 
-            if(!Email::is_valid_address($this->Email)) {
+            if (!Email::is_valid_address($this->Email)) {
                 throw new Exception("The email address provided for this record is not valid. See RFC822 spec.");
             }
 
@@ -635,7 +644,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
             $result = false;
 
-            if(!$existing) {
+            if (!$existing) {
                 $operation_path = "lists/{$list_id}/members";
                 $params = $this->getSubscribeRecord();
                 // add tags
@@ -702,17 +711,18 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      * @param int $count the number of records to return per request
      * @return array an array of values, each value is a string tag
      */
-    private function getCurrentSubscriberTags(bool $force = false, int $count = 10) : array {
+    private function getCurrentSubscriberTags(bool $force = false, int $count = 10): array
+    {
 
         // if already retrieved,
-        if(is_array($this->_cache_tags) && !$force) {
+        if (is_array($this->_cache_tags) && !$force) {
             return $this->_cache_tags;
         }
 
         $list_id = $this->MailchimpListId;
         $subscriber_hash = self::getMailchimpSubscribedId($this->Email ?? '');
 
-        if(!$list_id || !$subscriber_hash) {
+        if (!$list_id || !$subscriber_hash) {
             $this->_cache_tags = null;
             return [];
         }
@@ -727,16 +737,16 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $tags = isset($result['tags']) && is_array($result['tags']) ? $result['tags'] : [];
 
         // populate the list of tags
-        $walker = function($value, $key) use (&$list) {
+        $walker = function ($value, $key) use (&$list) {
             $list[] = $value['name'];
         };
         array_walk($tags, $walker);
 
-        if($total > $count) {
+        if ($total > $count) {
             // e.g if 11 returned, there are 2 pages with 10 per page
             $pages = ceil($total / $count);
             $p = 1;
-            while($p < $pages) {
+            while ($p < $pages) {
                 // update offset
                 $offset = $p * $count;
                 $operation_path = "lists/{$list_id}/members/{$subscriber_hash}/tags/?count={$count}&offset={$offset}";
@@ -754,7 +764,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     /**
      * Modify this subscriber's tags based on their current tags
      */
-    protected function modifySubscriberTags() : bool {
+    protected function modifySubscriberTags(): bool
+    {
 
         $current = $this->getCurrentSubscriberTags();
         $tags_for_update = $this->getSubscriberTags();
@@ -763,10 +774,10 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $params['tags'] = [];
 
         // if enabled: remove tags that do not exist in the modification list
-        if($this->config()->get('remove_subscriber_tags')) {
-            $inactive = array_diff($current,$tags_for_update);
+        if ($this->config()->get('remove_subscriber_tags')) {
+            $inactive = array_diff($current, $tags_for_update);
             // Mark removed tags as inactive
-            foreach($inactive as $tag) {
+            foreach ($inactive as $tag) {
                 $params['tags'][] = [
                     'name' => $tag,
                     'status' => self::MAILCHIMP_TAG_INACTIVE
@@ -775,8 +786,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // Retain active tags that are in both lists
-        $retained = array_intersect($current,$tags_for_update);
-        foreach($retained as $tag) {
+        $retained = array_intersect($current, $tags_for_update);
+        foreach ($retained as $tag) {
             $params['tags'][] = [
                 'name' => $tag,
                 'status' => self::MAILCHIMP_TAG_ACTIVE
@@ -786,7 +797,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         // DOCS
         // "If a tag that does not exist is passed in and set as 'active', a new tag will be created."
         $new = array_diff($tags_for_update, $current);
-        foreach($new as $tag) {
+        foreach ($new as $tag) {
             $params['tags'][] = [
                 'name' => $tag,
                 'status' => self::MAILCHIMP_TAG_ACTIVE
@@ -804,7 +815,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             $params
         );
 
-        if($error = self::api()->getLastError()) {
+        if ($error = self::api()->getLastError()) {
             Logger::log("FAIL:{$error} List:{$list_id}", 'WARNING');
             return false;
         } else {

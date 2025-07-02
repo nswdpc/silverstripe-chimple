@@ -7,7 +7,6 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use SilverStripe\Core\Config\Configurable;
-
 use DateTime;
 
 class MailchimpSubscribeJob extends AbstractQueuedJob implements QueuedJob

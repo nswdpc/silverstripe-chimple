@@ -13,8 +13,8 @@ use SilverStripe\Forms\Validator;
  * Subscription form subclass to handle submissions via XHR
  * Allows overrides of default form behaviour
  */
-class XhrSubscribeForm extends SubscribeForm {
-
+class XhrSubscribeForm extends SubscribeForm
+{
     /**
      * Set to true if forms of this class will appear on a publicly cacheable page
      * @var bool
@@ -29,7 +29,7 @@ class XhrSubscribeForm extends SubscribeForm {
         Validator $validator = null
     ) {
         parent::__construct($controller, $name, $fields, $actions, $validator);
-        if(self::config()->get('disable_security_token')) {
+        if (self::config()->get('disable_security_token')) {
             $this->disableSecurityToken();
         }
     }

@@ -3,7 +3,6 @@
 namespace NSWDPC\Chimple\Extensions;
 
 use NSWDPC\Chimple\Models\MailchimpConfig;
-
 use Silverstripe\ORM\DataExtension;
 use SilverStripe\Forms\CheckboxField;
 use Silverstripe\Forms\FieldList;
@@ -40,8 +39,8 @@ class SiteConfigExtension extends DataExtension
     public function onAfterWrite()
     {
         parent::onAfterWrite();
-        if($this->owner->MailchimpConfigID) {
-            if($config = MailchimpConfig::get()->byId($this->owner->MailchimpConfigID)) {
+        if ($this->owner->MailchimpConfigID) {
+            if ($config = MailchimpConfig::get()->byId($this->owner->MailchimpConfigID)) {
                 $config->IsGlobal = 1;
                 $config->write();
             }

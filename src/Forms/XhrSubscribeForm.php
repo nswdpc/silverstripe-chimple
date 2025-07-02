@@ -25,7 +25,7 @@ class XhrSubscribeForm extends SubscribeForm
         $name = self::DEFAULT_NAME,
         FieldList $fields = null,
         FieldList $actions = null,
-        Validator $validator = null
+        \SilverStripe\Forms\Validation\Validator $validator = null
     ) {
         parent::__construct($controller, $name, $fields, $actions, $validator);
         if (self::config()->get('disable_security_token')) {

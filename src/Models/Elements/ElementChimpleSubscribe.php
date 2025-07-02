@@ -70,7 +70,7 @@ class ElementChimpleSubscribe extends BaseElement
 
     private static string $title = 'Mailchimp subscribe';
 
-    private static string $description = 'Provide a mailchimp subscription form';
+    private static string $class_description = 'Provide a mailchimp subscription form';
 
     #[\Override]
     public function getCMSFields()

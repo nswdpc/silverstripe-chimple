@@ -17,10 +17,10 @@ class PageExtension extends Extension
      * Returns a form for the configuration marked 'IsGlobal'
      * @return Form|null
      */
-    public function ChimpleGlobalSubscribeForm()
+    public function ChimpleGlobalSubscribeForm(): ?\NSWDPC\Chimple\Forms\SubscribeForm
     {
         $config = MailchimpConfig::getGlobalConfig();
-        if ($config) {
+        if ($config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {
             return $config->SubscribeForm();
         }
 

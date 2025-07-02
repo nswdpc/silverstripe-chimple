@@ -118,17 +118,17 @@ class ChimpleSubscriberTest extends SapphireTest
 
             $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS, "Status of subscriber should be subscribed");
             // check ID matches md5
-            $this->assertEquals(md5(strtolower($email)), $subscriber->SubscribedId, "Email does not match returned id {$subscriber->SubscribedId}");
+            $this->assertEquals(md5(strtolower((string) $email)), $subscriber->SubscribedId, "Email does not match returned id {$subscriber->SubscribedId}");
 
             $this->assertNotEmpty($subscriber->SubscribedWebId, "SubscribedWebId should not be empty");
 
             $this->assertNotEmpty($subscriber->SubscribedUniqueEmailId, "SubscribedUniqueEmailId should not be empty");
 
-            $this->assertTrue(substr_count($subscriber->Email, (string) $obfuscation_chr) > 0, "Email is not obfuscated, it should be");
+            $this->assertTrue(substr_count((string) $subscriber->Email, (string) $obfuscation_chr) > 0, "Email is not obfuscated, it should be");
 
-            $this->assertTrue(substr_count($subscriber->Name, (string) $obfuscation_chr) > 0, "Name is not obfuscated, it should be");
+            $this->assertTrue(substr_count((string) $subscriber->Name, (string) $obfuscation_chr) > 0, "Name is not obfuscated, it should be");
 
-            $this->assertTrue(substr_count($subscriber->Surname, (string) $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
+            $this->assertTrue(substr_count((string) $subscriber->Surname, (string) $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
 
             $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
 

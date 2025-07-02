@@ -3,7 +3,7 @@
 namespace NSWDPC\Chimple\Extensions;
 
 use NSWDPC\Chimple\Models\MailchimpConfig;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\DropdownField;
@@ -12,9 +12,9 @@ use SilverStripe\Forms\DropdownField;
  * @property bool $MailchimpEnabled
  * @property int $MailchimpConfigID
  * @method \NSWDPC\Chimple\Models\MailchimpConfig MailchimpConfig()
- * @extends \SilverStripe\ORM\DataExtension<(\SilverStripe\SiteConfig\SiteConfig & static)>
+ * @extends \SilverStripe\Core\Extension<(\SilverStripe\SiteConfig\SiteConfig & static)>
  */
-class SiteConfigExtension extends DataExtension
+class SiteConfigExtension extends Extension
 {
     private static array $db = [
         'MailchimpEnabled' => 'Boolean'
@@ -24,7 +24,6 @@ class SiteConfigExtension extends DataExtension
         'MailchimpConfig' => MailchimpConfig::class // global element for configuration
     ];
 
-    #[\Override]
     public function updateCmsFields(FieldList $fields)
     {
         $fields->addFieldsToTab(
@@ -43,10 +42,8 @@ class SiteConfigExtension extends DataExtension
         );
     }
 
-    #[\Override]
     public function onAfterWrite()
     {
-        parent::onAfterWrite();
         if ($this->getOwner()->MailchimpConfigID && ($config = MailchimpConfig::get()->byId($this->getOwner()->MailchimpConfigID))) {
             $config->IsGlobal = true;
             $config->write();

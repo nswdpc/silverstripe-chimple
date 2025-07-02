@@ -180,16 +180,19 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, null);
         $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
 
         // template override
         $config->UseXHR = 0;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '1');
         $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
         $config->UseXHR = 0;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '0');
         $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
     }
@@ -204,6 +207,7 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
         $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
     }

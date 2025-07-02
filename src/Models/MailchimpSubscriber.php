@@ -528,7 +528,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $merge_fields = $this->applyMergeFields();
         // ensure sane email type either html or text, default html if invalid
         $email_type = self::config()->get('email_type') ?? '';
-        if(!in_array($email_type, [self::MAILCHIMP_EMAIL_TYPE_HTML, self::MAILCHIMP_EMAIL_TYPE_TEXT])) {
+        if (!in_array($email_type, [self::MAILCHIMP_EMAIL_TYPE_HTML, self::MAILCHIMP_EMAIL_TYPE_TEXT])) {
             $email_type = self::MAILCHIMP_EMAIL_TYPE_HTML;
         }
 

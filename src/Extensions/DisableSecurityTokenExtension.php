@@ -17,7 +17,7 @@ class DisableSecurityTokenExtension extends Extension
     public function updateChimpleSubscribeForm()
     {
         $form = $this->getOwner();
-        if($form instanceof SubscribeForm) {
+        if ($form instanceof SubscribeForm) {
             $form->disableSecurityToken();
         }
     }

@@ -4,3 +4,5 @@
 /.php-cs-fixer.cache
 /codeception.yml
 /tests/codeception/tests/_output/
+/composer.lock
+/public/

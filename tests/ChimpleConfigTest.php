@@ -204,11 +204,11 @@ class ChimpleConfigTest extends SapphireTest
         $config->write();
         // Use config value
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains((string) $template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
 
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
+        $this->assertTrue(str_contains((string) $template, 'data-xhr="1"'), "Attribute is in template");
     }
 }

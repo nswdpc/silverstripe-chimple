@@ -29,9 +29,6 @@
             "client/static"
         ]
     },
-    "support": {
-        "key" : "value"
-    },
     "require": {
         "dnadesign/silverstripe-elemental": "^5",
         "silverstripe/asset-admin": "^2",

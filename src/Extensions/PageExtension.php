@@ -3,7 +3,6 @@
 namespace NSWDPC\Chimple\Extensions;
 
 use NSWDPC\Chimple\Models\MailchimpConfig;
-use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\Form;

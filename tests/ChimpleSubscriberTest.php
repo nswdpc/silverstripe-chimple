@@ -3,7 +3,6 @@
 namespace NSWDPC\Chimple\Tests;
 
 use DrewM\MailChimp\MailChimp as MailchimpApiClient;
-use NSWDPC\Chimple\Services\Logger;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use SilverStripe\Core\Config\Config;

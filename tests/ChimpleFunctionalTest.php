@@ -5,16 +5,10 @@ namespace NSWDPC\Chimple\Tests;
 use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
-use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
-use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\FieldType\DBHTMLText;
-use SilverStripe\Security\SecurityToken;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\SSViewer;
 

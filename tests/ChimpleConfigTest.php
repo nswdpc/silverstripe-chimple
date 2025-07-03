@@ -2,10 +2,8 @@
 
 namespace NSWDPC\Chimple\Tests;
 
-use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Forms\XhrSubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
-use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Forms\EmailField;

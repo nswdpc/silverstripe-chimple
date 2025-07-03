@@ -4,7 +4,6 @@ namespace NSWDPC\Chimple\Models;
 
 use NSWDPC\Chimple\Controllers\ChimpleController;
 use NSWDPC\Chimple\Forms\SubscribeForm;
-use NSWDPC\Chimple\Services\Logger;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
@@ -21,7 +20,6 @@ use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\TemplateGlobalProvider;
-use SilverStripe\View\ArrayData;
 use Symbiote\MultiValueField\Fields\MultiValueTextField;
 
 /**

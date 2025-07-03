@@ -2,8 +2,6 @@
 
 namespace NSWDPC\Chimple\Traits;
 
-use NSWDPC\Chimple\Services\Logger;
-
 /**
  * Trait for use by subscription forms
  */

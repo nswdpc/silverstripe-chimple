@@ -2,7 +2,6 @@
 
 namespace NSWDPC\Chimple\Forms;
 
-use NSWDPC\Chimple\Services\Logger;
 use NSWDPC\Chimple\Traits\SubscriptionForm;
 use SilverStripe\Forms\Form;
 

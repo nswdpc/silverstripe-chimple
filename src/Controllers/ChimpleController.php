@@ -432,7 +432,7 @@ class ChimpleController extends PageController
             }
 
             // handle meta
-            if (!empty($data['meta'])) {
+            if (!empty($data['meta']) && is_array($data['meta'])) {
                 // treat a key marked meta in the form as data for Merge Fields
                 $sub->updateMergeFields($data['meta']);
             }

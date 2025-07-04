@@ -781,7 +781,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $list_id = $this->MailchimpListId ?? '';
         $subscriber_hash = self::getMailchimpSubscribedId($this->Email ?? '');
 
-        if (!$list_id || !$subscriber_hash) {
+        if (!$list_id || $subscriber_hash === '') {
             $this->_cache_tags = null;
             return [];
         }

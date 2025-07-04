@@ -5,7 +5,6 @@ namespace NSWDPC\Chimple\Forms;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\Validator;
 
 /**
  * Subscription form subclass to handle submissions via XHR

@@ -1,0 +1,89 @@
+<?php
+
+namespace NSWDPC\Chimple\Tests;
+
+use NSWDPC\Chimple\Models\MailchimpConfig;
+use NSWDPC\Chimple\Models\MailchimpSubscriber;
+use NSWDPC\Chimple\Services\ApiClientService;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\SapphireTest;
+
+/**
+ * Unit test for Batch Subscribe
+ * @author James
+ */
+class ChimpleBatchSubscriberTest extends SapphireTest
+{
+    use Configurable;
+
+    protected $usesDatabase = true;
+
+    protected string $test_list_id = 'test-list-id';
+
+    protected string $test_api_key = 'test-api-key';
+
+    protected string $test_obfuscation_chr = "•";
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Injector::inst()->registerService(new TestApiClientService(), ApiClientService::class);
+        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->test_list_id);
+        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', $this->test_obfuscation_chr);
+        Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', false);
+        TestMailchimpApiClient::$subscriber_exists = false;
+        TestMailchimpApiClient::$subscriber = [];
+    }
+
+    /**
+     * Test batch subscribe
+     */
+    public function testBatchSubscribe(): void
+    {
+
+        $client = MailchimpSubscriber::api();
+
+        $this->assertTrue($client instanceof TestMailchimpApiClient, "Tests require the TestMailchimpApiClient to be the API client class");
+
+        $subscribers = [
+            [
+                'Email' => 'test1@example.com',
+                'Name' => 'Text Example1',
+                'FailNoticeSent' => 0
+            ],
+            [
+                'Email' => 'test2@example.com',
+                'Name' => 'Text Example2',
+                'FailNoticeSent' => 0
+            ],
+            [
+                'Email' => 'test3@example.com',
+                'Name' => 'Text Example3',
+                'FailNoticeSent' => 0
+            ],
+            [
+                'Email' => 'test4@example.com',
+                'Name' => 'Text Example4',
+                'FailNoticeSent' => 0
+            ],
+        ];
+
+        foreach($subscribers as $subscriber) {
+            $record = MailchimpSubscriber::create($subscriber);
+            $record->write();
+            // flag one as subscribed
+            if($subscriber['Email'] == 'test2@example.com') {
+                $record->Status = MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS;
+                $record->write();
+            }
+        }
+
+        $result = MailchimpSubscriber::batch_subscribe();
+        $this->assertEquals(3, $result[MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS]);
+    }
+
+}

@@ -518,14 +518,14 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * Render this record using a template
      */
     #[\Override]
-    public function forTemplate(?bool $force_xhr = null): ?DBHTMLText
+    public function forTemplate(?bool $force_xhr = null): string
     {
         $form = $this->SubscribeForm($force_xhr);
         if ($form instanceof \NSWDPC\Chimple\Forms\SubscribeForm) {
             return $this->customise(['Form' => $form])->renderWith(self::class);
         }
 
-        return null;
+        return '';
     }
 
     /**

@@ -70,7 +70,7 @@ class ElementChimpleSubscribe extends BaseElement
 
     private static string $title = 'Mailchimp subscribe';
 
-    private static string $description = 'Provide a mailchimp subscription form';
+    private static string $class_description = 'Provide a mailchimp subscription form';
 
     #[\Override]
     public function getCMSFields()
@@ -78,7 +78,7 @@ class ElementChimpleSubscribe extends BaseElement
         $fields = parent::getCMSFields();
 
         $site_config = SiteConfig::current_site_config();
-        if ($site_config && $site_config->MailchimpEnabled == 0) {
+        if ($site_config->MailchimpEnabled == 0) {
             $fields->addFieldToTab(
                 'Root.Main',
                 LiteralField::create(

@@ -11,7 +11,6 @@ use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\SiteConfig\SiteConfig;
 
@@ -149,10 +148,10 @@ class ChimpleConfigTest extends SapphireTest
 
         $static_form = MailchimpConfig::get_chimple_subscribe_form($code_value);
 
-        $this->assertTrue($static_form instanceof DBHTMLText, "Static form for code {$code_value} was not returned");
+        $this->assertNotNull($static_form, "Static form for code {$code_value} was not returned");
 
         $needle = " value=\"{$code_value}\" ";
-        $this->assertTrue(str_contains($static_form->forTemplate(), $needle), "Missing {$code_value} input from form HTML");
+        $this->assertTrue(str_contains($static_form, $needle), "Missing {$code_value} input from form HTML");
 
     }
 
@@ -194,21 +193,24 @@ class ChimpleConfigTest extends SapphireTest
 
         // Use config value
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, null);
-        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains((string) $template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, null);
-        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
+        $this->assertTrue(str_contains((string) $template, 'data-xhr="1"'), "Attribute is in template");
 
         // template override
         $config->UseXHR = 0;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '1');
-        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
+        $this->assertTrue(str_contains((string) $template, 'data-xhr="1"'), "Attribute is in template");
         $config->UseXHR = 0;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_subscribe_form($config->Code, '0');
-        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains((string) $template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
     }
 
     public function testGlobalSubscribeFormTemplateVariable(): void
@@ -218,10 +220,11 @@ class ChimpleConfigTest extends SapphireTest
         $config->write();
         // Use config value
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(in_array(str_contains($template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
+        $this->assertTrue(in_array(str_contains((string) $template, 'data-xhr="1"'), [0, false], true), "Attribute is not in template");
         $config->UseXHR = 1;
         $config->write();
+
         $template = MailchimpConfig::get_chimple_global_subscribe_form();
-        $this->assertTrue(str_contains($template, 'data-xhr="1"'), "Attribute is in template");
+        $this->assertTrue(str_contains((string) $template, 'data-xhr="1"'), "Attribute is in template");
     }
 }

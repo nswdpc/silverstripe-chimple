@@ -30,22 +30,22 @@
         ]
     },
     "require": {
-        "dnadesign/silverstripe-elemental": "^5",
-        "silverstripe/asset-admin": "^2",
-        "silverstripe/framework": "^5",
-        "silverstripe/siteconfig": "^5",
-        "symbiote/silverstripe-queuedjobs": "^5",
+        "dnadesign/silverstripe-elemental": "^6",
+        "silverstripe/asset-admin": "^3",
+        "silverstripe/framework": "^6",
+        "silverstripe/siteconfig": "^6",
+        "symbiote/silverstripe-queuedjobs": "^6",
         "drewm/mailchimp-api": "^2.5",
-        "symbiote/silverstripe-multivaluefield": "^6"
+        "symbiote/silverstripe-multivaluefield": "dev-7 || ^7"
     },
     "require-dev": {
-        "cambis/silverstripe-rector": "^1",
-        "cambis/silverstan": "^1",
+        "cambis/silverstripe-rector": "^2",
+        "cambis/silverstan": "^2",
         "friendsofphp/php-cs-fixer": "^3",
-        "phpunit/phpunit": "^9.5",
-        "phpstan/phpstan": "^1",
-        "rector/rector": "^1",
-        "nswdpc/ci-files": "dev-v-3",
+        "phpunit/phpunit": "^11.5",
+        "phpstan/phpstan": "^2",
+        "rector/rector": "^2",
+        "nswdpc/ci-files": "dev-v-4",
         "vlucas/phpdotenv": "^5"
     },
     "autoload": {

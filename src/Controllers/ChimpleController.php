@@ -12,16 +12,13 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\FormAction;
-use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Forms\Validator;
-use SilverStripe\View\ArrayData;
 use SilverStripe\View\Requirements;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\ValidationResult;
 use PageController;
 
 /**
@@ -41,11 +38,11 @@ class ChimpleController extends PageController
 
     protected $formNameSuffix = "";
 
-    public function index()
+    public function index(): \SilverStripe\ORM\FieldType\DBHTMLText
     {
         // work out if complete or not
         $is_complete = $this->request->getVar('complete');
-        $data = ArrayData::create([
+        $data = \SilverStripe\Model\ArrayData::create([
             'IsComplete' => $is_complete,
             'Code' => $this->Code(),
             'HideGenericChimpleForm' => $this->HideGenericChimpleForm(),
@@ -238,9 +235,9 @@ class ChimpleController extends PageController
      * Return the default validator for the form.
      * @returns Validator|null
      */
-    protected function getValidator(): ?Validator
+    protected function getValidator(): ?\SilverStripe\Forms\Validation\Validator
     {
-        return RequiredFields::create(['Name','Email']);
+        return \SilverStripe\Forms\Validation\RequiredFieldsValidator::create(['Name','Email']);
     }
 
     /**
@@ -250,7 +247,7 @@ class ChimpleController extends PageController
      */
     protected function getCallbackForXhrValidation(): callable
     {
-        return function (ValidationResult $result): \SilverStripe\Control\HTTPResponse {
+        return function (\SilverStripe\Core\Validation\ValidationResult $result): \SilverStripe\Control\HTTPResponse {
             // Fail, using the first message returned from the validation result
             $messages = $result->getMessages();
             $message = (empty($messages[0]['message']) ? '' : $messages[0]['message']);
@@ -263,7 +260,7 @@ class ChimpleController extends PageController
      */
     protected function getCallbackForValidation(SubscribeForm $form): callable
     {
-        return function (ValidationResult $result) use ($form): \SilverStripe\Control\HTTPResponse {
+        return function (\SilverStripe\Core\Validation\ValidationResult $result) use ($form): \SilverStripe\Control\HTTPResponse {
             // Prior to redirection, persist this result in session to re-display on redirect
             $form->setSessionValidationResult($result);
             $form->setSessionData($form->getData());
@@ -285,7 +282,7 @@ class ChimpleController extends PageController
             return $this->xhrError($code, $error_message);
         } elseif ($form instanceof \SilverStripe\Forms\Form) {
             // set session error on the form
-            $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
+            $form->sessionError($error_message, \SilverStripe\Core\Validation\ValidationResult::TYPE_ERROR);
         }
 
         return null;
@@ -301,7 +298,7 @@ class ChimpleController extends PageController
             return $this->xhrSuccess($code, $success_message);
         } elseif ($form instanceof \SilverStripe\Forms\Form) {
             // set session message on the form
-            $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
+            $form->sessionMessage($success_message, \SilverStripe\Core\Validation\ValidationResult::TYPE_GOOD);
         }
 
         return null;
@@ -437,7 +434,7 @@ class ChimpleController extends PageController
 
             // handle a successful subscription
             $response = $this->handleSuccess(200, $form);
-            if ($response && ($response instanceof HTTPResponse)) {
+            if ($response instanceof HTTPResponse) {
                 // handle responses for e.g XHR
                 return $response;
             } else {
@@ -460,7 +457,7 @@ class ChimpleController extends PageController
 
         // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
-        if ($response && ($response instanceof HTTPResponse)) {
+        if ($response instanceof HTTPResponse) {
             // handle XHR error responses
             return $response;
         } else {

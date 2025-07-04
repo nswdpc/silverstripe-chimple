@@ -16,6 +16,7 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Permission;
@@ -62,7 +63,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     private static string $title = "Mailchimp Subscriber Form";
 
-    private static string $description = "Configuration for a Mailchimp subscribe form";
+    private static string $class_description = "Configuration for a Mailchimp subscribe form";
 
     /**
      * Database fields
@@ -204,7 +205,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Return the current global config
      */
-    public static function getGlobalConfig()
+    public static function getGlobalConfig(): ?MailchimpConfig
     {
         return MailchimpConfig::get()->filter(['IsGlobal' => 1])->first();
     }
@@ -516,16 +517,16 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
     /**
      * Render this record using a template
-     * @return DBHTMLText|null
      */
-    public function forTemplate(?bool $force_xhr = null)
+    #[\Override]
+    public function forTemplate(?bool $force_xhr = null): string
     {
         $form = $this->SubscribeForm($force_xhr);
         if ($form instanceof \NSWDPC\Chimple\Forms\SubscribeForm) {
             return $this->customise(['Form' => $form])->renderWith(self::class);
         }
 
-        return null;
+        return '';
     }
 
     /**
@@ -534,9 +535,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * The 2nd parameter is a 1 or 0 representing whether to handle the submission via XHR
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
      * @param array $args
-     * @return DBHTMLText|null
      */
-    public static function get_chimple_subscribe_form(...$args)
+    public static function get_chimple_subscribe_form(...$args): ?DBHTMLText
     {
         $code = $args[0] ?? '';
         if ($code) {
@@ -554,7 +554,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                     }
                 }
 
-                return $config->forTemplate($force_xhr);
+                /** @phpstan-ignore return.type */
+                return DBField::create_field(DBHTMLText::class, $config->forTemplate($force_xhr));
             }
         }
 
@@ -564,13 +565,13 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     /**
      * Get the subscribe form for the current global config
      * This is called from a template calling $ChimpleSubscribeForm('code')
-     * @return DBHTMLText|null
      */
-    public static function get_chimple_global_subscribe_form()
+    public static function get_chimple_global_subscribe_form(): ?DBHTMLText
     {
         $config = self::getGlobalConfig();
-        if ($config) {
-            return $config->forTemplate();
+        if ($config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {
+            /** @phpstan-ignore return.type */
+            return DBField::create_field(DBHTMLText::class, $config->forTemplate());
         }
 
         return null;

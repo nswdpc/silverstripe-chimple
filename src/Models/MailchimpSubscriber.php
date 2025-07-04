@@ -759,6 +759,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $this->LastError = $last_error;
         $this->write();
 
+        Logger::log("Failed to subscribe #{$this->ID} to Mailchimp list. View the error in the administration area.", "NOTICE");
+
         return false;
     }
 

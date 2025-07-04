@@ -267,10 +267,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 LiteralField::create(
                     'NoApiKey',
                     '<p class="message error">'
-                    . _t(
+                    . htmlspecialchars(_t(
                         self::class . '.NO_API_KEY',
                         'Warning: no API key was found in the system configuration - subscriptions cannot occur until this is set.'
-                    )
+                    ))
                     . '</p>'
                 ),
                 'Title'
@@ -309,10 +309,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 LiteralField::create(
                     'IsGlobalBanner',
                     '<p class="message info">'
-                    . _t(
+                    . htmlspecialchars(_t(
                         self::class. '.CONFIG_IS_GLOBAL',
                         'This configuration is the default for this website'
-                    )
+                    ))
                     . '</p>'
                 ),
                 'Title'

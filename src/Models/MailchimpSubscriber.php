@@ -294,10 +294,10 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 LiteralField::create(
                     'StatusForNew',
                     '<p class="message notice">'
-                    . _t(
+                    . htmlspecialchars(_t(
                         self::class . '.STATUS_NEW_MESSAGE',
                         "This subscription attempt record will be given status of 'New' and it will enter the pending subscription queue upon save"
-                    )
+                    ))
                     . '</p>'
                 ),
                 'Name'

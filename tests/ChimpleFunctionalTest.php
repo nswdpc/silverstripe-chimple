@@ -6,6 +6,7 @@ use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Forms\Form;
@@ -69,8 +70,8 @@ class ChimpleFunctionalTest extends FunctionalTest
         $site_config->MailchimpEnabled = 1;
         $site_config->write();
 
-        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
-        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->default_list_id);
+        Environment::setEnv('CHIMPLE_API_KEY', $this->test_api_key);
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', $this->default_list_id);
 
         // Config record
         $record = [

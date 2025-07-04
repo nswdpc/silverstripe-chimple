@@ -2,11 +2,11 @@
 
 namespace NSWDPC\Chimple\Tests;
 
-use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use NSWDPC\Chimple\Services\ApiClientService;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 
@@ -31,8 +31,8 @@ class ChimpleBatchSubscriberTest extends SapphireTest
     {
         parent::setUp();
         Injector::inst()->registerService(TestApiClientService::create(), ApiClientService::class);
-        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->test_list_id);
-        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Environment::setEnv('CHIMPLE_API_KEY', $this->test_api_key);
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', $this->test_list_id);
         Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', $this->test_obfuscation_chr);
         Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', false);
         TestMailchimpApiClient::setSubscriberExists(false);

@@ -5,6 +5,7 @@ namespace NSWDPC\Chimple\Tests;
 use NSWDPC\Chimple\Forms\XhrSubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
@@ -53,8 +54,8 @@ class ChimpleConfigTest extends SapphireTest
         $site_config->MailchimpEnabled = 1;
         $site_config->write();
 
-        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
-        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->default_list_id);
+        Environment::setEnv('CHIMPLE_API_KEY', $this->test_api_key);
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', $this->default_list_id);
 
         // Config record
         $record = [
@@ -70,6 +71,24 @@ class ChimpleConfigTest extends SapphireTest
         $config->write();
     }
 
+    public function testFallbackConfiguration(): void
+    {
+
+        Environment::setEnv('CHIMPLE_API_KEY', $this->test_api_key);
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', $this->default_list_id);
+
+        $this->assertEquals($this->test_api_key, MailchimpConfig::getApiKey(), "API key equals");
+        $this->assertEquals($this->default_list_id, MailchimpConfig::getDefaultMailchimpListId());
+
+        // fallback
+        Environment::setEnv('CHIMPLE_API_KEY', '');
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', '');
+        Config::modify()->set(MailchimpConfig::class, 'api_key', 'fallback_key');
+        Config::modify()->set(MailchimpConfig::class, 'list_id', 'fallback_default_list_id');
+        $this->assertEquals('fallback_key', MailchimpConfig::getApiKey(), "API key equals");
+        $this->assertEquals('fallback_default_list_id', MailchimpConfig::getDefaultMailchimpListId());
+    }
+
     protected function getMailchimpConfig()
     {
 
@@ -78,7 +97,7 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertTrue($config && $config->exists(), "Configuration does not exist in DB");
 
         // Api key check
-        $api_key = $config->getApiKey();
+        $api_key = MailchimpConfig::getApiKey();
         $this->assertEquals($api_key, $this->test_api_key, "API key equals");
 
         // list check

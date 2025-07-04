@@ -6,6 +6,7 @@ use NSWDPC\Chimple\Controllers\ChimpleController;
 use NSWDPC\Chimple\Forms\SubscribeForm;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
@@ -43,10 +44,11 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
+    // @deprecated
     private static string $list_id = "";
 
-    // default list (audience) ID
-    private static string $api_key = "";// API key provided by Mailchimp
+    // @deprecated
+    private static string $api_key = "";
 
     private static string $success_message = "Thank you for subscribing. You will receive an email to confirm your subscription shortly.";
 
@@ -124,14 +126,32 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         return $site_config->MailchimpEnabled == 1;
     }
 
-    public static function getDefaultMailchimpListId()
+    public static function getDefaultMailchimpListId(): string
     {
-        return Config::inst()->get(MailchimpConfig::class, 'list_id');
+        $listId = '';
+        if (Environment::hasEnv('CHIMPLE_DEFAULT_LIST_ID')) {
+            $listId = Environment::getEnv('CHIMPLE_DEFAULT_LIST_ID');
+        }
+
+        if (!is_string($listId) || $listId === '') {
+            $listId = Config::inst()->get(MailchimpConfig::class, 'list_id');
+        }
+
+        return is_string($listId) ? trim($listId) : '';
     }
 
-    public static function getApiKey()
+    public static function getApiKey(): string
     {
-        return Config::inst()->get(MailchimpConfig::class, 'api_key');
+        $key = '';
+        if (Environment::hasEnv('CHIMPLE_API_KEY')) {
+            $key = Environment::getEnv('CHIMPLE_API_KEY');
+        }
+
+        if (!is_string($key) || $key === '') {
+            $key = Config::inst()->get(MailchimpConfig::class, 'api_key');
+        }
+
+        return is_string($key) ? trim($key) : '';
     }
 
     /**
@@ -141,8 +161,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     {
         $key = self::getApiKey();
         $parts = [];
-        if ($key) {
-            $parts = explode("-", (string) $key);
+        if ($key !== '') {
+            $parts = explode("-", $key);
         }
 
         return empty($parts[1]) ? '' : $parts[1];
@@ -241,7 +261,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         ]);
 
         $api_key = self::getApiKey();
-        if (!$api_key) {
+        if ($api_key === '') {
             $fields->addFieldToTab(
                 'Root.Main',
                 LiteralField::create(

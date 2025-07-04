@@ -261,7 +261,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         ]);
 
         $api_key = self::getApiKey();
-        if ($api_key === '' || $api_key === '0') {
+        if ($api_key === '') {
             $fields->addFieldToTab(
                 'Root.Main',
                 LiteralField::create(

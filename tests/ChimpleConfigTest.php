@@ -81,8 +81,8 @@ class ChimpleConfigTest extends SapphireTest
         $this->assertEquals($this->default_list_id, MailchimpConfig::getDefaultMailchimpListId());
 
         // fallback
-        Environment::setEnv('CHIMPLE_API_KEY', false);
-        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', false);
+        Environment::setEnv('CHIMPLE_API_KEY', '');
+        Environment::setEnv('CHIMPLE_DEFAULT_LIST_ID', '');
         Config::modify()->set(MailchimpConfig::class, 'api_key', 'fallback_key');
         Config::modify()->set(MailchimpConfig::class, 'list_id', 'fallback_default_list_id');
         $this->assertEquals('fallback_key', MailchimpConfig::getApiKey(), "API key equals");

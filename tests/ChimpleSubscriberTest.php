@@ -2,7 +2,6 @@
 
 namespace NSWDPC\Chimple\Tests;
 
-use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use NSWDPC\Chimple\Services\ApiClientService;
 use SilverStripe\Control\Email\Email;

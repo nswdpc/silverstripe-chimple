@@ -44,7 +44,6 @@ use Symbiote\MultiValueField\Fields\MultiValueTextField;
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
-
     // @deprecated
     private static string $list_id = "";
 
@@ -130,11 +129,11 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     public static function getDefaultMailchimpListId(): string
     {
         $listId = '';
-        if(Environment::hasEnv('CHIMPLE_DEFAULT_LIST_ID')) {
+        if (Environment::hasEnv('CHIMPLE_DEFAULT_LIST_ID')) {
             $listId = Environment::getEnv('CHIMPLE_DEFAULT_LIST_ID');
         }
 
-        if(!is_string($listId) || $listId === '') {
+        if (!is_string($listId) || $listId === '') {
             $listId = Config::inst()->get(MailchimpConfig::class, 'list_id');
         }
 
@@ -144,11 +143,11 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     public static function getApiKey(): string
     {
         $key = '';
-        if(Environment::hasEnv('CHIMPLE_API_KEY')) {
+        if (Environment::hasEnv('CHIMPLE_API_KEY')) {
             $key = Environment::getEnv('CHIMPLE_API_KEY');
         }
 
-        if(!is_string($key) || $key === '') {
+        if (!is_string($key) || $key === '') {
             $key = Config::inst()->get(MailchimpConfig::class, 'api_key');
         }
 

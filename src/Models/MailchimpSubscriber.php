@@ -451,7 +451,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         $api_key = MailchimpConfig::getApiKey();
-        if (!$api_key) {
+        if ($api_key === '' || $api_key === '0') {
             throw new Exception("No Mailchimp API Key configured!");
         }
 

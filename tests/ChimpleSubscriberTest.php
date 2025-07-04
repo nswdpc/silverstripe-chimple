@@ -143,9 +143,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $this->assertTrue(!empty($mailchimpRecord['id']), "The subscriber exists in list {$this->test_list_id}");
         $this->assertEquals(MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_PENDING, $mailchimpRecord['status'], "The subscriber is pending");
 
-        $tagDelta = $subscriber->getTagDelta();
+        $currentTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMPSUBSCRIBER_TAG_CURRENT);
 
-        $this->assertEquals($this->test_tags, $tagDelta);
+        $this->assertEquals(2, count($currentTags));
+        foreach ($currentTags as $currentTag) {
+            $this->assertTrue(in_array($currentTag['name'], $this->test_tags));
+        }
 
     }
 

@@ -553,6 +553,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                         $force_xhr = true;
                     }
                 }
+
                 /** @phpstan-ignore return.type */
                 return DBField::create_field(DBHTMLText::class, $config->forTemplate($force_xhr));
             }

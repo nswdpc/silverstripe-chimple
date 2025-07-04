@@ -5,7 +5,6 @@ namespace NSWDPC\Chimple\Tests;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use NSWDPC\Chimple\Services\ApiClientService;
-use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injector;
@@ -73,11 +72,11 @@ class ChimpleBatchSubscriberTest extends SapphireTest
             ],
         ];
 
-        foreach($subscribers as $subscriber) {
+        foreach ($subscribers as $subscriber) {
             $record = MailchimpSubscriber::create($subscriber);
             $record->write();
             // flag one as subscribed
-            if($subscriber['Email'] === 'test2@example.com') {
+            if ($subscriber['Email'] === 'test2@example.com') {
                 $record->Status = MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS;
                 $record->write();
             }

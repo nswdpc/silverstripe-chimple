@@ -11,7 +11,6 @@ use SilverStripe\Dev\TestOnly;
  */
 class TestMailchimpApiClient extends MailChimp implements TestOnly
 {
-
     /**
      * By default, subscribers do not exist, flip to true in test to test update handling
      */
@@ -108,9 +107,9 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
         self::$last_mock_response = [];
 
         $testMethod = $this->determineApiAction($http_verb, $method);
-        if(method_exists($this, $testMethod)) {
+        if (method_exists($this, $testMethod)) {
             $response = $this->{$testMethod}($http_verb, $method, $args, $timeout);
-            if(is_array($response)) {
+            if (is_array($response)) {
                 self::$last_mock_response = $response;
             }
 
@@ -123,29 +122,32 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Work out the method to call based on the HTTP verb and method string
      */
-    protected function determineApiAction(string $http_verb, string $method): string {
-        switch($http_verb) {
+    protected function determineApiAction(string $http_verb, string $method): string
+    {
+        switch ($http_verb) {
             case 'get':
-                if(preg_match("|^lists/[^/]+/members/[^/]+$|", $method)) {
+                if (preg_match("|^lists/[^/]+/members/[^/]+$|", $method)) {
                     return "getSubscriber";
                 }
 
-                if(preg_match("|^lists/[^/]+/members/[^/]+/tags/.+|", $method)) {
+                if (preg_match("|^lists/[^/]+/members/[^/]+/tags/.+|", $method)) {
                     return "getSubscriberTags";
                 }
+                // no break
             case 'post':
-                if(preg_match("|^lists/[^/]+/members/[^/]+/tags$|", $method)) {
+                if (preg_match("|^lists/[^/]+/members/[^/]+/tags$|", $method)) {
                     return "postSubscriberTags";
                 }
 
-                if(preg_match("|^lists/[^/]+/members$|", $method)) {
+                if (preg_match("|^lists/[^/]+/members$|", $method)) {
                     return "createSubscriber";
                 }
+                // no break
             case 'put':
                 // handle used put requests
                 break;
             case 'patch':
-                if(preg_match("|^lists/[^/]+/members/.+$|", $method)) {
+                if (preg_match("|^lists/[^/]+/members/.+$|", $method)) {
                     return "updateSubscriber";
                 }
         }
@@ -156,16 +158,17 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Get a subscriber
      */
-    protected function getSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): ?array {
-        if(!self::$subscriber_exists) {
+    protected function getSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): ?array
+    {
+        if (!self::$subscriber_exists) {
             return null;
         } else {
 
             $tags = [];
-            if(isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
-                foreach(self::$subscriber['tags'] as $i => $tag) {
+            if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
+                foreach (self::$subscriber['tags'] as $i => $tag) {
                     $tags[] = [
-                        "id" => ($i+1),
+                        "id" => ($i + 1),
                         "name" => $tag
                     ];
                 }
@@ -192,12 +195,13 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Returns the state of the current set of tags for a user
      */
-    protected function getSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
+    protected function getSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array
+    {
         $tags = [];
-        if(isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
-            foreach(self::$subscriber['tags'] as $i => $tag) {
+        if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
+            foreach (self::$subscriber['tags'] as $i => $tag) {
                 $tags[] = [
-                    "id" => ($i+1),
+                    "id" => ($i + 1),
                     "name" => $tag
                 ];
             }
@@ -212,19 +216,21 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Method returns an empty response (204)
      */
-    protected function postSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
+    protected function postSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array
+    {
         return [];
     }
 
     /**
      * Return mock response for creating a new subscriber
      */
-    protected function createSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
+    protected function createSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array
+    {
         $tags = [];
-        if(isset($args['tags']) && is_array($args['tags'])) {
-            foreach($args['tags'] as $i => $tag) {
+        if (isset($args['tags']) && is_array($args['tags'])) {
+            foreach ($args['tags'] as $i => $tag) {
                 $tags[] = [
-                    "id" => ($i+1),
+                    "id" => ($i + 1),
                     "name" => $tag
                 ];
             }
@@ -250,7 +256,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Return mock response when an existing subscriber  is updated
      */
-    protected function updateSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
+    protected function updateSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array
+    {
         $response = [
             'id' =>  MailchimpSubscriber::getMailchimpSubscribedId($args['email_address']),
             'email' => $args['email_address'],
@@ -266,19 +273,19 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
         ];
 
         $tags = [];
-        if(isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
-            foreach(self::$subscriber['tags'] as $i => $tag) {
+        if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
+            foreach (self::$subscriber['tags'] as $i => $tag) {
                 $tags[] = [
-                    "id" => ($i+1),
+                    "id" => ($i + 1),
                     "name" => $tag
                 ];
             }
         }
 
-        if(isset(self::$subscriber['tags_for_update']) && is_array(self::$subscriber['tags_for_update'])) {
-            foreach(self::$subscriber['tags_for_update'] as $i => $tag) {
+        if (isset(self::$subscriber['tags_for_update']) && is_array(self::$subscriber['tags_for_update'])) {
+            foreach (self::$subscriber['tags_for_update'] as $i => $tag) {
                 $tags[] = [
-                    "id" => ($i+1),
+                    "id" => ($i + 1),
                     "name" => $tag
                 ];
             }

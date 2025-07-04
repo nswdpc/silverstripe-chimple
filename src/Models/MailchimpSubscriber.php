@@ -651,12 +651,12 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
      */
     public function getTagDelta(string $status = ''): array
     {
-        if($status === '') {
+        if ($status === '') {
             return $this->tagDelta;
         } else {
             return array_filter(
                 $this->tagDelta,
-                fn(array $v, $k): bool => $v['status'] == $status,
+                fn (array $v, $k): bool => $v['status'] == $status,
                 ARRAY_FILTER_USE_BOTH
             );
         }
@@ -696,7 +696,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 // add tags
                 $params['tags'] = $this->getSubscriberTags();
                 $this->tagDelta = [];
-                foreach($params['tags'] as $tagName) {
+                foreach ($params['tags'] as $tagName) {
                     $this->tagDelta[] = [
                         'name' => $tagName,
                         'status' => self::MAILCHIMPSUBSCRIBER_TAG_CURRENT
@@ -884,7 +884,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
         // store all tags, including current, for inspection
         $this->tagDelta = $params['tags'];
-        foreach($current as $tag) {
+        foreach ($current as $tag) {
             $this->tagDelta[] = [
                 'name' => $tag,
                 'status' => self::MAILCHIMPSUBSCRIBER_TAG_CURRENT

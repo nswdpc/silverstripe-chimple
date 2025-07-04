@@ -233,12 +233,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $activeTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_ACTIVE);
 
         $this->assertEquals(2, count($currentTags));
-        foreach($currentTags as $currentTag) {
+        foreach ($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
 
         $this->assertEquals(2, count($activeTags));
-        foreach($activeTags as $activeTag) {
+        foreach ($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
         }
     }
@@ -277,18 +277,18 @@ class ChimpleSubscriberTest extends SapphireTest
         $inactiveTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_INACTIVE);
 
         $this->assertEquals(2, count($currentTags));
-        foreach($currentTags as $currentTag) {
+        foreach ($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
 
         $this->assertEquals(2, count($activeTags));
-        foreach($activeTags as $activeTag) {
+        foreach ($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
         }
 
         // tags marked for removal as remove_subscriber_tags switch to true
         $this->assertEquals(2, count($inactiveTags));
-        foreach($inactiveTags as $inactiveTag) {
+        foreach ($inactiveTags as $inactiveTag) {
             $this->assertTrue(in_array($inactiveTag['name'], $subscriberCurrentTags));
         }
     }
@@ -325,12 +325,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $inactiveTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_INACTIVE);
 
         $this->assertEquals(2, count($currentTags));
-        foreach($currentTags as $currentTag) {
+        foreach ($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
 
         $this->assertEquals(3, count($activeTags));
-        foreach($activeTags as $activeTag) {
+        foreach ($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
         }
 

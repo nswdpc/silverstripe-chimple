@@ -10,7 +10,6 @@ use SilverStripe\Core\Injector\Injectable;
  */
 class ApiClientService
 {
-
     use Injectable;
 
     public static function getClient(string $api_key, string $api_endpoint = null): object

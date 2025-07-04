@@ -434,7 +434,7 @@ class ChimpleController extends PageController
 
             // handle a successful subscription
             $response = $this->handleSuccess(200, $form);
-            if ($response && ($response instanceof HTTPResponse)) {
+            if ($response instanceof HTTPResponse) {
                 // handle responses for e.g XHR
                 return $response;
             } else {
@@ -457,7 +457,7 @@ class ChimpleController extends PageController
 
         // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
-        if ($response && ($response instanceof HTTPResponse)) {
+        if ($response instanceof HTTPResponse) {
             // handle XHR error responses
             return $response;
         } else {

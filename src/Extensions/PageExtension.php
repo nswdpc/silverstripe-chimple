@@ -14,7 +14,6 @@ class PageExtension extends Extension
 {
     /**
      * Returns a form for the configuration marked 'IsGlobal'
-     * @return Form|null
      */
     public function ChimpleGlobalSubscribeForm(): ?\NSWDPC\Chimple\Forms\SubscribeForm
     {
@@ -28,10 +27,9 @@ class PageExtension extends Extension
 
     /**
      * Returns a form based on a config code
-     * @return Form|null
      * @param string $config_code a MailchimpConfig.Code value (not an audience ID)
      */
-    public function ChimpleSubscribeForm($config_code)
+    public function ChimpleSubscribeForm($config_code): ?\NSWDPC\Chimple\Forms\SubscribeForm
     {
         $config = MailchimpConfig::getConfig('', '', $config_code);
         if ($config) {

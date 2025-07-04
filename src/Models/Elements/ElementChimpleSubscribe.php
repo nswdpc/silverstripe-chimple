@@ -78,7 +78,7 @@ class ElementChimpleSubscribe extends BaseElement
         $fields = parent::getCMSFields();
 
         $site_config = SiteConfig::current_site_config();
-        if ($site_config && $site_config->MailchimpEnabled == 0) {
+        if ($site_config->MailchimpEnabled == 0) {
             $fields->addFieldToTab(
                 'Root.Main',
                 LiteralField::create(

@@ -567,7 +567,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     public static function get_chimple_global_subscribe_form(): ?DBHTMLText
     {
         $config = self::getGlobalConfig();
-        if ($config !== null) {
+        if ($config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {
             return $config->forTemplate();
         }
 

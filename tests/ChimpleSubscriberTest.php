@@ -40,13 +40,13 @@ class ChimpleSubscriberTest extends SapphireTest
     protected function setUp(): void
     {
         parent::setUp();
-        Injector::inst()->registerService(new TestApiClientService(), ApiClientService::class);
+        Injector::inst()->registerService(TestApiClientService::create(), ApiClientService::class);
         Config::modify()->set(MailchimpConfig::class, 'list_id', $this->test_list_id);
         Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
         Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', $this->test_obfuscation_chr);
         Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', false);
-        TestMailchimpApiClient::$subscriber_exists = false;
-        TestMailchimpApiClient::$subscriber = [];
+        TestMailchimpApiClient::setSubscriberExists(false);
+        TestMailchimpApiClient::setSubscriber();
     }
 
     /**
@@ -78,12 +78,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $subscriber->write();
 
         // Store the subscriber for the test api client to provide mock responses
-        TestMailchimpApiClient::$subscriber = [
+        TestMailchimpApiClient::setSubscriber([
             'fname' => $this->test_fname,
             'lname' => $this->test_fname,
             'email' => $this->test_email,
             'tags' => $this->test_tags,
-        ];
+        ]);
 
         $this->assertTrue($subscriber->exists(), "Subscriber exists");
 
@@ -116,7 +116,7 @@ class ChimpleSubscriberTest extends SapphireTest
         }
 
         // trigger test API client to handle as new subscriber
-        TestMailchimpApiClient::$subscriber_exists = false;
+        TestMailchimpApiClient::setSubscriberExists(false);
 
         $result = $subscriber->subscribe();
 
@@ -136,7 +136,7 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertTrue(substr_count($subscriber->Surname, $this->test_obfuscation_chr) > 0, "Surname is obfuscated");
 
-        TestMailchimpApiClient::$subscriber_exists = true;// flip to exist mode fpr test
+        TestMailchimpApiClient::setSubscriberExists(true);// flip to exist mode fpr test
         $mailchimpRecord = MailchimpSubscriber::checkExistsInList($this->test_list_id, $record['Email']);
         $this->assertIsArray($mailchimpRecord);
         $this->assertTrue(!empty($mailchimpRecord['id']), "The subscriber exists in list {$this->test_list_id}");
@@ -179,16 +179,16 @@ class ChimpleSubscriberTest extends SapphireTest
         $subscriber->write();
 
         // Store the subscriber for the test api client to provide mock responses
-        TestMailchimpApiClient::$subscriber = [
+        TestMailchimpApiClient::setSubscriber([
             'fname' => $this->test_fname,
             'lname' => $this->test_fname,
             'email' => $this->test_email,
             'tags' => $this->test_tags,// the ones that already exist
             'tags_for_update' => $this->test_update_tags // updated tags
-        ];
+        ]);
 
         // Trigger existing user handling
-        TestMailchimpApiClient::$subscriber_exists = true;
+        TestMailchimpApiClient::setSubscriberExists(true);
 
         $result = $subscriber->subscribe();
 
@@ -207,12 +207,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $subscriberCurrentTags = ['current1','current2'];
         $subscriberNewTags = ['new1','new2'];
         // Store the subscriber for the test api client to provide mock responses
-        TestMailchimpApiClient::$subscriber = [
+        TestMailchimpApiClient::setSubscriber([
             'fname' => $this->test_fname,
             'lname' => $this->test_fname,
             'email' => $this->test_email,
             'tags' => $subscriberCurrentTags
-        ];
+        ]);
 
         // MailchimpSubscriber record values
         $record = [
@@ -249,12 +249,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $subscriberCurrentTags = ['current1','current2'];
         $subscriberNewTags = ['new1','new2'];
         // Store the subscriber for the test api client to provide mock responses
-        TestMailchimpApiClient::$subscriber = [
+        TestMailchimpApiClient::setSubscriber([
             'fname' => $this->test_fname,
             'lname' => $this->test_fname,
             'email' => $this->test_email,
             'tags' => $subscriberCurrentTags
-        ];
+        ]);
 
         // MailchimpSubscriber record values
         $record = [
@@ -296,12 +296,12 @@ class ChimpleSubscriberTest extends SapphireTest
         $subscriberCurrentTags = ['current1','current2'];
         $subscriberNewTags = ['current2','new1','new2'];//retain current1
         // Store the subscriber for the test api client to provide mock responses
-        TestMailchimpApiClient::$subscriber = [
+        TestMailchimpApiClient::setSubscriber([
             'fname' => $this->test_fname,
             'lname' => $this->test_fname,
             'email' => $this->test_email,
             'tags' => $subscriberCurrentTags
-        ];
+        ]);
 
         // MailchimpSubscriber record values
         $record = [

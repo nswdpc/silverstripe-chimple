@@ -30,13 +30,13 @@ class ChimpleBatchSubscriberTest extends SapphireTest
     protected function setUp(): void
     {
         parent::setUp();
-        Injector::inst()->registerService(new TestApiClientService(), ApiClientService::class);
+        Injector::inst()->registerService(TestApiClientService::create(), ApiClientService::class);
         Config::modify()->set(MailchimpConfig::class, 'list_id', $this->test_list_id);
         Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
         Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', $this->test_obfuscation_chr);
         Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', false);
-        TestMailchimpApiClient::$subscriber_exists = false;
-        TestMailchimpApiClient::$subscriber = [];
+        TestMailchimpApiClient::setSubscriberExists(false);
+        TestMailchimpApiClient::setSubscriber();
     }
 
     /**

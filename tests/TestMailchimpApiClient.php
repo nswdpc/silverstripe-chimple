@@ -15,23 +15,33 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * By default, subscribers do not exist, flip to true in test to test update handling
      */
-    public static bool $subscriber_exists = false;
+    protected static bool $subscriber_exists = false;
 
     /**
      * An array of subscriber data, relating the subscriber record that is current
      */
-    public static array $subscriber = [];
+    protected static array $subscriber = [];
 
     public static string $last_mock_error = '';
 
     public static array $last_mock_response = [];
+
+    public static function setSubscriberExists(bool $exists): void
+    {
+        static::$subscriber_exists = $exists;
+    }
+
+    public static function setSubscriber(array $subscriber = []): void
+    {
+        static::$subscriber = $subscriber;
+    }
 
     /**
      * Override last error handling, to never return an error
      */
     public function getLastError()
     {
-        return self::$last_mock_error ?: false;
+        return self::$last_mock_error !== '' ? self::$last_mock_error : false;
     }
 
     /**

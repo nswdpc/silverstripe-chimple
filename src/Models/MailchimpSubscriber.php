@@ -728,9 +728,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
             if ($succeeded) {
                 // this unique_email_id value is returned when subscribed
-                $this->SubscribedUniqueEmailId = $result['unique_email_id'];
-                $this->SubscribedWebId = $result['web_id'] ?? '';
-                $this->SubscribedId = $result['id'] ?? '';
+                $this->SubscribedUniqueEmailId = (string)$result['unique_email_id'];
+                $this->SubscribedWebId = (string)$result['web_id'];
+                $this->SubscribedId = (string)$result['id'];
                 $this->Status = self::CHIMPLE_STATUS_SUCCESS;
                 $this->LastError = '';//reset any error
                 // obfucsate values of subscriber after successful subscription

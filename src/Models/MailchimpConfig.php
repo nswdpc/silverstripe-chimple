@@ -535,7 +535,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * This is called from a template calling $ChimpleSubscribeForm('code'[,0|1])
      * @param array $args
      */
-    public static function get_chimple_subscribe_form(...$args): ?DBHTMLText
+    public static function get_chimple_subscribe_form(...$args): ?string
     {
         $code = $args[0] ?? '';
         if ($code) {
@@ -564,7 +564,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      * Get the subscribe form for the current global config
      * This is called from a template calling $ChimpleSubscribeForm('code')
      */
-    public static function get_chimple_global_subscribe_form(): ?DBHTMLText
+    public static function get_chimple_global_subscribe_form(): ?string
     {
         $config = self::getGlobalConfig();
         if ($config instanceof \NSWDPC\Chimple\Models\MailchimpConfig) {

@@ -149,10 +149,10 @@ class ChimpleConfigTest extends SapphireTest
 
         $static_form = MailchimpConfig::get_chimple_subscribe_form($code_value);
 
-        $this->assertTrue($static_form instanceof DBHTMLText, "Static form for code {$code_value} was not returned");
+        $this->assertNotNull($static_form, "Static form for code {$code_value} was not returned");
 
         $needle = " value=\"{$code_value}\" ";
-        $this->assertTrue(str_contains($static_form->forTemplate(), $needle), "Missing {$code_value} input from form HTML");
+        $this->assertTrue(str_contains($static_form, $needle), "Missing {$code_value} input from form HTML");
 
     }
 

@@ -8,7 +8,6 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use DateTime;
-use Exception;
 
 /**
  * Run through Mailchimp batches and subscribers to verify whether they are subscribed or not

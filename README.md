@@ -37,19 +37,11 @@ It doesn't support:
 
 ## Configuration
 
-Example project configuration:
+Example environment configuration, using the values provided by Mailchimp:
 
-```yaml
----
-Name: app-mailchimp
-After:
-  - '#silverstripe-chimple'
----
-NSWDPC\Chimple\Models\MailchimpConfig:
-  # account API key
-  api_key: '<api key>'
-  # default list id
-  list_id: '<list id>'
+```sh
+CHIMPLE_API_KEY="Your Mailchimp key"
+CHIMPLE_DEFAULT_LIST_ID="Your default Mailchimp list/audience id"
 ```
 
 [Further integration](./docs/en/002_integration.md)

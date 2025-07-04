@@ -2,8 +2,6 @@
 
 namespace NSWDPC\Chimple\Forms;
 
-use NSWDPC\Chimple\Services\Logger;
-use NSWDPC\Chimple\Traits\SubscriptionForm;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;

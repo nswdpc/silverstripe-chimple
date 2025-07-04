@@ -2,11 +2,13 @@
 
 namespace NSWDPC\Chimple\Tests;
 
-use DrewM\MailChimp\MailChimp as MailchimpApiClient;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
+use NSWDPC\Chimple\Services\ApiClientService;
+use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 
 /**
@@ -19,153 +21,315 @@ class ChimpleSubscriberTest extends SapphireTest
 
     protected $usesDatabase = true;
 
-    /**
-     * e.g example.com
-     */
-    private static string $test_email_domain = "";
+    protected string $test_list_id = 'test-list-id';
 
-    /**
-     * e.g bob.smith
-     */
-    private static string $test_email_user = "";
+    protected string $test_api_key = 'test-api-key';
 
-    /**
-     * use plus notation in email address
-     */
-    private static bool $test_use_plus = true;
+    protected string $test_fname = 'Test';
 
-    public function testSubscriber(): void
+    protected string $test_lname = 'Subscriber';
+
+    protected string $test_email = 'test.subscriber@example.com';
+
+    protected array $test_tags = ['TestOne','TestTwo'];
+
+    protected array $test_update_tags = ['TestThree','TestFour'];
+
+    protected string $test_obfuscation_chr = "•";
+
+    protected function setUp(): void
     {
-        $fname = "Test";
-        $lname = "Tester";
+        parent::setUp();
+        Injector::inst()->registerService(new TestApiClientService(), ApiClientService::class);
+        Config::modify()->set(MailchimpConfig::class, 'list_id', $this->test_list_id);
+        Config::modify()->set(MailchimpConfig::class, 'api_key', $this->test_api_key);
+        Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', $this->test_obfuscation_chr);
+        Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', false);
+        TestMailchimpApiClient::$subscriber_exists = false;
+        TestMailchimpApiClient::$subscriber = [];
+    }
 
-        $test_email_domain = $this->config()->get('test_email_domain');
-        $test_email_user = $this->config()->get('test_email_user');
-        $test_use_plus = $this->config()->get('test_use_plus');
-
-        if (!$test_email_user) {
-            throw new \Exception("The test needs a test email user");
-        }
-
-        if (!$test_email_domain) {
-            throw new \Exception("The test needs a test email domain");
-        }
-
-        // store current value
-        $list_id = Config::inst()->get(MailchimpConfig::class, 'list_id');
-
-        // set a obfuscation chr
-        Config::modify()->set(MailchimpSubscriber::class, 'obfuscation_chr', "•");
-
-        $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
-
-        $email_address_for_test = $test_email_user;
-        if ($test_use_plus) {
-            $email_address_for_test .= "+unittest" . bin2hex(random_bytes(2));
-        }
-
-        $email_address_for_test .= "@{$test_email_domain}";
-
-        $tags = ['TestOne','TestTwo'];
-        $record = [
-            'Name' => "{$fname} {$lname}",
-            'Email' => $email_address_for_test,
-            'FailNoticeSent' => 0,
-            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
-            'TagsValue' => json_encode($tags)
-        ];
-        $subscriber =  MailchimpSubscriber::create($record);
-        $subscriber->write();
-
-        $this->assertTrue($subscriber->exists(), "Subscriber does not exist");
-
-        $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_NEW, "Subscriber should be 'new' status");
-
-        $this->assertEquals($subscriber->Name, $fname, "Subscriber should have fname of {$fname}");
-
-        $this->assertEquals($subscriber->Surname, $lname, "Subscriber shold have lname of {$lname}");
+    /**
+     * Test a new subscriber who is not already in the list/audience
+     */
+    public function testNewSubscriber(): void
+    {
 
         $client = MailchimpSubscriber::api();
 
-        $this->assertTrue($client instanceof MailchimpApiClient, "Client is not a valid mailchimp instance");
+        $this->assertTrue($client instanceof TestMailchimpApiClient, "Tests require the TestMailchimpApiClient to be the API client class");
+
+        if ($this->test_email === '' || !Email::is_valid_address($this->test_email)) {
+            throw new \Exception("The test needs a test email user");
+        }
+
+        // set a obfuscation chr
+        $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
+
+        // MailchimpSubscriber record values
+        $record = [
+            'Name' => "{$this->test_fname} {$this->test_lname}",
+            'Email' => $this->test_email,
+            'FailNoticeSent' => 0,
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
+            'TagsValue' => json_encode($this->test_tags)
+        ];
+        $subscriber = MailchimpSubscriber::create($record);
+        $subscriber->write();
+
+        // Store the subscriber for the test api client to provide mock responses
+        TestMailchimpApiClient::$subscriber = [
+            'fname' => $this->test_fname,
+            'lname' => $this->test_fname,
+            'email' => $this->test_email,
+            'tags' => $this->test_tags,
+        ];
+
+        $this->assertTrue($subscriber->exists(), "Subscriber exists");
+
+        $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_NEW, "Subscriber should be 'new' status");
+
+        $this->assertEquals($subscriber->Name, $this->test_fname, "Subscriber should have fname of {$this->test_fname}");
+
+        $this->assertEquals($subscriber->Surname, $this->test_lname, "Subscriber shold have lname of {$this->test_lname}");
 
         // test an API subscription
-        $this->assertEquals($list_id, $subscriber->getMailchimpListId(), "List id should be the default list id");
+        $this->assertEquals($this->test_list_id, $subscriber->getMailchimpListId(), "List id should be the test list id");
 
         $subscribe_record = $subscriber->getSubscribeRecord();
 
-        $this->assertTrue(is_array($subscribe_record), "Record is not an array of values");
+        $this->assertIsArray($subscribe_record, "Subscribe record is an array");
 
-        $this->assertTrue($subscribe_record !== [], "Record is empty");
+        $this->assertNotEmpty($subscribe_record, "Subscribe Record is not empty");
 
-        $this->assertTrue(isset($subscribe_record['merge_fields']), "Record merge_fields is not set");
+        $this->assertNotEmpty($subscribe_record['merge_fields'] ?? [], "Subscribe record merge_fields is not empty");
 
-        $this->assertTrue(!empty($subscribe_record['email_type']), "Record email_type is empty");
+        $this->assertNotEmpty($subscribe_record['email_type'] ?? '', "Record email_type is not empty");
 
-        $this->assertEquals($subscriber->Email, $subscribe_record['email_address'], "Subscribed email_address value is not the same as subsciber record Email field value");
+        $this->assertEquals($subscriber->Email, $subscribe_record['email_address'], "Subscribed email_address matches");
 
         // check merge fields
-        $sync_fields = $subscriber->config()->get('sync_fields');
+        $sync_fields = MailchimpSubscriber::config()->get('sync_fields');
         $merge_fields = $subscribe_record['merge_fields'];
         foreach ($sync_fields as $field => $tag) {
             $this->assertTrue(isset($merge_fields[ $tag ]) && $merge_fields[ $tag ] = $subscriber->getField($field), "Merge field tag {$tag} value does not match subscriber {$field} value");
         }
 
-        $email = $subscriber->Email;
+        // trigger test API client to handle as new subscriber
+        TestMailchimpApiClient::$subscriber_exists = false;
 
-        if ($subscriber->subscribe()) {
+        $result = $subscriber->subscribe();
 
-            $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS, "Status of subscriber should be subscribed");
-            // check ID matches md5
-            $this->assertEquals(md5(strtolower($email)), $subscriber->SubscribedId, "Email does not match returned id {$subscriber->SubscribedId}");
+        $this->assertTrue($result);
 
-            $this->assertNotEmpty($subscriber->SubscribedWebId, "SubscribedWebId should not be empty");
+        $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS, "Status of subscriber should be subscribed");
 
-            $this->assertNotEmpty($subscriber->SubscribedUniqueEmailId, "SubscribedUniqueEmailId should not be empty");
+        $this->assertEquals($subscriber->SubscribedId, MailchimpSubscriber::getMailchimpSubscribedId($record['Email']), "Email hash should match");
 
-            $this->assertTrue(substr_count($subscriber->Email, (string) $obfuscation_chr) > 0, "Email is not obfuscated, it should be");
+        $this->assertNotEmpty($subscriber->SubscribedWebId);
 
-            $this->assertTrue(substr_count($subscriber->Name, (string) $obfuscation_chr) > 0, "Name is not obfuscated, it should be");
+        $this->assertNotEmpty($subscriber->SubscribedUniqueEmailId);
 
-            $this->assertTrue(substr_count($subscriber->Surname, (string) $obfuscation_chr) > 0, "Surname is not obfuscated, it should be");
+        $this->assertTrue(substr_count($subscriber->Email, $this->test_obfuscation_chr) > 0, "Email is obfuscated");
 
-            $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
+        $this->assertTrue(substr_count($subscriber->Name, $this->test_obfuscation_chr) > 0, "Name is obfuscated");
 
-            $this->assertTrue(!empty($mc_record['id']), "The subscriber does not exist in the list {$list_id} - it should");
-            $this->assertEquals(MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_PENDING, $mc_record['status'], "The subscriber is not pending status");
+        $this->assertTrue(substr_count($subscriber->Surname, $this->test_obfuscation_chr) > 0, "Surname is obfuscated");
 
-            // check tags
-            $this->assertEquals(count($tags), count($mc_record['tags']), "Tag count mismatch");
+        TestMailchimpApiClient::$subscriber_exists = true;// flip to exist mode fpr test
+        $mailchimpRecord = MailchimpSubscriber::checkExistsInList($this->test_list_id, $record['Email']);
+        $this->assertIsArray($mailchimpRecord);
+        $this->assertTrue(!empty($mailchimpRecord['id']), "The subscriber exists in list {$this->test_list_id}");
+        $this->assertEquals(MailchimpSubscriber::MAILCHIMP_SUBSCRIBER_PENDING, $mailchimpRecord['status'], "The subscriber is pending");
 
-            $mc_tags_list = [];
-            array_walk($mc_record['tags'], function (array $value, $key) use (&$mc_tags_list): void {
-                $mc_tags_list[] = $value['name'];
-            });
+        $tagDelta = $subscriber->getTagDelta();
 
-            sort($tags);
-            sort($mc_tags_list);
-
-            $this->assertEquals($tags, $mc_tags_list, "Tags sent do not match tags retrieved");
-
-        } else {
-
-            // failed
-            $this->assertEquals($subscriber->Status, MailchimpSubscriber::CHIMPLE_STATUS_FAIL, "Status of subscriber should be failed");
-
-            $this->assertNotEmpty($subscriber->LastError, "Last error should have some information");
-
-            // the values should be empty
-            $this->assertEmpty($subscriber->SubscribedUniqueEmailId, "SubscribedUniqueEmailId should be empty");
-
-            $this->assertEmpty($subscriber->SubscribedWebId, "SubscribedWebId should be empty");
-
-            $this->assertEmpty($subscriber->SubscribedId, "SubscribedId should be empty");
-
-            $mc_record = MailchimpSubscriber::checkExistsInList($list_id, $email);
-            $this->assertTrue(empty($mc_record['id']), "The subscriber exists in the list {$list_id} it should not");
-
-        }
+        $this->assertEquals($this->test_tags, $tagDelta);
 
     }
 
+
+    /**
+     * Test a new subscriber who is already in the list/audience
+     */
+    public function testExistingSubscriber(): void
+    {
+
+        $client = MailchimpSubscriber::api();
+
+        $this->assertTrue($client instanceof TestMailchimpApiClient, "Tests require the TestMailchimpApiClient to be the API client class");
+
+        if ($this->test_email === '' || !Email::is_valid_address($this->test_email)) {
+            throw new \Exception("The test needs a test email user");
+        }
+
+        // set a obfuscation chr
+        $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
+
+        // MailchimpSubscriber record values
+        $record = [
+            'Name' => "{$this->test_fname} {$this->test_lname}",
+            'Email' => $this->test_email,
+            'FailNoticeSent' => 0,
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
+            'TagsValue' => json_encode($this->test_update_tags)
+        ];
+
+        $subscriber = MailchimpSubscriber::create($record);
+        $subscriber->write();
+
+        // Store the subscriber for the test api client to provide mock responses
+        TestMailchimpApiClient::$subscriber = [
+            'fname' => $this->test_fname,
+            'lname' => $this->test_fname,
+            'email' => $this->test_email,
+            'tags' => $this->test_tags,// the ones that already exist
+            'tags_for_update' => $this->test_update_tags // updated tags
+        ];
+
+        // Trigger existing user handling
+        TestMailchimpApiClient::$subscriber_exists = true;
+
+        $result = $subscriber->subscribe();
+
+        $this->assertTrue($result);
+
+        $currentTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMPSUBSCRIBER_TAG_CURRENT);
+        $activeTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_ACTIVE);
+
+        $this->assertEquals(2, count($currentTags));
+        $this->assertEquals(2, count($activeTags));
+
+    }
+
+    public function testModifySubscriberTags(): void
+    {
+        $subscriberCurrentTags = ['current1','current2'];
+        $subscriberNewTags = ['new1','new2'];
+        // Store the subscriber for the test api client to provide mock responses
+        TestMailchimpApiClient::$subscriber = [
+            'fname' => $this->test_fname,
+            'lname' => $this->test_fname,
+            'email' => $this->test_email,
+            'tags' => $subscriberCurrentTags
+        ];
+
+        // MailchimpSubscriber record values
+        $record = [
+            'Name' => "{$this->test_fname} {$this->test_lname}",
+            'Email' => $this->test_email,
+            'FailNoticeSent' => 0,
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
+            'TagsValue' => json_encode($subscriberNewTags)
+        ];
+
+        $subscriber = MailchimpSubscriber::create($record);
+        $subscriber->write();
+
+        $subscriber->modifySubscriberTags();
+
+        $currentTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMPSUBSCRIBER_TAG_CURRENT);
+        $activeTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_ACTIVE);
+
+        $this->assertEquals(2, count($currentTags));
+        foreach($currentTags as $currentTag) {
+            $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
+        }
+        $this->assertEquals(2, count($activeTags));
+        foreach($activeTags as $activeTag) {
+            $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
+        }
+    }
+
+    public function testRemoveModifySubscriberTags(): void
+    {
+
+        Config::modify()->set(MailchimpSubscriber::class, 'remove_subscriber_tags', true);
+
+        $subscriberCurrentTags = ['current1','current2'];
+        $subscriberNewTags = ['new1','new2'];
+        // Store the subscriber for the test api client to provide mock responses
+        TestMailchimpApiClient::$subscriber = [
+            'fname' => $this->test_fname,
+            'lname' => $this->test_fname,
+            'email' => $this->test_email,
+            'tags' => $subscriberCurrentTags
+        ];
+
+        // MailchimpSubscriber record values
+        $record = [
+            'Name' => "{$this->test_fname} {$this->test_lname}",
+            'Email' => $this->test_email,
+            'FailNoticeSent' => 0,
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
+            'TagsValue' => json_encode($subscriberNewTags)
+        ];
+
+        $subscriber = MailchimpSubscriber::create($record);
+        $subscriber->write();
+
+        $subscriber->modifySubscriberTags();
+
+        $currentTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMPSUBSCRIBER_TAG_CURRENT);
+        $activeTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_ACTIVE);
+        $inactiveTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_INACTIVE);
+
+        $this->assertEquals(2, count($currentTags));
+        foreach($currentTags as $currentTag) {
+            $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
+        }
+        $this->assertEquals(2, count($activeTags));
+        foreach($activeTags as $activeTag) {
+            $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
+        }
+
+        // tags marked for removal as remove_subscriber_tags switch to true
+        $this->assertEquals(2, count($inactiveTags));
+        foreach($inactiveTags as $inactiveTag) {
+            $this->assertTrue(in_array($inactiveTag['name'], $subscriberCurrentTags));
+        }
+    }
+
+    public function testRetainModifySubscriberTags(): void
+    {
+
+        $subscriberCurrentTags = ['current1','current2'];
+        $subscriberNewTags = ['current2','new1','new2'];//retain current1
+        // Store the subscriber for the test api client to provide mock responses
+        TestMailchimpApiClient::$subscriber = [
+            'fname' => $this->test_fname,
+            'lname' => $this->test_fname,
+            'email' => $this->test_email,
+            'tags' => $subscriberCurrentTags
+        ];
+
+        // MailchimpSubscriber record values
+        $record = [
+            'Name' => "{$this->test_fname} {$this->test_lname}",
+            'Email' => $this->test_email,
+            'FailNoticeSent' => 0,
+            'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW,
+            'TagsValue' => json_encode($subscriberNewTags)
+        ];
+
+        $subscriber = MailchimpSubscriber::create($record);
+        $subscriber->write();
+
+        $subscriber->modifySubscriberTags();
+
+        $currentTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMPSUBSCRIBER_TAG_CURRENT);
+        $activeTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_ACTIVE);
+        $inactiveTags = $subscriber->getTagDelta(MailchimpSubscriber::MAILCHIMP_TAG_INACTIVE);
+
+        $this->assertEquals(2, count($currentTags));
+        foreach($currentTags as $currentTag) {
+            $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
+        }
+        $this->assertEquals(3, count($activeTags));
+        foreach($activeTags as $activeTag) {
+            $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
+        }
+
+        $this->assertEquals(0, count($inactiveTags));
+    }
 }

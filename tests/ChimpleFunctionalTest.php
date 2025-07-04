@@ -5,16 +5,10 @@ namespace NSWDPC\Chimple\Tests;
 use NSWDPC\Chimple\Forms\SubscribeForm;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
-use NSWDPC\Chimple\Controllers\ChimpleController;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
-use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\FieldType\DBHTMLText;
-use SilverStripe\Security\SecurityToken;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\SSViewer;
 
@@ -24,7 +18,6 @@ use SilverStripe\View\SSViewer;
  */
 class ChimpleFunctionalTest extends FunctionalTest
 {
-
     /**
      * @inheritdoc
      */
@@ -51,19 +44,22 @@ class ChimpleFunctionalTest extends FunctionalTest
     protected $test_form_code = 'functionalformcode';
 
 
-    public function setUp() : void {
+    #[\Override]
+    public function setUp(): void
+    {
         parent::setUp();
 
 
         // Inject test form
         Injector::inst()->registerService(
-            new TestSubscribeForm(), SubscribeForm::class
+            \NSWDPC\Chimple\Tests\TestSubscribeForm::create(),
+            SubscribeForm::class
         );
 
         // Suppress themes
         SSViewer::set_themes(
             [
-            SSViewer::DEFAULT_THEME
+                SSViewer::DEFAULT_THEME
             ]
         );
 
@@ -90,10 +86,10 @@ class ChimpleFunctionalTest extends FunctionalTest
         $config->write();
     }
 
-    public function testFormSubmission()
+    public function testFormSubmission(): void
     {
 
-        $this->useTestTheme(__DIR__, 'chimpletest', function () {
+        $this->useTestTheme(__DIR__, 'chimpletest', function (): void {
 
             // request default route
             $url = "/mc-subscribe/v1/";
@@ -115,7 +111,7 @@ class ChimpleFunctionalTest extends FunctionalTest
                 'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW
             ])->first();
 
-            $this->assertTrue( $subscriber && $subscriber->exists() );
+            $this->assertTrue($subscriber && $subscriber->exists());
 
         });
 

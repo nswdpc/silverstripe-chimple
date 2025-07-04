@@ -13,12 +13,12 @@ use SilverStripe\Admin\ModelAdmin;
  */
 class MailchimpAdmin extends ModelAdmin
 {
-    private static $managed_models = [
+    private static array $managed_models = [
         MailchimpSubscriber::class,
         MailchimpConfig::class
     ];
 
-    private static $menu_title = 'Mailchimp';
+    private static string $menu_title = 'Mailchimp';
 
-    private static $url_segment = 'mailchimp';
+    private static string $url_segment = 'mailchimp';
 }

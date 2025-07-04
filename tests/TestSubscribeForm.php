@@ -3,17 +3,18 @@
 namespace NSWDPC\Chimple\Tests;
 
 use NSWDPC\Chimple\Forms\SubscribeForm;
-use SilverStripe\Dev\Testonly;
+use SilverStripe\Dev\TestOnly;
 
 /**
  * Test subscribe form handling
  */
-class TestSubscribeForm extends SubscribeForm implements TestOnly {
-
+class TestSubscribeForm extends SubscribeForm implements TestOnly
+{
     /**
      * No need to spam protection on tests
      */
-    public function enableSpamProtection() {
+    public function enableSpamProtection(): null
+    {
         return null;
     }
 }

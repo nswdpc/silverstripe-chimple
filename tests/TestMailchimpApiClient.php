@@ -39,6 +39,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Override last error handling, to never return an error
      */
+    #[\Override]
     public function getLastError()
     {
         return self::$last_mock_error !== '' ? self::$last_mock_error : false;
@@ -47,6 +48,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Override last error handling, to never return an error
      */
+    #[\Override]
     public function getLastResponse()
     {
         return self::$last_mock_response;
@@ -55,7 +57,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * @inheritdoc
      */
-    public function delete($method, $args = array(), $timeout = self::TIMEOUT)
+    #[\Override]
+    public function delete($method, $args = [], $timeout = self::TIMEOUT)
     {
         return $this->makeTestRequest('delete', $method, $args, $timeout);
     }
@@ -63,7 +66,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * @inheritdoc
      */
-    public function get($method, $args = array(), $timeout = self::TIMEOUT)
+    #[\Override]
+    public function get($method, $args = [], $timeout = self::TIMEOUT)
     {
         return $this->makeTestRequest('get', $method, $args, $timeout);
     }
@@ -71,7 +75,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * @inheritdoc
      */
-    public function patch($method, $args = array(), $timeout = self::TIMEOUT)
+    #[\Override]
+    public function patch($method, $args = [], $timeout = self::TIMEOUT)
     {
         return $this->makeTestRequest('patch', $method, $args, $timeout);
     }
@@ -79,7 +84,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * @inheritdoc
      */
-    public function post($method, $args = array(), $timeout = self::TIMEOUT)
+    #[\Override]
+    public function post($method, $args = [], $timeout = self::TIMEOUT)
     {
         return $this->makeTestRequest('post', $method, $args, $timeout);
     }
@@ -87,7 +93,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * @inheritdoc
      */
-    public function put($method, $args = array(), $timeout = self::TIMEOUT)
+    #[\Override]
+    public function put($method, $args = [], $timeout = self::TIMEOUT)
     {
         return $this->makeTestRequest('put', $method, $args, $timeout);
     }
@@ -106,6 +113,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
             if(is_array($response)) {
                 self::$last_mock_response = $response;
             }
+
             return $response;
         }
 
@@ -172,8 +180,8 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
                 'web_id' => bin2hex(random_bytes(8)),
                 'full_name' => trim(self::$subscriber['fname'] . " " . self::$subscriber['lname']),
                 'merge_fields' => [
-                    'FNAME' => trim(self::$subscriber['fname']),
-                    'LNAME' => trim(self::$subscriber['lname'])
+                    'FNAME' => trim((string) self::$subscriber['fname']),
+                    'LNAME' => trim((string) self::$subscriber['lname'])
                 ]
             ];
             $response['tags'] = $tags;
@@ -184,7 +192,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Returns the state of the current set of tags for a user
      */
-    protected function getSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT) {
+    protected function getSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
         $tags = [];
         if(isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
             foreach(self::$subscriber['tags'] as $i => $tag) {
@@ -194,6 +202,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
                 ];
             }
         }
+
         return [
             'tags' => $tags,
             'total_items' => count($tags)
@@ -203,14 +212,14 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Method returns an empty response (204)
      */
-    protected function postSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT) {
+    protected function postSubscriberTags(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
         return [];
     }
 
     /**
      * Return mock response for creating a new subscriber
      */
-    protected function createSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT) {
+    protected function createSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
         $tags = [];
         if(isset($args['tags']) && is_array($args['tags'])) {
             foreach($args['tags'] as $i => $tag) {
@@ -241,7 +250,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     /**
      * Return mock response when an existing subscriber  is updated
      */
-    protected function updateSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT) {
+    protected function updateSubscriber(string $http_verb, string $method, array $args = [], int $timeout = parent::TIMEOUT): array {
         $response = [
             'id' =>  MailchimpSubscriber::getMailchimpSubscribedId($args['email_address']),
             'email' => $args['email_address'],

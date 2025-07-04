@@ -27,6 +27,7 @@ class ChimpleBatchSubscriberTest extends SapphireTest
 
     protected string $test_obfuscation_chr = "•";
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -76,7 +77,7 @@ class ChimpleBatchSubscriberTest extends SapphireTest
             $record = MailchimpSubscriber::create($subscriber);
             $record->write();
             // flag one as subscribed
-            if($subscriber['Email'] == 'test2@example.com') {
+            if($subscriber['Email'] === 'test2@example.com') {
                 $record->Status = MailchimpSubscriber::CHIMPLE_STATUS_SUCCESS;
                 $record->write();
             }

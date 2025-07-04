@@ -37,6 +37,7 @@ class ChimpleSubscriberTest extends SapphireTest
 
     protected string $test_obfuscation_chr = "•";
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -64,7 +65,7 @@ class ChimpleSubscriberTest extends SapphireTest
         }
 
         // set a obfuscation chr
-        $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
+        Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
 
         // MailchimpSubscriber record values
         $record = [
@@ -164,7 +165,7 @@ class ChimpleSubscriberTest extends SapphireTest
         }
 
         // set a obfuscation chr
-        $obfuscation_chr = Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
+        Config::inst()->get(MailchimpSubscriber::class, 'obfuscation_chr');
 
         // MailchimpSubscriber record values
         $record = [
@@ -235,6 +236,7 @@ class ChimpleSubscriberTest extends SapphireTest
         foreach($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
+
         $this->assertEquals(2, count($activeTags));
         foreach($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
@@ -278,6 +280,7 @@ class ChimpleSubscriberTest extends SapphireTest
         foreach($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
+
         $this->assertEquals(2, count($activeTags));
         foreach($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));
@@ -325,6 +328,7 @@ class ChimpleSubscriberTest extends SapphireTest
         foreach($currentTags as $currentTag) {
             $this->assertTrue(in_array($currentTag['name'], $subscriberCurrentTags));
         }
+
         $this->assertEquals(3, count($activeTags));
         foreach($activeTags as $activeTag) {
             $this->assertTrue(in_array($activeTag['name'], $subscriberNewTags));

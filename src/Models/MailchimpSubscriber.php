@@ -591,7 +591,6 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
 
     /**
      * Get the hash that is used as the MC subscribed Id value
-     * @return string
      */
     public static function getMailchimpSubscribedId(string $email): string
     {
@@ -632,7 +631,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         }
 
         // attempt to get the subscriber
-        if ($hash = self::getMailchimpSubscribedId($email)) {
+        if (($hash = self::getMailchimpSubscribedId($email)) !== '') {
             $result = self::api()->get(
                 "lists/{$list_id}/members/{$hash}"
             );
@@ -657,9 +656,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         } else {
             return array_filter(
                 $this->tagDelta,
-                function($v, $k) use ($status) {
-                    return $v['status'] == $status;
-                },
+                fn(array $v, $k): bool => $v['status'] == $status,
                 ARRAY_FILTER_USE_BOTH
             );
         }
@@ -705,6 +702,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                         'status' => self::MAILCHIMPSUBSCRIBER_TAG_CURRENT
                     ];
                 }
+
                 // new members are pending
                 $params['status'] = self::MAILCHIMP_SUBSCRIBER_PENDING;
 

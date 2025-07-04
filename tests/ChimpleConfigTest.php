@@ -11,7 +11,6 @@ use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\SiteConfig\SiteConfig;
 

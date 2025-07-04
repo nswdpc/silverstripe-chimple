@@ -84,7 +84,7 @@ class ElementChimpleSubscribe extends BaseElement
                 LiteralField::create(
                     'NotEnabled',
                     '<p class="message warning">'
-                    . _t(self::class . 'NOT_ENABLED', 'Mailchimp is not enable in site configuration')
+                    . htmlspecialchars(_t(self::class . 'NOT_ENABLED', 'Mailchimp is not enable in site configuration'))
                     . '</p>'
                 )
             );

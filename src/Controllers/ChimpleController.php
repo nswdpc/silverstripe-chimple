@@ -230,7 +230,6 @@ class ChimpleController extends PageController
      */
     public function getSelectableTagsMeta(array $tags, string $title, ?string $description = null): array
     {
-        $field = [];
         $result['field'] = $this->getSelectableTagsField($tags, $title, $description);
         $result['insertAfter'] = $this->getSelectableTagsFieldPosition();
         return $result;
@@ -252,10 +251,12 @@ class ChimpleController extends PageController
         if($tags == []) {
             return null;
         }
+
         $title = strip_tags(trim($title));
         if($title === "") {
             $title = "I am interested in the following topics";
         }
+
         $field = CheckboxSetField::create(
             'SelectedTags',
             _t(self::class . ".TAGS_USER_SELECT_TITLE", $title),
@@ -264,6 +265,7 @@ class ChimpleController extends PageController
         if(is_string($description)) {
             $field = $field->setDescription(strip_tags(trim($description)));
         }
+
         return $field;
     }
 
@@ -527,8 +529,9 @@ class ChimpleController extends PageController
     /**
      * Return a merged array of tags the user has selected and the default tags from the
      * provided MailchimpConfig instance
+     * @return mixed[]
      */
-    public function getSubscriptionTags(MailchimpConfig $config, array $userSelectedTags = []) {
+    public function getSubscriptionTags(MailchimpConfig $config, array $userSelectedTags = []): array {
         // resulting array of tags
         $subscriptionTags = [];
 

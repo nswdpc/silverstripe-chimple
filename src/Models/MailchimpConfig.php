@@ -45,6 +45,9 @@ use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
  * @property bool $UseXHR
  * @property ?string $BeforeFormContent
  * @property ?string $AfterFormContent
+ * @property mixed $SelectableTags
+ * @property bool $SelectableTagsEnabled
+ * @property ?string $SelectableTagsTitle
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {
@@ -527,6 +530,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 return $tags;
             }
         }
+
         return [];
     }
 

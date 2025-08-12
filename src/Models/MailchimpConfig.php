@@ -11,8 +11,10 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\MultiSelectField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
@@ -21,7 +23,9 @@ use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\TemplateGlobalProvider;
+use Symbiote\MultiValueField\Fields\KeyValueField;
 use Symbiote\MultiValueField\Fields\MultiValueTextField;
+use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 
 /**
  * Configure mailchimp subscriptions - this is linked to {@link Site} for the global form
@@ -78,8 +82,10 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'SendWelcome' => 'Boolean',// @deprecated
         'ReplaceInterests' => 'Boolean',// @deprecated
         'DoubleOptIn' => 'Boolean',// @deprecated
-        // for storing tags to submit with subscriber
-        'Tags' => 'MultiValueField',
+        'Tags' => 'MultiValueField',// for storing tags to submit with subscriber
+        'SelectableTags' => 'MultiValueField',// optional selectable tags
+        'SelectableTagsEnabled' => 'Boolean', // whether the user can select the tags in SelectableTags,
+        'SelectableTagsTitle' => 'Varchar(255)', // title for the tag selection field
         'UseXHR' => 'Boolean',// whether to submit without redirect
         'BeforeFormContent' => 'HTMLText',
         'AfterFormContent' => 'HTMLText'
@@ -112,7 +118,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'ReplaceInterests' => 0,// @deprecated
         'DoubleOptIn' => 1,// @deprecated
         'IsGlobal' => 0,
-        'UseXHR' => 1
+        'UseXHR' => 1,
+        'SelectableTagsTitle' => "I am interested in the following topics"
     ];
 
     public function TitleCode(): string
@@ -319,15 +326,60 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             );
         }
 
-        $fields->addFieldToTab(
-            'Root.Main',
-            MultiValueTextField::create(
-                'Tags',
-                _t(
-                    self::class . '.TAGS_FOR_SUBSCRIPTIONS',
-                    'Tags assigned to subscribers'
+        $fields->removeByName(['Tags','SelectableTags','SelectableTagsEnabled','SelectableTagsTitle']);
+        $fields->addFieldsToTab(
+            'Root.Tagging', [
+                MultiValueTextField::create(
+                    'Tags',
+                    _t(
+                        self::class . '.TAGS_FOR_SUBSCRIPTIONS',
+                        'Tags assigned to subscribers'
+                    )
+                )->setRightTitle(
+                    _t(
+                        self::class . '.TAGS_FOR_SUBSCRIPTIONS_HELPTEXT',
+                        'These tags will be assigned to susbcribers who have subscribed via forms using this configuration'
+                    )
+                ),
+                CompositeField::create(
+                    KeyValueField::create(
+                        'SelectableTags',
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_TO_SELECT',
+                            'Enter tag names and descriptions'
+                        )
+                    )->setRightTitle(
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_TO_SELECT_HELPTEXT',
+                            'Enter the Mailchimp tag name on the left and the value that will be seen by a subscriber on the right'
+                        )
+                    ),
+                    CheckboxField::create(
+                        'SelectableTagsEnabled',
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_ENABLED',
+                            'Allow the tags listed above to be shown in subscription forms'
+                        )
+                    )->setRightTitle(
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_ENABLED_HELPTEXT',
+                            'Allows toggling visibility of selectable tags.'
+                        )
+                    ),
+                    TextField::create(
+                        'SelectableTagsTitle',
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_TITLE',
+                            'The title that will prompt subscribers to select the tags'
+                        )
+                    )
+                )->setTitle(
+                    _t(
+                        self::class . '.TAGS_FOR_SUBSCRIBERS_GROUP_TITLE',
+                        'Tags that can be selected by subscribers'
+                    )
                 )
-            )
+            ]
         );
 
         $fields->addFieldToTab(
@@ -433,24 +485,49 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
         // ensure the form has a unique name per code
         $formNameSuffix = ($this->Code ?? '');
-        $form = Injector::inst()->create(ChimpleController::class)
-            ->setFormNameSuffix($formNameSuffix)
-            ->getSubscriptionForm($use_xhr);
+        $controller = Injector::inst()->create(ChimpleController::class);
+        $form = $controller->setFormNameSuffix($formNameSuffix)->getSubscriptionForm($use_xhr);
         // to return a form, there must be one and the Code must exist
         if ($form && $this->Code) {
             // apply the code for this config to the form
+            $fields = $form->Fields();
             $code_field = HiddenField::create('code', 'code', $this->Code);
             $code_field->setForm($form);
-            $form->Fields()->push($code_field);
+            $fields->push($code_field);
             if ($this->Heading) {
                 $form->setLegend($this->Heading);
             }
 
+            // add the selectable tags field
+            $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $this->SelectableTagsTitle ?? '');
+            $insertTagsAfter = isset($selectableTagsMeta['insertAfter']) && is_string($selectableTagsMeta['insertAfter']) ? $selectableTagsMeta['insertAfter'] : 'Email';
+            if(isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField) {
+                $fields->insertAfter($insertTagsAfter, $selectableTagsMeta['field']);
+            }
+
             $form->addExtraClass('form-subscribe');
+
+            // allow extensions to update the configured field
+            $form->extend('updateConfiguredChimpleSubscribeForm');
+
             return $form;
         }
 
         return null;
+    }
+
+    /**
+     * Return an array in key=>value format of all tags available for selection
+     */
+    public function getSelectableTagsList(): array
+    {
+        if($this->SelectableTagsEnabled && (($selectableTags = $this->SelectableTags) instanceof MultiValueField)) {
+            $tags = $selectableTags->getValue();
+            if(is_array($tags)) {
+                return $tags;
+            }
+        }
+        return [];
     }
 
     /**

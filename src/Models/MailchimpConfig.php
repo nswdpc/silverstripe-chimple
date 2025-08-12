@@ -331,7 +331,8 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
 
         $fields->removeByName(['Tags','SelectableTags','SelectableTagsEnabled','SelectableTagsTitle']);
         $fields->addFieldsToTab(
-            'Root.Tagging', [
+            'Root.Tagging',
+            [
                 MultiValueTextField::create(
                     'Tags',
                     _t(
@@ -504,7 +505,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             // add the selectable tags field
             $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $this->SelectableTagsTitle ?? '');
             $insertTagsAfter = isset($selectableTagsMeta['insertAfter']) && is_string($selectableTagsMeta['insertAfter']) ? $selectableTagsMeta['insertAfter'] : 'Email';
-            if(isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField) {
+            if (isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField) {
                 $fields->insertAfter($insertTagsAfter, $selectableTagsMeta['field']);
             }
 
@@ -524,9 +525,9 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
      */
     public function getSelectableTagsList(): array
     {
-        if($this->SelectableTagsEnabled && (($selectableTags = $this->SelectableTags) instanceof MultiValueField)) {
+        if ($this->SelectableTagsEnabled && (($selectableTags = $this->SelectableTags) instanceof MultiValueField)) {
             $tags = $selectableTags->getValue();
-            if(is_array($tags)) {
+            if (is_array($tags)) {
                 return $tags;
             }
         }

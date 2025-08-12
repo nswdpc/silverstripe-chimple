@@ -248,12 +248,12 @@ class ChimpleController extends PageController
      */
     public function getSelectableTagsField(array $tags, string $title, ?string $description = null): ?MultiSelectField
     {
-        if($tags == []) {
+        if ($tags == []) {
             return null;
         }
 
         $title = strip_tags(trim($title));
-        if($title === "") {
+        if ($title === "") {
             $title = "I am interested in the following topics";
         }
 
@@ -262,7 +262,7 @@ class ChimpleController extends PageController
             _t(self::class . ".TAGS_USER_SELECT_TITLE", $title),
             $tags
         );
-        if(is_string($description)) {
+        if (is_string($description)) {
             $field = $field->setDescription(strip_tags(trim($description)));
         }
 
@@ -531,15 +531,16 @@ class ChimpleController extends PageController
      * provided MailchimpConfig instance
      * @return mixed[]
      */
-    public function getSubscriptionTags(MailchimpConfig $config, array $userSelectedTags = []): array {
+    public function getSubscriptionTags(MailchimpConfig $config, array $userSelectedTags = []): array
+    {
         // resulting array of tags
         $subscriptionTags = [];
 
         // Selectable tags
         $selectableTags = $config->SelectableTags;
-        if($selectableTags instanceof MultiValueField) {
+        if ($selectableTags instanceof MultiValueField) {
             $selectableTagsList = $selectableTags->getValue();
-            if(is_array($selectableTagsList)) {
+            if (is_array($selectableTagsList)) {
                 // return all tags allowed in the MailchimpConfig provided
                 // selectable tags are stored in key->value format
                 $subscriptionTags = array_intersect($userSelectedTags, array_keys($selectableTagsList));
@@ -548,9 +549,9 @@ class ChimpleController extends PageController
 
         // Default tags
         $tags = $config->Tags;
-        if($tags instanceof MultiValueField) {
+        if ($tags instanceof MultiValueField) {
             $configTags = $tags->getValue();
-            if(is_array($configTags)) {
+            if (is_array($configTags)) {
                 $subscriptionTags = array_merge($subscriptionTags, $configTags);
             }
         }

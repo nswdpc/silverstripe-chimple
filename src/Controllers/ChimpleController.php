@@ -256,7 +256,7 @@ class ChimpleController extends PageController
         }
 
         $title = strip_tags(trim($title));
-        if($singleSelect) {
+        if ($singleSelect) {
             if ($title === "") {
                 $title = "I am interested in one of the following topics";
             }
@@ -490,7 +490,7 @@ class ChimpleController extends PageController
 
                 // tagging
                 $selectedTags = [];
-                if(isset($data['SelectedTags'])) {
+                if (isset($data['SelectedTags'])) {
                     if (is_array($data['SelectedTags'])) {
                         // multi select field
                         $selectedTags = $data['SelectedTags'];

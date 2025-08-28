@@ -520,7 +520,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             // only one allowed?
             $singleSelect = $this->SelectableTagsOneOnly == 1;
             // get the selectable tags field and other data
-            $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $singleSelect, $this->SelectableTagsTitle ?? ''); 
+            $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $singleSelect, $this->SelectableTagsTitle ?? '');
             $insertTagsAfter = isset($selectableTagsMeta['insertAfter']) && is_string($selectableTagsMeta['insertAfter']) ? $selectableTagsMeta['insertAfter'] : 'Email';
             if (isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField || $selectableTagsMeta['field'] instanceof SingleSelectField) {
                 $fields->insertAfter($insertTagsAfter, $selectableTagsMeta['field']);

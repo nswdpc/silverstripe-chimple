@@ -49,6 +49,7 @@ use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
  * @property mixed $SelectableTags
  * @property bool $SelectableTagsEnabled
  * @property ?string $SelectableTagsTitle
+ * @property bool $SelectableTagsOneOnly
  */
 class MailchimpConfig extends DataObject implements TemplateGlobalProvider, PermissionProvider
 {

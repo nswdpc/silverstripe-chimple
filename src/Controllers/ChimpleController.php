@@ -277,6 +277,7 @@ class ChimpleController extends PageController
                 $tags
             );
         }
+
         if (is_string($description) && $description !== '') {
             $field = $field->setDescription(strip_tags(trim($description)));
         }
@@ -490,14 +491,15 @@ class ChimpleController extends PageController
                 // tagging
                 $selectedTags = [];
                 if(isset($data['SelectedTags'])) {
-                    if(is_array($data['SelectedTags'])) {
+                    if (is_array($data['SelectedTags'])) {
                         // multi select field
                         $selectedTags = $data['SelectedTags'];
-                    } else if(is_string($data['SelectedTags'])) {
+                    } elseif (is_string($data['SelectedTags'])) {
                         // single tag selection
                         $selectedTags[] = $data['SelectedTags'];
                     }
                 }
+
                 $sub->Tags = $this->getSubscriptionTags($mc_config, $selectedTags);
                 $sub_id = $sub->write();
                 if (!$sub_id) {

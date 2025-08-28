@@ -9,6 +9,8 @@ use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
 use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Forms\MultiSelectField;
+use SilverStripe\Forms\SingleSelectField;
+use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -228,9 +230,9 @@ class ChimpleController extends PageController
     /**
      * Get metadata for the selectable tags field
      */
-    public function getSelectableTagsMeta(array $tags, string $title, ?string $description = null): array
+    public function getSelectableTagsMeta(array $tags, bool $singleSelect, string $title, ?string $description = null): array
     {
-        $result['field'] = $this->getSelectableTagsField($tags, $title, $description);
+        $result['field'] = $this->getSelectableTagsField($tags, $singleSelect, $title, $description);
         $result['insertAfter'] = $this->getSelectableTagsFieldPosition();
         return $result;
     }
@@ -244,25 +246,38 @@ class ChimpleController extends PageController
     }
 
     /**
-     * Return a MultiSelectField containing all the selectable tags in the provided config
+     * Return a MultiSelectField or a SingleSelectField containing all the selectable tags in the provided config
+     * Can return null if no tags are passed
      */
-    public function getSelectableTagsField(array $tags, string $title, ?string $description = null): ?MultiSelectField
+    public function getSelectableTagsField(array $tags, bool $singleSelect, string $title, ?string $description = null): MultiSelectField|SingleSelectField|null
     {
         if ($tags == []) {
             return null;
         }
 
         $title = strip_tags(trim($title));
-        if ($title === "") {
-            $title = "I am interested in the following topics";
-        }
+        if($singleSelect) {
+            if ($title === "") {
+                $title = "I am interested in one of the following topics";
+            }
 
-        $field = CheckboxSetField::create(
-            'SelectedTags',
-            _t(self::class . ".TAGS_USER_SELECT_TITLE", $title),
-            $tags
-        );
-        if (is_string($description)) {
+            $field = OptionsetField::create(
+                'SelectedTags',
+                _t(self::class . ".TAGS_USER_SELECT_SINGLE_TITLE", $title),
+                $tags
+            );
+        } else {
+            if ($title === "") {
+                $title = "I am interested in the following topics";
+            }
+
+            $field = CheckboxSetField::create(
+                'SelectedTags',
+                _t(self::class . ".TAGS_USER_SELECT_TITLE", $title),
+                $tags
+            );
+        }
+        if (is_string($description) && $description !== '') {
             $field = $field->setDescription(strip_tags(trim($description)));
         }
 
@@ -471,10 +486,19 @@ class ChimpleController extends PageController
                 $sub->Email = $data['Email'];
                 $sub->MailchimpListId = $list_id;//list they are subscribing to
                 $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-                $sub->Tags = $this->getSubscriptionTags(
-                    $mc_config,
-                    isset($data['SelectedTags']) && is_array($data['SelectedTags']) ? $data['SelectedTags'] : []
-                );
+
+                // tagging
+                $selectedTags = [];
+                if(isset($data['SelectedTags'])) {
+                    if(is_array($data['SelectedTags'])) {
+                        // multi select field
+                        $selectedTags = $data['SelectedTags'];
+                    } else if(is_string($data['SelectedTags'])) {
+                        // single tag selection
+                        $selectedTags[] = $data['SelectedTags'];
+                    }
+                }
+                $sub->Tags = $this->getSubscriptionTags($mc_config, $selectedTags);
                 $sub_id = $sub->write();
                 if (!$sub_id) {
                     throw new RequestException("Bad Gateway", 502);

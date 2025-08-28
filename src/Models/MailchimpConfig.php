@@ -12,6 +12,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\MultiSelectField;
+use SilverStripe\Forms\SingleSelectField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\CompositeField;
@@ -88,6 +89,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
         'Tags' => 'MultiValueField',// for storing tags to submit with subscriber
         'SelectableTags' => 'MultiValueField',// optional selectable tags
         'SelectableTagsEnabled' => 'Boolean', // whether the user can select the tags in SelectableTags,
+        'SelectableTagsOneOnly' => 'Boolean', // whether the user can only select one of the tags
         'SelectableTagsTitle' => 'Varchar(255)', // title for the tag selection field
         'UseXHR' => 'Boolean',// whether to submit without redirect
         'BeforeFormContent' => 'HTMLText',
@@ -329,7 +331,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
             );
         }
 
-        $fields->removeByName(['Tags','SelectableTags','SelectableTagsEnabled','SelectableTagsTitle']);
+        $fields->removeByName(['Tags','SelectableTags','SelectableTagsEnabled','SelectableTagsOneOnly','SelectableTagsTitle']);
         $fields->addFieldsToTab(
             'Root.Tagging',
             [
@@ -368,6 +370,18 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                         _t(
                             self::class . '.TAGS_FOR_SUBSCRIBERS_ENABLED_HELPTEXT',
                             'Allows toggling visibility of selectable tags.'
+                        )
+                    ),
+                    CheckboxField::create(
+                        'SelectableTagsOneOnly',
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_ONE_ONLY',
+                            'Subscriber can select one tag only'
+                        )
+                    )->setRightTitle(
+                        _t(
+                            self::class . '.TAGS_FOR_SUBSCRIBERS_ONE_ONLY_HELPTEXT',
+                            'Adds a single-selection field instead of a multi-selection field.'
                         )
                     ),
                     TextField::create(
@@ -502,10 +516,12 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
                 $form->setLegend($this->Heading);
             }
 
-            // add the selectable tags field
-            $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $this->SelectableTagsTitle ?? '');
+            // only one allowed?
+            $singleSelect = $this->SelectableTagsOneOnly == 1;
+            // get the selectable tags field and other data
+            $selectableTagsMeta = $controller->getSelectableTagsMeta($this->getSelectableTagsList(), $singleSelect, $this->SelectableTagsTitle ?? ''); 
             $insertTagsAfter = isset($selectableTagsMeta['insertAfter']) && is_string($selectableTagsMeta['insertAfter']) ? $selectableTagsMeta['insertAfter'] : 'Email';
-            if (isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField) {
+            if (isset($selectableTagsMeta['field']) && $selectableTagsMeta['field'] instanceof MultiSelectField || $selectableTagsMeta['field'] instanceof SingleSelectField) {
                 $fields->insertAfter($insertTagsAfter, $selectableTagsMeta['field']);
             }
 

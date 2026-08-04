@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace NSWDPC\Chimple\Services;
 
 use Psr\Log\LoggerInterface;

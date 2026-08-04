@@ -437,6 +437,7 @@ class ChimpleController extends PageController
 
             // handle a successful subscription
             $response = $this->handleSuccess(200, $form);
+            // @phpstan-ignore instanceof.alwaysTrue
             if ($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
                 return $response;
@@ -460,6 +461,7 @@ class ChimpleController extends PageController
 
         // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
+        // @phpstan-ignore instanceof.alwaysTrue
         if ($response && ($response instanceof HTTPResponse)) {
             // handle XHR error responses
             return $response;

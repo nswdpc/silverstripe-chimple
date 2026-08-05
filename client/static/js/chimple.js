@@ -18,7 +18,6 @@ if (typeof window.FormData !== 'undefined') {
     }
 
     handle() {
-      console.log('handle');
       this.form.addEventListener('submit', (e) => {
         e.preventDefault();
         this.submitForm();

@@ -81,12 +81,17 @@ if(typeof window.FormData != 'undefined') {
 
   };
 
-  const chimples = document.querySelectorAll('form.form-subscribe.chimple[data-xhr]');
-  chimples.forEach(
-    function(f) {
-      var c = new ChimpleSubmit();
-      c.init(f).handle();
-    }
+  window.addEventListener(
+      'DOMContentLoaded',
+      function() {
+        const chimples = document.querySelectorAll('form.form-subscribe.chimple[data-xhr]');
+        chimples.forEach(
+          function(f) {
+            var c = new ChimpleSubmit();
+            c.init(f).handle();
+          }
+        );
+      }
   );
 
 }

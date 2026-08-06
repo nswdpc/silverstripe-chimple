@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace NSWDPC\Chimple\Forms;
 
 use NSWDPC\Chimple\Traits\SubscriptionForm;

@@ -5,7 +5,6 @@ namespace NSWDPC\Chimple\Forms;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\Validator;
 
 /**
  * Subscription form subclass to handle submissions via XHR
@@ -19,11 +18,11 @@ class XhrSubscribeForm extends SubscribeForm
     private static bool $disable_security_token = false;
 
     public function __construct(
-        RequestHandler $controller = null,
+        ?RequestHandler $controller = null,
         $name = self::DEFAULT_NAME,
-        FieldList $fields = null,
-        FieldList $actions = null,
-        Validator $validator = null
+        ?FieldList $fields = null,
+        ?FieldList $actions = null,
+        ?\SilverStripe\Forms\Validation\Validator $validator = null
     ) {
         parent::__construct($controller, $name, $fields, $actions, $validator);
         if (self::config()->get('disable_security_token')) {

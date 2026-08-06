@@ -131,11 +131,11 @@ class ChimpleSubscriberTest extends SapphireTest
 
         $this->assertNotEmpty($subscriber->SubscribedUniqueEmailId);
 
-        $this->assertTrue(substr_count($subscriber->Email, $this->test_obfuscation_chr) > 0, "Email is obfuscated");
+        $this->assertTrue(substr_count((string) $subscriber->Email, $this->test_obfuscation_chr) > 0, "Email is obfuscated");
 
-        $this->assertTrue(substr_count($subscriber->Name, $this->test_obfuscation_chr) > 0, "Name is obfuscated");
+        $this->assertTrue(substr_count((string) $subscriber->Name, $this->test_obfuscation_chr) > 0, "Name is obfuscated");
 
-        $this->assertTrue(substr_count($subscriber->Surname, $this->test_obfuscation_chr) > 0, "Surname is obfuscated");
+        $this->assertTrue(substr_count((string) $subscriber->Surname, $this->test_obfuscation_chr) > 0, "Surname is obfuscated");
 
         TestMailchimpApiClient::setSubscriberExists(true);// flip to exist mode fpr test
         $mailchimpRecord = MailchimpSubscriber::checkExistsInList($this->test_list_id, $record['Email']);

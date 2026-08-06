@@ -304,7 +304,13 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             );
         }
 
-        $tags = $this->getCurrentSubscriberTags();
+        try {
+            $tags = $this->getCurrentSubscriberTags();
+        } catch (\Exception $exception) {
+            Logger::log("Failed to get current subscriber tags: {$exception->getMessage()}", "NOTICE");
+            $tags = [];
+        }
+
         $tag_field_description = "";
         if ($tags !== []) {
             $tag_field_description = _t(

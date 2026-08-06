@@ -7,6 +7,10 @@ use NSWDPC\Chimple\Forms\XhrSubscribeForm;
 use NSWDPC\Chimple\Exceptions\RequestException;
 use NSWDPC\Chimple\Models\MailchimpConfig;
 use NSWDPC\Chimple\Models\MailchimpSubscriber;
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\MultiSelectField;
+use SilverStripe\Forms\SingleSelectField;
+use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -22,6 +26,7 @@ use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\ValidationResult;
+use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 use PageController;
 
 /**
@@ -33,6 +38,8 @@ class ChimpleController extends PageController
     private static string $url_segment = 'mc-subscribe/v1';
 
     private static bool $hide_generic_form = true;
+
+    private static string $selectable_tags_field_position = 'Email';
 
     private static array $allowed_actions = [
         'SubscribeForm',
@@ -218,6 +225,64 @@ class ChimpleController extends PageController
                         ->setAttribute('title', _t(self::class. '.EMAIL', 'Email'))
                         ->setAttribute('required', 'required')
         );
+    }
+
+    /**
+     * Get metadata for the selectable tags field
+     */
+    public function getSelectableTagsMeta(array $tags, bool $singleSelect, string $title, ?string $description = null): array
+    {
+        $result['field'] = $this->getSelectableTagsField($tags, $singleSelect, $title, $description);
+        $result['insertAfter'] = $this->getSelectableTagsFieldPosition();
+        return $result;
+    }
+
+    /**
+     * Return the field that the selectable tags field should be inserted after
+     */
+    public function getSelectableTagsFieldPosition(): string
+    {
+        return static::config()->get('selectable_tags_field_position') ?? 'Email';
+    }
+
+    /**
+     * Return a MultiSelectField or a SingleSelectField containing all the selectable tags in the provided config
+     * Can return null if no tags are passed
+     */
+    public function getSelectableTagsField(array $tags, bool $singleSelect, string $title, ?string $description = null): MultiSelectField|SingleSelectField|null
+    {
+        if ($tags == []) {
+            return null;
+        }
+
+        $title = strip_tags(trim($title));
+        if ($singleSelect) {
+            if ($title === "") {
+                $title = "I am interested in one of the following topics";
+            }
+
+            $field = OptionsetField::create(
+                'SelectedTags',
+                _t(self::class . ".TAGS_USER_SELECT_SINGLE_TITLE", $title),
+                $tags
+            );
+        } else {
+            if ($title === "") {
+                $title = "I am interested in the following topics";
+            }
+
+            $field = CheckboxSetField::create(
+                'SelectedTags',
+                _t(self::class . ".TAGS_USER_SELECT_TITLE", $title),
+                $tags
+            );
+        }
+
+        if (is_string($description) && $description !== '') {
+            $field = $field->setDescription(strip_tags(trim($description)));
+        }
+
+        return $field;
     }
 
     /**
@@ -422,7 +487,20 @@ class ChimpleController extends PageController
                 $sub->Email = $data['Email'];
                 $sub->MailchimpListId = $list_id;//list they are subscribing to
                 $sub->Status = MailchimpSubscriber::CHIMPLE_STATUS_NEW;
-                $sub->Tags = $mc_config->Tags;
+
+                // tagging
+                $selectedTags = [];
+                if (isset($data['SelectedTags'])) {
+                    if (is_array($data['SelectedTags'])) {
+                        // multi select field
+                        $selectedTags = $data['SelectedTags'];
+                    } elseif (is_string($data['SelectedTags'])) {
+                        // single tag selection
+                        $selectedTags[] = $data['SelectedTags'];
+                    }
+                }
+
+                $sub->Tags = $this->getSubscriptionTags($mc_config, $selectedTags);
                 $sub_id = $sub->write();
                 if (!$sub_id) {
                     throw new RequestException("Bad Gateway", 502);
@@ -474,6 +552,39 @@ class ChimpleController extends PageController
             return $this->redirect($this->Link("?" . $query_string));
         }
 
+    }
+
+    /**
+     * Return a merged array of tags the user has selected and the default tags from the
+     * provided MailchimpConfig instance
+     * @return mixed[]
+     */
+    public function getSubscriptionTags(MailchimpConfig $config, array $userSelectedTags = []): array
+    {
+        // resulting array of tags
+        $subscriptionTags = [];
+
+        // Selectable tags
+        $selectableTags = $config->SelectableTags;
+        if ($selectableTags instanceof MultiValueField) {
+            $selectableTagsList = $selectableTags->getValue();
+            if (is_array($selectableTagsList)) {
+                // return all tags allowed in the MailchimpConfig provided
+                // selectable tags are stored in key->value format
+                $subscriptionTags = array_intersect($userSelectedTags, array_keys($selectableTagsList));
+            }
+        }
+
+        // Default tags
+        $tags = $config->Tags;
+        if ($tags instanceof MultiValueField) {
+            $configTags = $tags->getValue();
+            if (is_array($configTags)) {
+                $subscriptionTags = array_merge($subscriptionTags, $configTags);
+            }
+        }
+
+        return $subscriptionTags;
     }
 
     /**

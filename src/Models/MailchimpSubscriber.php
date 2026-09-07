@@ -747,8 +747,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 $error_status = $result['status'];
                 $error_title = $result['title'];
                 $errors = "{$error_status}|{$error_title}|{$error_detail}";
-            }
-            else {
+            } else {
                 $errors = "Unhandled error for email: {$email}";
             }
 

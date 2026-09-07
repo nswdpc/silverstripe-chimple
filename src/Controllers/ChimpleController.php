@@ -344,7 +344,7 @@ class ChimpleController extends PageController
     /**
      * Handle errors, based on the request type
      */
-    private function handleError($code, $error_message, Form $form = null): ?\SilverStripe\Control\HTTPResponse
+    private function handleError($code, $error_message, ?Form $form = null): ?\SilverStripe\Control\HTTPResponse
     {
         if ($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
@@ -359,7 +359,7 @@ class ChimpleController extends PageController
     /**
      * Handle successful submissions, based on the request type
      */
-    private function handleSuccess(int $code, Form $form = null): ?\SilverStripe\Control\HTTPResponse
+    private function handleSuccess(int $code, ?Form $form = null): ?\SilverStripe\Control\HTTPResponse
     {
         $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
         if ($this->request->isAjax()) {
@@ -375,7 +375,7 @@ class ChimpleController extends PageController
     /**
      * Subscribe action
      */
-    public function subscribe(array $data = [], Form $form = null)
+    public function subscribe(array $data = [], ?Form $form = null)
     {
 
         try {
@@ -515,6 +515,7 @@ class ChimpleController extends PageController
 
             // handle a successful subscription
             $response = $this->handleSuccess(200, $form);
+            // @phpstan-ignore instanceof.alwaysTrue
             if ($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
                 return $response;
@@ -538,6 +539,7 @@ class ChimpleController extends PageController
 
         // Handle subscribe attempt failures
         $response = $this->handleError($error_code, $error_message, $form);
+        // @phpstan-ignore instanceof.alwaysTrue
         if ($response && ($response instanceof HTTPResponse)) {
             // handle XHR error responses
             return $response;

@@ -573,7 +573,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         $obfuscate = function (string $in): string {
             $length = strlen($in);
-            if ($length == 0) {
+            if ($length === 0) {
                 return "";
             }
 

@@ -39,14 +39,14 @@
         "symbiote/silverstripe-multivaluefield": "^6"
     },
     "require-dev": {
-        "cambis/silverstripe-rector": "^1",
-        "cambis/silverstan": "^1",
+        "cambis/silverstripe-rector": "^2",
+        "cambis/silverstan": "^2",
         "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9.5",
-        "phpstan/phpstan": "^1",
-        "rector/rector": "^1",
-        "nswdpc/ci-files": "dev-v-3",
-        "vlucas/phpdotenv": "^5"
+        "phpstan/phpstan": "^2",
+        "phpstan/phpstan-phpunit": "^2",
+        "rector/rector": "^2",
+        "nswdpc/ci-files": "dev-v-4"
     },
     "autoload": {
         "psr-4": {
@@ -61,6 +61,12 @@
             "NSWDPC\\Chimple\\Traits\\": "src/Traits/",
             "NSWDPC\\Chimple\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "phpstan-analyse": "./vendor/bin/phpstan analyse --ansi --no-progress --no-interaction --configuration vendor/nswdpc/ci-files/phpstan/.phpstan.silverstripe.neon src/ tests/",
+        "rector-dryrun": "./vendor/bin/rector process --dry-run --ansi --config vendor/nswdpc/ci-files/rector/.rector.silverstripe_53_83.php src/ tests/",
+        "rector-process": "./vendor/bin/rector process --no-diffs --ansi --config vendor/nswdpc/ci-files/rector/.rector.silverstripe_53_83.php src/ tests/",
+        "phpcsfixer-fix": "./vendor/bin/php-cs-fixer fix --ansi --no-interaction --config vendor/nswdpc/ci-files/php-cs-fixer/.php-cs-fixer.php src/ tests/"
     },
     "config": {
         "allow-plugins": {

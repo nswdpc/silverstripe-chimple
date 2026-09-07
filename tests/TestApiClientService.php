@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace NSWDPC\Chimple\Tests;
 
 use NSWDPC\Chimple\Services\ApiClientService;
@@ -11,7 +13,7 @@ use SilverStripe\Dev\TestOnly;
 class TestApiClientService extends ApiClientService implements TestOnly
 {
     #[\Override]
-    public static function getClient(string $api_key, string $api_endpoint = null): object
+    public static function getClient(string $api_key, ?string $api_endpoint = null): object
     {
         return new TestMailchimpApiClient($api_key, $api_endpoint);
     }

@@ -480,7 +480,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         $list_id = $this->getField('MailchimpListId');
         if (!$list_id) {
-            $list_id = MailchimpConfig::getDefaultMailchimpListId();
+            return MailchimpConfig::getDefaultMailchimpListId();
         }
 
         return $list_id;
@@ -560,9 +560,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $tags = $this->Tags->getValue();
         if (!is_array($tags)) {
             return [];
-        } else {
-            return array_values($tags);
         }
+        return array_values($tags);
     }
 
     /**
@@ -602,9 +601,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         if ($email === '' || !Email::is_valid_address($email)) {
             return '';
-        } else {
-            return MailchimpApiClient::subscriberHash($email);
         }
+        return MailchimpApiClient::subscriberHash($email);
     }
 
     /**
@@ -659,13 +657,12 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         if ($status === '') {
             return $this->tagDelta;
-        } else {
-            return array_filter(
-                $this->tagDelta,
-                fn (array $v, $k): bool => $v['status'] == $status,
-                ARRAY_FILTER_USE_BOTH
-            );
         }
+        return array_filter(
+            $this->tagDelta,
+            fn (array $v, $k): bool => $v['status'] == $status,
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 
     /**
@@ -731,24 +728,27 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                     $this->modifySubscriberTags();
                 }
             }
-
             if ($succeeded) {
                 // this unique_email_id value is returned when subscribed
                 $this->SubscribedUniqueEmailId = $result['unique_email_id'];
                 $this->SubscribedWebId = $result['web_id'] ?? '';
                 $this->SubscribedId = $result['id'] ?? '';
                 $this->Status = self::CHIMPLE_STATUS_SUCCESS;
-                $this->LastError = '';//reset any error
+                $this->LastError = '';
+                //reset any error
                 // obfucsate values of subscriber after successful subscription
                 $this->obfuscate();
                 $this->write();
                 return true;
-            } elseif (!empty($result['status'])) {
+            }
+
+            if (!empty($result['status'])) {
                 $error_detail = $result['detail'] ?? '';
                 $error_status = $result['status'];
                 $error_title = $result['title'];
                 $errors = "{$error_status}|{$error_title}|{$error_detail}";
-            } else {
+            }
+            else {
                 $errors = "Unhandled error for email: {$email}";
             }
 
@@ -900,9 +900,8 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if ($error = self::api()->getLastError()) {
             Logger::log("FAIL:{$error} List:{$list_id}", 'WARNING');
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**

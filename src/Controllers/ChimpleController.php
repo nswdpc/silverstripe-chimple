@@ -232,9 +232,7 @@ class ChimpleController extends PageController
      */
     public function getSelectableTagsMeta(array $tags, bool $singleSelect, string $title, ?string $description = null): array
     {
-        $result['field'] = $this->getSelectableTagsField($tags, $singleSelect, $title, $description);
-        $result['insertAfter'] = $this->getSelectableTagsFieldPosition();
-        return $result;
+        return ['field' => $this->getSelectableTagsField($tags, $singleSelect, $title, $description), 'insertAfter' => $this->getSelectableTagsFieldPosition()];
     }
 
     /**
@@ -279,7 +277,7 @@ class ChimpleController extends PageController
         }
 
         if (is_string($description) && $description !== '') {
-            $field = $field->setDescription(strip_tags(trim($description)));
+            return $field->setDescription(strip_tags(trim($description)));
         }
 
         return $field;
@@ -348,7 +346,8 @@ class ChimpleController extends PageController
     {
         if ($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
-        } elseif ($form instanceof \SilverStripe\Forms\Form) {
+        }
+        if ($form instanceof \SilverStripe\Forms\Form) {
             // set session error on the form
             $form->sessionError($error_message, ValidationResult::TYPE_ERROR);
         }
@@ -364,7 +363,8 @@ class ChimpleController extends PageController
         $success_message = Config::inst()->get(MailchimpConfig::class, 'success_message');
         if ($this->request->isAjax()) {
             return $this->xhrSuccess($code, $success_message);
-        } elseif ($form instanceof \SilverStripe\Forms\Form) {
+        }
+        if ($form instanceof \SilverStripe\Forms\Form) {
             // set session message on the form
             $form->sessionMessage($success_message, ValidationResult::TYPE_GOOD);
         }
@@ -519,14 +519,13 @@ class ChimpleController extends PageController
             if ($response && ($response instanceof HTTPResponse)) {
                 // handle responses for e.g XHR
                 return $response;
-            } else {
-                // Create a redirect response for success
-                $query = [
-                    'complete' => 'y'
-                ];
-                $query_string = http_build_query($query);
-                return $this->redirect($this->Link("?" . $query_string));
             }
+            // Create a redirect response for success
+            $query = [
+                'complete' => 'y'
+            ];
+            $query_string = http_build_query($query);
+            return $this->redirect($this->Link("?" . $query_string));
 
         } catch (RequestException $e) {
             $error_message = $e->getMessage();
@@ -543,14 +542,13 @@ class ChimpleController extends PageController
         if ($response && ($response instanceof HTTPResponse)) {
             // handle XHR error responses
             return $response;
-        } else {
-            // Create a redirect response for errors
-            $query = [
-                'complete' => 'n'
-            ];
-            $query_string = http_build_query($query);
-            return $this->redirect($this->Link("?" . $query_string));
         }
+        // Create a redirect response for errors
+        $query = [
+            'complete' => 'n'
+        ];
+        $query_string = http_build_query($query);
+        return $this->redirect($this->Link("?" . $query_string));
 
     }
 

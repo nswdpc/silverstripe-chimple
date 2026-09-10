@@ -304,7 +304,13 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             );
         }
 
-        $tags = $this->getCurrentSubscriberTags();
+        try {
+            $tags = $this->getCurrentSubscriberTags();
+        } catch (\Exception $exception) {
+            Logger::log("Failed to get current subscriber tags: {$exception->getMessage()}", "NOTICE");
+            $tags = [];
+        }
+
         $tag_field_description = "";
         if ($tags !== []) {
             $tag_field_description = _t(
@@ -474,7 +480,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         $list_id = $this->getField('MailchimpListId');
         if (!$list_id) {
-            $list_id = MailchimpConfig::getDefaultMailchimpListId();
+            return MailchimpConfig::getDefaultMailchimpListId();
         }
 
         return $list_id;
@@ -554,9 +560,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         $tags = $this->Tags->getValue();
         if (!is_array($tags)) {
             return [];
-        } else {
-            return array_values($tags);
         }
+
+        return array_values($tags);
     }
 
     /**
@@ -596,9 +602,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         if ($email === '' || !Email::is_valid_address($email)) {
             return '';
-        } else {
-            return MailchimpApiClient::subscriberHash($email);
         }
+
+        return MailchimpApiClient::subscriberHash($email);
     }
 
     /**
@@ -653,13 +659,13 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
     {
         if ($status === '') {
             return $this->tagDelta;
-        } else {
-            return array_filter(
-                $this->tagDelta,
-                fn (array $v, $k): bool => $v['status'] == $status,
-                ARRAY_FILTER_USE_BOTH
-            );
         }
+
+        return array_filter(
+            $this->tagDelta,
+            fn (array $v, $k): bool => $v['status'] == $status,
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 
     /**
@@ -732,12 +738,15 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                 $this->SubscribedWebId = (string)$result['web_id'];
                 $this->SubscribedId = (string)$result['id'];
                 $this->Status = self::CHIMPLE_STATUS_SUCCESS;
-                $this->LastError = '';//reset any error
+                $this->LastError = '';
+                //reset any error
                 // obfucsate values of subscriber after successful subscription
                 $this->obfuscate();
                 $this->write();
                 return true;
-            } elseif (!empty($result['status'])) {
+            }
+
+            if (!empty($result['status'])) {
                 $error_detail = $result['detail'] ?? '';
                 $error_status = $result['status'];
                 $error_title = $result['title'];
@@ -896,9 +905,9 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if ($error = self::api()->getLastError()) {
             Logger::log("FAIL:{$error} List:{$list_id}", 'WARNING');
             return false;
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     /**

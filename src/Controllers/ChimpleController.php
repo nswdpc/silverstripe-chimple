@@ -23,7 +23,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\ValidationResult;
 use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 use PageController;
 

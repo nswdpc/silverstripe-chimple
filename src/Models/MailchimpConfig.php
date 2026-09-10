@@ -230,7 +230,7 @@ class MailchimpConfig extends DataObject implements TemplateGlobalProvider, Perm
     {
         $list_id = $this->getField('MailchimpListId');
         if (!$list_id) {
-            $list_id = self::getDefaultMailchimpListId();
+            return self::getDefaultMailchimpListId();
         }
 
         return $list_id;

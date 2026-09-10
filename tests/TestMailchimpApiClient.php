@@ -162,34 +162,31 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
     {
         if (!self::$subscriber_exists) {
             return null;
-        } else {
-
-            $tags = [];
-            if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
-                foreach (self::$subscriber['tags'] as $i => $tag) {
-                    $tags[] = [
-                        "id" => ($i + 1),
-                        "name" => $tag
-                    ];
-                }
-            }
-
-            $response = [
-                'id' =>  parent::subscriberHash(self::$subscriber['email']),
-                'email' => self::$subscriber['email'],
-                'email_type' => MailchimpSubscriber::MAILCHIMP_EMAIL_TYPE_HTML,
-                'status' => 'pending',
-                'unique_email_id' => bin2hex(random_bytes(16)),
-                'web_id' => bin2hex(random_bytes(8)),
-                'full_name' => trim(self::$subscriber['fname'] . " " . self::$subscriber['lname']),
-                'merge_fields' => [
-                    'FNAME' => trim((string) self::$subscriber['fname']),
-                    'LNAME' => trim((string) self::$subscriber['lname'])
-                ]
-            ];
-            $response['tags'] = $tags;
-            return $response;
         }
+        $tags = [];
+        if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
+            foreach (self::$subscriber['tags'] as $i => $tag) {
+                $tags[] = [
+                    "id" => ($i + 1),
+                    "name" => $tag
+                ];
+            }
+        }
+        $response = [
+            'id' =>  parent::subscriberHash(self::$subscriber['email']),
+            'email' => self::$subscriber['email'],
+            'email_type' => MailchimpSubscriber::MAILCHIMP_EMAIL_TYPE_HTML,
+            'status' => 'pending',
+            'unique_email_id' => bin2hex(random_bytes(16)),
+            'web_id' => bin2hex(random_bytes(8)),
+            'full_name' => trim(self::$subscriber['fname'] . " " . self::$subscriber['lname']),
+            'merge_fields' => [
+                'FNAME' => trim((string) self::$subscriber['fname']),
+                'LNAME' => trim((string) self::$subscriber['lname'])
+            ]
+        ];
+        $response['tags'] = $tags;
+        return $response;
     }
 
     /**

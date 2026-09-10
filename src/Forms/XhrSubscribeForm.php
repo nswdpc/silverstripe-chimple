@@ -37,11 +37,7 @@ class XhrSubscribeForm extends SubscribeForm
     protected function canBeCached()
     {
         $token = $this->getSecurityToken();
-        if ($token && !$token->isEnabled()) {
-            return true;
-        } else {
-            return false;
-        }
+        return $token && !$token->isEnabled();
     }
 
     /**

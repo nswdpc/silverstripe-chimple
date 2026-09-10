@@ -117,4 +117,49 @@ class ChimpleFunctionalTest extends FunctionalTest
         });
 
     }
+
+
+    public function testFormSubmissionWithTags(): void
+    {
+
+        $config = MailchimpConfig::get()->filter(['Code' => $this->test_form_code])->first();
+
+        // add selectable tags to config
+        $config->SelectableTagsEnabled = 1;
+        $config->SelectableTagsOneOnly = 0;
+        $config->SelectableTagsTitle = 'Select your interests';
+        $config->SelectableTags = ["tag1" => "Tag 1", "tag2" => "Tag 2" ];
+        $config->write();
+
+        $this->useTestTheme(__DIR__, 'chimpletest', function (): void {
+
+            // request default route
+            $url = "/mc-subscribe/v1/";
+            $page = $this->get($url);
+
+            $formId = "TestSubscribeForm_SubscribeForm_{$this->test_form_code}";
+            $email = 'functionaltester@example.org';
+            $response = $this->submitForm(
+                $formId,
+                null,
+                [
+                    'Name' => 'Functional Tester',
+                    'Email' => $email,
+                    'SelectedTags[tag1]' => 'tag1',
+                    'SelectedTags[tag2]' => 'tag2',
+                ]
+            );
+
+            $subscriber = MailchimpSubscriber::get()->filter([
+                'Email' => $email,
+                'Status' => MailchimpSubscriber::CHIMPLE_STATUS_NEW
+            ])->first();
+
+            $this->assertTrue($subscriber && $subscriber->exists());
+
+            $tags = $subscriber->Tags->getValue();
+            $this->assertEquals(['tag1','tag2'], array_values($tags));
+
+        });
+    }
 }

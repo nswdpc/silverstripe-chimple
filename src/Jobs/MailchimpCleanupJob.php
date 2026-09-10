@@ -131,7 +131,7 @@ class MailchimpCleanupJob extends AbstractQueuedJob implements QueuedJob
         $minutes  = (int)$this->config()->get('run_in_minutes');
         if ($minutes <= 2) {
             // min every 2 minutes
-            $minutes = 2;
+            return 2;
         }
 
         return $minutes;

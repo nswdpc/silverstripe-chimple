@@ -561,6 +561,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if (!is_array($tags)) {
             return [];
         }
+
         return array_values($tags);
     }
 
@@ -602,6 +603,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if ($email === '' || !Email::is_valid_address($email)) {
             return '';
         }
+
         return MailchimpApiClient::subscriberHash($email);
     }
 
@@ -658,6 +660,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
         if ($status === '') {
             return $this->tagDelta;
         }
+
         return array_filter(
             $this->tagDelta,
             fn (array $v, $k): bool => $v['status'] == $status,
@@ -728,6 +731,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
                     $this->modifySubscriberTags();
                 }
             }
+
             if ($succeeded) {
                 // this unique_email_id value is returned when subscribed
                 $this->SubscribedUniqueEmailId = (string)$result['unique_email_id'];
@@ -902,6 +906,7 @@ class MailchimpSubscriber extends DataObject implements PermissionProvider
             Logger::log("FAIL:{$error} List:{$list_id}", 'WARNING');
             return false;
         }
+
         return true;
     }
 

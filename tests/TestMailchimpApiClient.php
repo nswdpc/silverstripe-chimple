@@ -163,6 +163,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
         if (!self::$subscriber_exists) {
             return null;
         }
+
         $tags = [];
         if (isset(self::$subscriber['tags']) && is_array(self::$subscriber['tags'])) {
             foreach (self::$subscriber['tags'] as $i => $tag) {
@@ -172,6 +173,7 @@ class TestMailchimpApiClient extends MailChimp implements TestOnly
                 ];
             }
         }
+
         $response = [
             'id' =>  parent::subscriberHash(self::$subscriber['email']),
             'email' => self::$subscriber['email'],

@@ -345,6 +345,7 @@ class ChimpleController extends PageController
         if ($this->request->isAjax()) {
             return $this->xhrError($code, $error_message);
         }
+
         if ($form instanceof \SilverStripe\Forms\Form) {
             // set session error on the form
             $form->sessionError($error_message, \SilverStripe\Core\Validation\ValidationResult::TYPE_ERROR);
@@ -362,6 +363,7 @@ class ChimpleController extends PageController
         if ($this->request->isAjax()) {
             return $this->xhrSuccess($code, $success_message);
         }
+
         if ($form instanceof \SilverStripe\Forms\Form) {
             // set session message on the form
             $form->sessionMessage($success_message, \SilverStripe\Core\Validation\ValidationResult::TYPE_GOOD);
@@ -517,6 +519,7 @@ class ChimpleController extends PageController
                 // handle responses for e.g XHR
                 return $response;
             }
+
             // Create a redirect response for success
             $query = [
                 'complete' => 'y'
@@ -539,6 +542,7 @@ class ChimpleController extends PageController
             // handle XHR error responses
             return $response;
         }
+
         // Create a redirect response for errors
         $query = [
             'complete' => 'n'
